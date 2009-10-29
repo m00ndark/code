@@ -39,8 +39,13 @@ namespace MediaGallery.DataObjects
 
 		public void IncreaseImageCount(int increment)
 		{
+			IncreaseImageCount(increment, true);
+		}
+
+		private void IncreaseImageCount(int increment, bool updateSource)
+		{
 			ImageCount += increment;
-			IncreaseTotalImageCount(increment);
+			IncreaseTotalImageCount(increment, updateSource);
 		}
 
 		public void IncreaseVideoCount()
@@ -50,35 +55,40 @@ namespace MediaGallery.DataObjects
 
 		public void IncreaseVideoCount(int increment)
 		{
-			VideoCount += increment;
-			IncreaseTotalVideoCount(increment);
+			IncreaseVideoCount(increment, true);
 		}
 
-		public void IncreaseTotalImageCount()
+		private void IncreaseVideoCount(int increment, bool updateSource)
 		{
-			IncreaseTotalImageCount(1);
+			VideoCount += increment;
+			IncreaseTotalVideoCount(increment, updateSource);
 		}
 
 		public void IncreaseTotalImageCount(int increment)
 		{
-			TotalImageCount += increment;
-			if (Parent != null)
-				Parent.IncreaseTotalImageCount(increment);
-			else if (Source != null)
-				Source.ImageCount = TotalImageCount;
+			IncreaseTotalImageCount(increment, false);
 		}
 
-		public void IncreaseTotalVideoCount()
+		private void IncreaseTotalImageCount(int increment, bool updateSource)
 		{
-			IncreaseTotalVideoCount(1);
+			TotalImageCount += increment;
+			if (Parent != null)
+				Parent.IncreaseTotalImageCount(increment, updateSource);
+			else if (updateSource && Source != null)
+				Source.ImageCount = TotalImageCount;
 		}
 
 		public void IncreaseTotalVideoCount(int increment)
 		{
+			IncreaseTotalVideoCount(increment, false);
+		}
+
+		private void IncreaseTotalVideoCount(int increment, bool updateSource)
+		{
 			TotalVideoCount += increment;
 			if (Parent != null)
-				Parent.IncreaseTotalVideoCount(increment);
-			else if (Source != null)
+				Parent.IncreaseTotalVideoCount(increment, updateSource);
+			else if (updateSource && Source != null)
 				Source.VideoCount = TotalVideoCount;
 		}
 
@@ -99,8 +109,8 @@ namespace MediaGallery.DataObjects
 		public override string LoadFromDeserialized(string[] deserialized)
 		{
 			int baseItemCount = deserialized.Length - SERIALIZED_VALUES;
-			IncreaseImageCount(int.Parse(deserialized[baseItemCount + 0]));
-			IncreaseVideoCount(int.Parse(deserialized[baseItemCount + 1]));
+			IncreaseImageCount(int.Parse(deserialized[baseItemCount + 0]), false);
+			IncreaseVideoCount(int.Parse(deserialized[baseItemCount + 1]), false);
 			return base.LoadFromDeserialized(deserialized.Take(baseItemCount).ToArray());
 		}
 

@@ -161,21 +161,25 @@ namespace MediaGallery.Workers
 
 		#region Scan source
 
-		public void ScanSource(GallerySource source)
+		public void ScanSource(GallerySource source, bool reScan)
 		{
-			new Thread(ScanSourceThread).Start(source);
+			new Thread(ScanSourceThread).Start(new object[] { source, reScan });
 		}
 
 		private void ScanSourceThread(object data)
 		{
 			try
 			{
-				GallerySource source = (data as GallerySource);
-				if (source != null)
+				object[] parameters = data as object[];
+				if (parameters != null && parameters.Length == 2)
 				{
-					FileSystemHandler.PrepareDirectories();
-					FileSystemHandler.InitializeImageProcessor(90L);
-					FileSystemHandler.ScanFolders(source);
+					GallerySource source = (parameters[0] as GallerySource);
+					if (source != null && parameters[1] is bool)
+					{
+						FileSystemHandler.PrepareDirectories();
+						FileSystemHandler.InitializeImageProcessor(90L);
+						FileSystemHandler.ScanFolders(source, (bool) parameters[1]);
+					}
 				}
 				RaiseDatabaseOperationCompletedEvent(OperationType.ScanSource);
 			}

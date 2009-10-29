@@ -102,24 +102,70 @@ namespace MediaGallery.DataAccess
 
 		#region Scanning
 
-		public static void ScanFolders(GallerySource source)
+		public static void ScanFolders(GallerySource source, bool reScan)
 		{
-			ClearWorkingDirectory();
-			_scanState.Source = source;
-			_scanState.DatabaseImageEntries.Clear();
-			int folderCount = 0, fileCount = 0;
-			ZipFile sourceDatabase = new ZipFile(Path.Combine(ObjectPool.CompleteDatabaseLocation, Path.ChangeExtension(source.ID, DATABASE_FILE_EXTENSION)));
-			source.RootFolder = new MediaFolder(source.Path, Path.GetDirectoryName(source.Path), null, source);
-			ScanSubFolder(source.RootFolder, source, sourceDatabase, ref folderCount, ref fileCount, 0);
-			source.ScanDate = DateTime.Now;
-			sourceDatabase.UpdateEntry(Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION), string.Empty, Stream.Null);
-			sourceDatabase.SaveProgress += SourceDatabase_SaveProgress;
-			sourceDatabase.Save();
-			sourceDatabase.SaveProgress -= SourceDatabase_SaveProgress;
-			sourceDatabase.Dispose();
-			RegistryHandler.SaveSettings(SettingsType.GallerySource);
-			ClearWorkingDirectory();
-			_scanState.DatabaseImageEntries.Clear();
+			ZipFile sourceDatabase = null;
+			string sourceDatabasePath = null;
+			string sourceDatabaseBackupPath = null;
+			bool deleteBackup = true;
+			try
+			{
+				ClearWorkingDirectory();
+				_scanState.Source = source;
+				_scanState.DatabaseImageEntries.Clear();
+				int folderCount = 0, fileCount = 0;
+				sourceDatabasePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, Path.ChangeExtension(source.ID, DATABASE_FILE_EXTENSION));
+				if (File.Exists(sourceDatabasePath))
+				{
+					RaiseStatusUpdatedEvent("Backing up existing source database...");
+					sourceDatabaseBackupPath = sourceDatabasePath + ".backup";
+					if (File.Exists(sourceDatabaseBackupPath))
+						File.Delete(sourceDatabaseBackupPath);
+					if (reScan)
+						File.Move(sourceDatabasePath, sourceDatabaseBackupPath);
+					else
+						File.Copy(sourceDatabasePath, sourceDatabaseBackupPath);
+				}
+				sourceDatabase = new ZipFile(sourceDatabasePath);
+				source.RootFolder = new MediaFolder(source.Path, Path.GetDirectoryName(source.Path), null, source);
+				ScanSubFolder(source.RootFolder, source, sourceDatabase, reScan, ref folderCount, ref fileCount, 0);
+				source.ScanDate = DateTime.Now;
+				sourceDatabase.UpdateEntry(Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION), string.Empty, Stream.Null);
+				sourceDatabase.SaveProgress += SourceDatabase_SaveProgress;
+				sourceDatabase.Save();
+				sourceDatabase.SaveProgress -= SourceDatabase_SaveProgress;
+				sourceDatabase.Dispose();
+				RegistryHandler.SaveSettings(SettingsType.GallerySource);
+			}
+			catch
+			{
+				try
+				{
+					if (sourceDatabasePath != null && sourceDatabaseBackupPath != null && File.Exists(sourceDatabaseBackupPath))
+					{
+						deleteBackup = false;
+						if (sourceDatabase != null) sourceDatabase.Dispose();
+						if (File.Exists(sourceDatabasePath)) File.Delete(sourceDatabasePath);
+						File.Move(sourceDatabaseBackupPath, sourceDatabasePath);
+						deleteBackup = true;
+					}
+				}
+				catch {}
+				throw;
+			}
+			finally
+			{
+				try
+				{
+					if (deleteBackup && sourceDatabaseBackupPath != null && File.Exists(sourceDatabaseBackupPath))
+					{
+						File.Delete(sourceDatabaseBackupPath);
+					}
+					ClearWorkingDirectory();
+					_scanState.DatabaseImageEntries.Clear();
+				}
+				catch {}
+			}
 		}
 
 		private static void SourceDatabase_SaveProgress(object sender, SaveProgressEventArgs e)
@@ -138,14 +184,14 @@ namespace MediaGallery.DataAccess
 		}
 
 		private static bool ScanSubFolder(MediaFolder folder, GallerySource source, ZipFile sourceDatabase,
-			ref int folderCount, ref int fileCount, int depth)
+			bool reScan, ref int folderCount, ref int fileCount, int depth)
 		{
 			try
 			{
 				folderCount++;
 				RaiseStatusUpdatedEvent("Scanning folder #" + folderCount + " at depth " + depth + ", found " + fileCount + " files...");
 				GetFolders(folder, source);
-				GetFiles(folder, source, sourceDatabase);
+				GetFiles(folder, source, sourceDatabase, reScan);
 
 				if (folder.SubFolders.Count == 0 && folder.Files.Count == 0)
 					return false;
@@ -156,7 +202,7 @@ namespace MediaGallery.DataAccess
 				List<MediaFolder> emptyFolders = new List<MediaFolder>();
 				foreach (MediaFolder subFolder in folder.SubFolders)
 				{
-					if (!ScanSubFolder(subFolder, source, sourceDatabase, ref folderCount, ref fileCount, depth))
+					if (!ScanSubFolder(subFolder, source, sourceDatabase, reScan, ref folderCount, ref fileCount, depth))
 						emptyFolders.Add(subFolder);
 				}
 				foreach (MediaFolder emptyFolder in emptyFolders)
@@ -174,7 +220,7 @@ namespace MediaGallery.DataAccess
 			return true;
 		}
 
-		private static void GetFiles(MediaFolder parent, GallerySource source, ZipFile sourceDatabase)
+		private static void GetFiles(MediaFolder parent, GallerySource source, ZipFile sourceDatabase, bool reScan)
 		{
 			List<string> files = Directory.GetFiles(Path.Combine(source.Path, parent.RelativePathName)).ToList();
 			files.Sort();
@@ -194,7 +240,7 @@ namespace MediaGallery.DataAccess
 							};
 						parent.Files.Add(imageFile);
 						parent.IncreaseImageCount();
-						AddDatabaseImageEntry(imageFile, sourceDatabase);
+						AddDatabaseImageEntry(imageFile, sourceDatabase, reScan);
 					}
 				}
 				else if (MediaFile.VIDEO_FILE_EXTENSIONS.Contains(extension))
@@ -223,7 +269,7 @@ namespace MediaGallery.DataAccess
 					catch { }
 					parent.Files.Add(videoFile);
 					parent.IncreaseVideoCount();
-					AddDatabaseImageEntry(videoFile, sourceDatabase);
+					AddDatabaseImageEntry(videoFile, sourceDatabase, reScan);
 				}
 			}
 		}
@@ -241,22 +287,21 @@ namespace MediaGallery.DataAccess
 			}
 		}
 
-		private static void AddDatabaseImageEntry(MediaFile mediaFile, ZipFile sourceDatabase)
+		private static void AddDatabaseImageEntry(MediaFile mediaFile, ZipFile sourceDatabase, bool reScan)
 		{
 			ZipEntry zipEntry;
 			string path = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePath);
 			if (mediaFile is VideoFile)
 			{
-				// lägg till setting för att skippa omgenerering av thumbnails
 				// obs! hitta ett sätt att läsa upp image size utan att läsa in bilden
-				if (!sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.PreviewName)
+				if (reScan || !sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.PreviewName)
 					.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase)))
 				{
 					zipEntry = sourceDatabase.UpdateEntry(mediaFile.PreviewName, path, Stream.Null);
 					_scanState.DatabaseImageEntries.Add(zipEntry, mediaFile);
 				}
 			}
-			if (!sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.ThumbnailName)
+			if (reScan || !sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.ThumbnailName)
 				.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase)))
 			{
 				zipEntry = sourceDatabase.UpdateEntry(mediaFile.ThumbnailName, path, Stream.Null);
@@ -299,8 +344,8 @@ namespace MediaGallery.DataAccess
 				bool makeThumbnail = true;
 				const double maxThumbnailSize = 200.0;
 				string filePathName = Path.Combine(mediaFile.Source.Path, mediaFile.RelativePathName);
-				RaiseStatusUpdatedEvent("Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named "
-					+ mediaFile.Name + " (" + Path.Combine(mediaFile.Source.Path, mediaFile.Parent.RelativePathName) + ")");
+				RaiseStatusUpdatedEvent("Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named \""
+					+ mediaFile.Name + "\" in " + Path.Combine(mediaFile.Source.Path, mediaFile.Parent.RelativePathName));
 				if (mediaFile is ImageFile)
 				{
 					ImageFile imageFile = (mediaFile as ImageFile);
@@ -426,7 +471,7 @@ namespace MediaGallery.DataAccess
 			{
 				try
 				{
-					RaiseStatusUpdatedEvent("Loading source... (" + source.Path + ")");
+					RaiseStatusUpdatedEvent("Loading source (" + source.Path + ")...");
 					string databaseFileName = Path.ChangeExtension(source.ID, DATABASE_FILE_EXTENSION);
 					string databaseFilePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, databaseFileName);
 					if (File.Exists(databaseFilePath))
@@ -482,6 +527,10 @@ namespace MediaGallery.DataAccess
 					}
 				}
 				catch { }
+				if (fileSystemEntries.Count % 100 == 0)
+				{
+					RaiseStatusUpdatedEvent("Loading source (" + source.Path + ")... " + (100 * (double) fileSystemEntries.Count / (source.ImageCount + source.VideoCount)).ToString("0.0") + "%");
+				}
 				serializedObject = reader.ReadLine();
 			}
 			if (!fileSystemEntries.ContainsKey(rootFolderID)) throw new Exception("Failed to deserialize source database; root object does not exist");

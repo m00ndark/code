@@ -6,7 +6,7 @@ namespace MediaGallery.DataObjects.Serialization
 	{
 		public static string Serialize(object obj, params string[] values)
 		{
-			return (obj != null ? ObjectPrefix(obj) : string.Empty) + values.Aggregate((a, b) => (a + "|" + b));
+			return (obj != null ? ObjectPrefix(obj) : string.Empty) + (values.Length > 0 ? values.Aggregate((a, b) => (a + "|" + b)) : string.Empty);
 		}
 
 		public static string[] Deserialize(string serialized, out string prefix)

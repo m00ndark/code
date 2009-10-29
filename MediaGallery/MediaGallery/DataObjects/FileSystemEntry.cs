@@ -63,7 +63,7 @@ namespace MediaGallery.DataObjects
 			ID = null;
 			Name = name;
 			RelativePath = relativePath;
-			SetParent(parent);
+			Parent = parent;
 			Source = source;
 			if (!string.IsNullOrEmpty(RelativePathName) && Source != null)
 				CreateID();
@@ -83,11 +83,6 @@ namespace MediaGallery.DataObjects
 				{
 					Parent.IncreaseTotalImageCount(((MediaFolder) this).TotalImageCount);
 					Parent.IncreaseTotalVideoCount(((MediaFolder) this).TotalVideoCount);
-				}
-				else if (Source != null)
-				{
-					Source.ImageCount = ((MediaFolder) this).TotalImageCount;
-					Source.VideoCount = ((MediaFolder) this).TotalVideoCount;
 				}
 			}
 		}

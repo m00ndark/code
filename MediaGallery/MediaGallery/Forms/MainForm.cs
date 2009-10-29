@@ -75,13 +75,13 @@ namespace MediaGallery.Forms
 				}
 				else
 				{
-					comboBoxSources.BeginUpdate();
-					comboBoxSources.Items.Clear();
+					toolStripComboBoxSource.BeginUpdate();
+					toolStripComboBoxSource.Items.Clear();
 					foreach (GallerySource source in e.Sources)
 					{
-						comboBoxSources.Items.Add(new ComboBoxItem(source.Path, source));
+						toolStripComboBoxSource.Items.Add(new ComboBoxItem(source.Path, source));
 					}
-					comboBoxSources.EndUpdate();
+					toolStripComboBoxSource.EndUpdate();
 					EnableControls(true, true);
 				}
 			}
@@ -190,8 +190,11 @@ namespace MediaGallery.Forms
 				}
 				else
 				{
-					if (e.OperationType == MainWorker.OperationType.LoadSources)
+					if (e.OperationType == MainWorker.OperationType.LoadSources || e.OperationType == MainWorker.OperationType.ScanSource)
+					{
 						UpdateTreeNodeFileTypeCounts();
+						treeView.Sort();
+					}
 					toolStripStatusLabelStatus.Text = "Ready";
 					EnableControls(true, true);
 				}
@@ -210,6 +213,7 @@ namespace MediaGallery.Forms
 		{
 			try
 			{
+				treeView.Sort();
 				EnableControls(true, false);
 				_worker.Initialize();
 				_worker.LoadSources();
@@ -234,24 +238,18 @@ namespace MediaGallery.Forms
 			}
 		}
 
-		private void buttonSettings_Click(object sender, EventArgs e)
+		private void toolStripButtonSettings_Click(object sender, EventArgs e)
 		{
 			SettingsForm settingsForm = new SettingsForm();
 			settingsForm.ShowDialog(this);
 			_worker.Initialize();
 		}
 
-		private void buttonScan_Click(object sender, EventArgs e)
+		private void toolStripMenuItemSourceRescan_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				if (comboBoxSources.SelectedIndex > -1)
-				{
-					EnableControls(true, false);
-					GallerySource source = (GallerySource) ((ComboBoxItem) comboBoxSources.SelectedItem).Tag;
-					RemoveTreeNodes(source.RootFolder);
-					_worker.ScanSource(source);
-				}
+				StartScan(true);
 			}
 			catch (Exception ex)
 			{
@@ -259,7 +257,19 @@ namespace MediaGallery.Forms
 			}
 		}
 
-		private void comboBoxSources_SelectedIndexChanged(object sender, EventArgs e)
+		private void toolStripMenuItemSourceUpdate_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				StartScan(false);
+			}
+			catch (Exception ex)
+			{
+				FormUtilities.ShowError(this, ex);
+			}
+		}
+
+		private void toolStripComboBoxSource_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			EnableControls(true, true);
 		}
@@ -365,14 +375,26 @@ namespace MediaGallery.Forms
 
 		private void EnableControls(bool enable, bool enableDatabaseOperations)
 		{
-			buttonScan.Enabled = (enable && enableDatabaseOperations && comboBoxSources.SelectedIndex > -1);
+			toolStripMenuItemSourceRescan.Enabled = (enable && enableDatabaseOperations && toolStripComboBoxSource.SelectedIndex > -1);
+			toolStripMenuItemSourceUpdate.Enabled = (enable && enableDatabaseOperations && toolStripComboBoxSource.SelectedIndex > -1);
+		}
+
+		private void StartScan(bool reScan)
+		{
+			if (toolStripComboBoxSource.SelectedIndex > -1)
+			{
+				EnableControls(true, false);
+				GallerySource source = (GallerySource) ((ComboBoxItem) toolStripComboBoxSource.SelectedItem).Tag;
+				RemoveTreeNodes(source.RootFolder);
+				_worker.ScanSource(source, reScan);
+			}
 		}
 
 		private void UpdateTreeNodeFileTypeCounts()
 		{
 			foreach (KeyValuePair<MediaFolder, TreeNode> pair in _folderCollection)
 			{
-				pair.Value.Text += " (" + pair.Key.TotalImageCount + "/" + pair.Key.TotalVideoCount + ")";
+				pair.Value.Text = pair.Key.Name + " (" + pair.Key.TotalImageCount + "/" + pair.Key.TotalVideoCount + ")";
 			}
 		}
 
