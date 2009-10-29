@@ -66,7 +66,9 @@ namespace MediaGallery.DataAccess
 								if (sourceKey != null)
 								{
 									string sourcePath = (string) sourceKey.GetValue("Path", null);
-									ObjectPool.Sources.Add(new GallerySource(sourcePath));
+									int imageCount = (int) sourceKey.GetValue("Image Count", 0);
+									int videoCount = (int) sourceKey.GetValue("Video Count", 0);
+									ObjectPool.Sources.Add(new GallerySource(sourcePath) { ImageCount = imageCount, VideoCount = videoCount });
 									sourceKey.Close();
 								}
 							}
@@ -123,6 +125,8 @@ namespace MediaGallery.DataAccess
 							if (sourceKey != null)
 							{
 								sourceKey.SetValue("Path", source.Path);
+								sourceKey.SetValue("Image Count", source.ImageCount);
+								sourceKey.SetValue("Video Count", source.VideoCount);
 								sourceKey.Close();
 							}
 							sourceCount++;

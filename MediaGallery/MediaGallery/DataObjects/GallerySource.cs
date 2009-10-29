@@ -45,7 +45,7 @@ namespace MediaGallery.DataObjects
 
 		public virtual string Serialize(bool withPrefix)
 		{
-			return ObjectSerializer.Serialize((withPrefix ? this : null), Path, RootFolder.ID, ScanDateStr);
+			return ObjectSerializer.Serialize((withPrefix ? this : null), Path, RootFolder.ID, ScanDateStr, ImageCount.ToString(), VideoCount.ToString());
 		}
 
 		public string LoadFromDeserialized(string[] deserialized)

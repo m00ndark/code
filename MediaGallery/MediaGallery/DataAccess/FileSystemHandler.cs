@@ -117,6 +117,7 @@ namespace MediaGallery.DataAccess
 			sourceDatabase.Save();
 			sourceDatabase.SaveProgress -= SourceDatabase_SaveProgress;
 			sourceDatabase.Dispose();
+			RegistryHandler.SaveSettings(SettingsType.GallerySource);
 			ClearWorkingDirectory();
 			_scanState.DatabaseImageEntries.Clear();
 		}
@@ -192,7 +193,7 @@ namespace MediaGallery.DataAccess
 								FileSize = fileInfo.Length
 							};
 						parent.Files.Add(imageFile);
-						parent.ImageCount++;
+						parent.IncreaseImageCount();
 						AddDatabaseImageEntry(imageFile, sourceDatabase);
 					}
 				}
@@ -221,7 +222,7 @@ namespace MediaGallery.DataAccess
 					}
 					catch { }
 					parent.Files.Add(videoFile);
-					parent.VideoCount++;
+					parent.IncreaseVideoCount();
 					AddDatabaseImageEntry(videoFile, sourceDatabase);
 				}
 			}
@@ -511,7 +512,7 @@ namespace MediaGallery.DataAccess
 				if (!fileSystemEntries.ContainsKey(parentID)) throw new Exception("Failed to deserialize file system entry of source database; parent object does not exist");
 				MediaFolder parentFolder = fileSystemEntries[parentID] as MediaFolder;
 				if (parentFolder == null) throw new Exception("Failed to deserialize file system entry of source database; parent object is not a folder");
-				fileSystemEntry.Parent = parentFolder;
+				fileSystemEntry.SetParent(parentFolder);
 				if (fileSystemEntry is MediaFolder)
 				{
 					parentFolder.SubFolders.Add((MediaFolder) fileSystemEntry);

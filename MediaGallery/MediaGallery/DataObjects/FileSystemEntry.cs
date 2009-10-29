@@ -22,21 +22,7 @@ namespace MediaGallery.DataObjects
 		public string Name { get; private set; }
 		public string RelativePath { get; private set; }
 		public GallerySource Source { get; private set; }
-		private MediaFolder InternalParent { get; set; }
-
-		public MediaFolder Parent
-		{
-			get { return InternalParent; }
-			set
-			{
-				InternalParent = value;
-				if (InternalParent != null && IsFolder)
-				{
-					InternalParent.TotalImageCount += ((MediaFolder) this).TotalImageCount;
-					InternalParent.TotalVideoCount += ((MediaFolder) this).TotalVideoCount;
-				}
-			}
-		}
+		public MediaFolder Parent { get; private set; }
 
 		public bool IsFolder
 		{
@@ -77,7 +63,7 @@ namespace MediaGallery.DataObjects
 			ID = null;
 			Name = name;
 			RelativePath = relativePath;
-			Parent = parent;
+			SetParent(parent);
 			Source = source;
 			if (!string.IsNullOrEmpty(RelativePathName) && Source != null)
 				CreateID();
@@ -86,6 +72,24 @@ namespace MediaGallery.DataObjects
 		private void CreateID()
 		{
 			ID = CryptoServiceHandler.GenerateHash(Source.ID + ":" + RelativePathName);
+		}
+
+		public void SetParent(MediaFolder parent)
+		{
+			Parent = parent;
+			if (IsFolder)
+			{
+				if (Parent != null)
+				{
+					Parent.IncreaseTotalImageCount(((MediaFolder) this).TotalImageCount);
+					Parent.IncreaseTotalVideoCount(((MediaFolder) this).TotalVideoCount);
+				}
+				else if (Source != null)
+				{
+					Source.ImageCount = ((MediaFolder) this).TotalImageCount;
+					Source.VideoCount = ((MediaFolder) this).TotalVideoCount;
+				}
+			}
 		}
 
 		public bool Exists()

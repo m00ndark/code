@@ -23,51 +23,63 @@ namespace MediaGallery.DataObjects
 
 		public List<MediaFile> Files { get; private set; }
 		public List<MediaFolder> SubFolders { get; private set; }
-		public int InternalImageCount { get; set; }
-		public int InternalVideoCount { get; set; }
-		private int InternalTotalImageCount { get; set; }
-		private int InternalTotalVideoCount { get; set; }
+		public int ImageCount { get; private set; }
+		public int VideoCount { get; private set; }
+		public int TotalImageCount { get; private set; }
+		public int TotalVideoCount { get; private set; }
 
-		public int ImageCount
+		#endregion
+
+		#region Image/video count incrementation
+
+		public void IncreaseImageCount()
 		{
-			get { return InternalImageCount; }
-			set
-			{
-				InternalImageCount = value;
-				InternalTotalImageCount += ImageCount;
-			}
+			IncreaseImageCount(1);
 		}
 
-		public int VideoCount
+		public void IncreaseImageCount(int increment)
 		{
-			get { return InternalVideoCount; }
-			set
-			{
-				InternalVideoCount = value;
-				InternalTotalVideoCount += VideoCount;
-			}
+			ImageCount += increment;
+			IncreaseTotalImageCount(increment);
 		}
 
-		public int TotalImageCount
+		public void IncreaseVideoCount()
 		{
-			get { return InternalTotalImageCount; }
-			set
-			{
-				int increment = value - InternalTotalImageCount;
-				InternalTotalImageCount = value;
-				if (Parent != null) Parent.TotalImageCount += increment;
-			}
+			IncreaseVideoCount(1);
 		}
 
-		public int TotalVideoCount
+		public void IncreaseVideoCount(int increment)
 		{
-			get { return InternalTotalVideoCount; }
-			set
-			{
-				int increment = value - InternalTotalVideoCount;
-				InternalTotalVideoCount = value;
-				if (Parent != null) Parent.TotalVideoCount += increment;
-			}
+			VideoCount += increment;
+			IncreaseTotalVideoCount(increment);
+		}
+
+		public void IncreaseTotalImageCount()
+		{
+			IncreaseTotalImageCount(1);
+		}
+
+		public void IncreaseTotalImageCount(int increment)
+		{
+			TotalImageCount += increment;
+			if (Parent != null)
+				Parent.IncreaseTotalImageCount(increment);
+			else if (Source != null)
+				Source.ImageCount = TotalImageCount;
+		}
+
+		public void IncreaseTotalVideoCount()
+		{
+			IncreaseTotalVideoCount(1);
+		}
+
+		public void IncreaseTotalVideoCount(int increment)
+		{
+			TotalVideoCount += increment;
+			if (Parent != null)
+				Parent.IncreaseTotalVideoCount(increment);
+			else if (Source != null)
+				Source.VideoCount = TotalVideoCount;
 		}
 
 		#endregion
@@ -87,8 +99,8 @@ namespace MediaGallery.DataObjects
 		public override string LoadFromDeserialized(string[] deserialized)
 		{
 			int baseItemCount = deserialized.Length - SERIALIZED_VALUES;
-			ImageCount = int.Parse(deserialized[baseItemCount + 0]);
-			VideoCount = int.Parse(deserialized[baseItemCount + 1]);
+			IncreaseImageCount(int.Parse(deserialized[baseItemCount + 0]));
+			IncreaseVideoCount(int.Parse(deserialized[baseItemCount + 1]));
 			return base.LoadFromDeserialized(deserialized.Take(baseItemCount).ToArray());
 		}
 
