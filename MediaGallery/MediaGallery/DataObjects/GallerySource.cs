@@ -73,11 +73,22 @@ namespace MediaGallery.DataObjects
 			ID = CryptoServiceHandler.GenerateHash(Path);
 		}
 
+		#region Equality
+
 		public override bool Equals(object obj)
 		{
 			GallerySource source = obj as GallerySource;
 			return (source != null && source.Path.Equals(Path, StringComparison.CurrentCultureIgnoreCase));
 		}
+
+		public override int GetHashCode()
+		{
+			return Path.ToLower().GetHashCode();
+		}
+
+		#endregion
+
+		#region Comparable
 
 		public int CompareTo(object obj)
 		{
@@ -85,5 +96,7 @@ namespace MediaGallery.DataObjects
 			if (source == null) return -1;
 			return Path.CompareTo(source.Path);
 		}
+
+		#endregion
 	}
 }
