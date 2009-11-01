@@ -4,7 +4,7 @@ namespace MediaGallery.DataObjects.Properties
 {
 	public class MediaFileProperties : FileSystemEntryProperties
 	{
-		public MediaFileProperties(MediaFile mediaFile) : base(mediaFile)
+		public MediaFileProperties(MediaFile mediaFile) : base()
 		{
 			MediaFile = mediaFile;
 		}
@@ -17,19 +17,39 @@ namespace MediaGallery.DataObjects.Properties
 		#region Browsable
 
 		[ReadOnly(true)]
-		[Category("Source Folder")]
-		[DisplayName("Image Count")]
+		[Category("Count")]
+		[DisplayName("Images")]
 		public int ImageCount { get { return MediaFile.Parent.ImageCount; } }
 
 		[ReadOnly(true)]
-		[Category("Source Folder")]
-		[DisplayName("Video Count")]
+		[Category("Count")]
+		[DisplayName("Videos")]
 		public int VideoCount { get { return MediaFile.Parent.VideoCount; } }
+
+		[ReadOnly(true)]
+		[Category("File")]
+		[DisplayName("Name")]
+		public string BrowsableName { get { return MediaFile.Name; } }
+
+		[ReadOnly(true)]
+		[Category("File")]
+		[DisplayName("Relative Path")]
+		public string BrowsableRelativePath { get { return MediaFile.RelativePath; } }
 
 		[ReadOnly(true)]
 		[Category("File")]
 		[DisplayName("Size")]
 		public string FileSize { get { return GetShortFileSize(MediaFile.FileSize); } }
+
+		[ReadOnly(true)]
+		[Category("Source")]
+		[DisplayName("Root Path")]
+		public string BrowsableRootPath { get { return MediaFile.Source.Path; } }
+
+		[ReadOnly(true)]
+		[Category("Source")]
+		[DisplayName("Scanned")]
+		public string BrowsableScanned { get { return MediaFile.Source.ScanDateStr; } }
 
 		[ReadOnly(true)]
 		[Category("Media")]

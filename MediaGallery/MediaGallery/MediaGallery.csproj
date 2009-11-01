@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="DataAccess\CryptoServiceHandler.cs" />
     <Compile Include="DataAccess\FileSystemHandler.cs" />
+    <Compile Include="DataAccess\ImageFileHelper.cs" />
     <Compile Include="DataAccess\RegistryHandler.cs" />
     <Compile Include="DataObjects\Properties\ImageFileProperties.cs" />
     <Compile Include="DataObjects\Properties\MediaCodecProperties.cs" />

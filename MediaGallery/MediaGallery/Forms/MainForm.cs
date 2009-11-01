@@ -400,12 +400,11 @@ namespace MediaGallery.Forms
 
 		private void RemoveTreeNodes(MediaFolder folder)
 		{
-			if (folder != null)
+			if (folder != null && _folderCollection.ContainsKey(folder))
 			{
 				foreach (MediaFolder subFolder in folder.SubFolders)
 				{
-					if (_folderCollection.ContainsKey(subFolder))
-						RemoveTreeNodes(subFolder);
+					RemoveTreeNodes(subFolder);
 				}
 				TreeNode node = _folderCollection[folder];
 				if (node.Parent != null && node.Parent.Nodes.Contains(node))
@@ -488,7 +487,7 @@ namespace MediaGallery.Forms
 						: (fileSystemEntry is ImageFile ? new ImageFileProperties((ImageFile) fileSystemEntry)
 							: (fileSystemEntry is MediaFile ? new MediaFileProperties((MediaFile) fileSystemEntry)
 								: (fileSystemEntry is MediaFolder ? new MediaFolderProperties((MediaFolder) fileSystemEntry)
-									: new FileSystemEntryProperties(fileSystemEntry)
+									: (FileSystemEntryProperties) null
 								)
 							)
 						)

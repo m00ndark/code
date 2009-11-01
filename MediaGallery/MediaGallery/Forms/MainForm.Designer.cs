@@ -101,7 +101,7 @@
 			// 
 			this.splitContainerHorizontal.Panel2.Controls.Add(this.propertyGridMediaFile);
 			this.splitContainerHorizontal.Size = new System.Drawing.Size(317, 789);
-			this.splitContainerHorizontal.SplitterDistance = 551;
+			this.splitContainerHorizontal.SplitterDistance = 509;
 			this.splitContainerHorizontal.TabIndex = 1;
 			// 
 			// treeView
@@ -116,7 +116,7 @@
 			this.treeView.Location = new System.Drawing.Point(0, 0);
 			this.treeView.Name = "treeView";
 			this.treeView.SelectedImageKey = "folder-16";
-			this.treeView.Size = new System.Drawing.Size(317, 551);
+			this.treeView.Size = new System.Drawing.Size(317, 509);
 			this.treeView.TabIndex = 0;
 			this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_AfterSelect);
 			// 
@@ -136,7 +136,7 @@
 			this.propertyGridMediaFile.LineColor = System.Drawing.Color.FromArgb(((int) (((byte) (64)))), ((int) (((byte) (64)))), ((int) (((byte) (64)))));
 			this.propertyGridMediaFile.Location = new System.Drawing.Point(0, 0);
 			this.propertyGridMediaFile.Name = "propertyGridMediaFile";
-			this.propertyGridMediaFile.Size = new System.Drawing.Size(317, 234);
+			this.propertyGridMediaFile.Size = new System.Drawing.Size(317, 276);
 			this.propertyGridMediaFile.TabIndex = 0;
 			this.propertyGridMediaFile.ToolbarVisible = false;
 			this.propertyGridMediaFile.ViewBackColor = System.Drawing.Color.Black;

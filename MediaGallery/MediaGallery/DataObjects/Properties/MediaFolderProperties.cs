@@ -4,7 +4,7 @@ namespace MediaGallery.DataObjects.Properties
 {
 	public class MediaFolderProperties : FileSystemEntryProperties
 	{
-		public MediaFolderProperties(MediaFolder mediaFolder) : base(mediaFolder)
+		public MediaFolderProperties(MediaFolder mediaFolder) : base()
 		{
 			MediaFolder = mediaFolder;
 		}
@@ -17,14 +17,34 @@ namespace MediaGallery.DataObjects.Properties
 		#region Browsable
 
 		[ReadOnly(true)]
-		[Category("Source Folder")]
-		[DisplayName("Image Count")]
+		[Category("Count")]
+		[DisplayName("Images")]
 		public int ImageCount { get { return MediaFolder.ImageCount; } }
 
 		[ReadOnly(true)]
-		[Category("Source Folder")]
-		[DisplayName("Video Count")]
+		[Category("Count")]
+		[DisplayName("Videos")]
 		public int VideoCount { get { return MediaFolder.VideoCount; } }
+
+		[ReadOnly(true)]
+		[Category("Folder")]
+		[DisplayName("Name")]
+		public string BrowsableName { get { return MediaFolder.Name; } }
+
+		[ReadOnly(true)]
+		[Category("Folder")]
+		[DisplayName("Relative Path")]
+		public string BrowsableRelativePath { get { return MediaFolder.RelativePath; } }
+
+		[ReadOnly(true)]
+		[Category("Source")]
+		[DisplayName("Root Path")]
+		public string BrowsableRootPath { get { return MediaFolder.Source.Path; } }
+
+		[ReadOnly(true)]
+		[Category("Source")]
+		[DisplayName("Scanned")]
+		public string BrowsableScanned { get { return MediaFolder.Source.ScanDateStr; } }
 
 		#endregion
 

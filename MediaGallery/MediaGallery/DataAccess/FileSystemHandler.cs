@@ -127,7 +127,7 @@ namespace MediaGallery.DataAccess
 						File.Copy(sourceDatabasePath, sourceDatabaseBackupPath);
 				}
 				sourceDatabase = new ZipFile(sourceDatabasePath);
-				source.RootFolder = new MediaFolder(source.Path, Path.GetDirectoryName(source.Path), null, source);
+				source.RootFolder = new MediaFolder(source.Path, string.Empty, null, source);
 				ScanSubFolder(source.RootFolder, source, sourceDatabase, reScan, ref folderCount, ref fileCount, 0);
 				source.ScanDate = DateTime.Now;
 				sourceDatabase.UpdateEntry(Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION), string.Empty, Stream.Null);
@@ -226,51 +226,60 @@ namespace MediaGallery.DataAccess
 			files.Sort();
 			foreach (string file in files)
 			{
-				string extension = Path.GetExtension(file).ToLower();
-				string fileName = Path.GetFileName(file);
-				string relativePath = RemoveAbsolutePath(Path.GetDirectoryName(file), source.Path);
-				FileInfo fileInfo = new FileInfo(file);
-				if (MediaFile.IMAGE_FILE_EXTENSIONS.Contains(extension))
+				try
 				{
-					if (!files.Any(filePath => (Path.GetFileName(filePath) == Path.GetFileNameWithoutExtension(file))))
+					string extension = Path.GetExtension(file).ToLower();
+					string fileName = Path.GetFileName(file);
+					string relativePath = RemoveAbsolutePath(Path.GetDirectoryName(file), source.Path);
+					FileInfo fileInfo = new FileInfo(file);
+					if (MediaFile.IMAGE_FILE_EXTENSIONS.Contains(extension))
 					{
-						ImageFile imageFile = new ImageFile(fileName, relativePath, parent, source)
+						if (!files.Any(filePath => (Path.GetFileName(filePath) == Path.GetFileNameWithoutExtension(file))))
+						{
+							ImageFile imageFile = new ImageFile(fileName, relativePath, parent, source)
+								{
+									FileSize = fileInfo.Length
+								};
+							try
 							{
-								FileSize = fileInfo.Length
-							};
-						parent.Files.Add(imageFile);
-						parent.IncreaseImageCount();
-						AddDatabaseImageEntry(imageFile, sourceDatabase, reScan);
-					}
-				}
-				else if (MediaFile.VIDEO_FILE_EXTENSIONS.Contains(extension))
-				{
-					VideoFile videoFile = new VideoFile(fileName, relativePath, parent, source)
-						{
-							FileSize = fileInfo.Length,
-							ThumbnailName = fileName + ".tn.jpg",
-							PreviewName = fileName + ".jpg"
-						};
-					try
-					{
-						TagLib.File tagFile = TagLib.File.Create(file);
-						videoFile.Duration = tagFile.Properties.Duration;
-						videoFile.Size = new Size(tagFile.Properties.VideoWidth, tagFile.Properties.VideoHeight);
-						foreach (TagLib.ICodec codec in tagFile.Properties.Codecs)
-						{
-							MediaCodec mediaCodec = new MediaCodec(MediaCodec.TranslateCodecType(codec.MediaTypes), codec.Description);
-							if (source.Codecs.Contains(mediaCodec)) 
-								mediaCodec = source.Codecs.First(x => x.Equals(mediaCodec));
-							else
-								source.Codecs.Add(mediaCodec);
-							videoFile.Codecs.Add(mediaCodec);
+								imageFile.Size = ImageFileHelper.GetDimensions(file);
+							}
+							catch {}
+							parent.Files.Add(imageFile);
+							parent.IncreaseImageCount();
+							AddDatabaseImageEntry(imageFile, sourceDatabase, reScan);
 						}
 					}
-					catch { }
-					parent.Files.Add(videoFile);
-					parent.IncreaseVideoCount();
-					AddDatabaseImageEntry(videoFile, sourceDatabase, reScan);
+					else if (MediaFile.VIDEO_FILE_EXTENSIONS.Contains(extension))
+					{
+						VideoFile videoFile = new VideoFile(fileName, relativePath, parent, source)
+							{
+								FileSize = fileInfo.Length,
+								ThumbnailName = fileName + ".tn.jpg",
+								PreviewName = fileName + ".jpg"
+							};
+						try
+						{
+							TagLib.File tagFile = TagLib.File.Create(file);
+							videoFile.Duration = tagFile.Properties.Duration;
+							videoFile.Size = new Size(tagFile.Properties.VideoWidth, tagFile.Properties.VideoHeight);
+							foreach (TagLib.ICodec codec in tagFile.Properties.Codecs)
+							{
+								MediaCodec mediaCodec = new MediaCodec(MediaCodec.TranslateCodecType(codec.MediaTypes), codec.Description);
+								if (source.Codecs.Contains(mediaCodec))
+									mediaCodec = source.Codecs.First(x => x.Equals(mediaCodec));
+								else
+									source.Codecs.Add(mediaCodec);
+								videoFile.Codecs.Add(mediaCodec);
+							}
+						}
+						catch {}
+						parent.Files.Add(videoFile);
+						parent.IncreaseVideoCount();
+						AddDatabaseImageEntry(videoFile, sourceDatabase, reScan);
+					}
 				}
+				catch {}
 			}
 		}
 
@@ -350,7 +359,8 @@ namespace MediaGallery.DataAccess
 				{
 					ImageFile imageFile = (mediaFile as ImageFile);
 					image = Image.FromFile(filePathName);
-					imageFile.Size = image.Size;
+					if (imageFile.Size.Width == 0 && imageFile.Size.Height == 0)
+						imageFile.Size = image.Size;
 				}
 				else if (mediaFile is VideoFile)
 				{
