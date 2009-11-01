@@ -290,6 +290,15 @@ namespace MediaGallery.Forms
 			}
 		}
 
+		private void treeView_Enter(object sender, EventArgs e)
+		{
+			if (treeView.SelectedNode != null)
+			{
+				MediaFolder folder = (MediaFolder) treeView.SelectedNode.Tag;
+				UpdateProperties(folder);
+			}
+		}
+
 		#region Thumbnail context menu
 
 		private void toolStripMenuItemThumbnailOpenImage_Click(object sender, EventArgs e)

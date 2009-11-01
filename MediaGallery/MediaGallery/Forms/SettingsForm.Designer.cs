@@ -35,6 +35,9 @@
 			this.columnHeaderVideoCount = new System.Windows.Forms.ColumnHeader();
 			this.buttonRemove = new System.Windows.Forms.Button();
 			this.groupBoxApplication = new System.Windows.Forms.GroupBox();
+			this.buttonBrowserWorkingDirectory = new System.Windows.Forms.Button();
+			this.labelWorkingDirectory = new System.Windows.Forms.Label();
+			this.textBoxWorkingDirectory = new System.Windows.Forms.TextBox();
 			this.buttonBrowseDatabase = new System.Windows.Forms.Button();
 			this.labelDatabaseLocation = new System.Windows.Forms.Label();
 			this.textBoxDatabaseLocation = new System.Windows.Forms.TextBox();
@@ -48,9 +51,7 @@
 			this.buttonBrowseVideoThumbnailsMaker = new System.Windows.Forms.Button();
 			this.textBoxVideoThumbnailsMaker = new System.Windows.Forms.TextBox();
 			this.labelVideoThumbnailsMaker = new System.Windows.Forms.Label();
-			this.buttonBrowserWorkingDirectory = new System.Windows.Forms.Button();
-			this.labelWorkingDirectory = new System.Windows.Forms.Label();
-			this.textBoxWorkingDirectory = new System.Windows.Forms.TextBox();
+			this.columnHeaderScanned = new System.Windows.Forms.ColumnHeader();
 			this.groupBoxApplication.SuspendLayout();
 			this.groupBoxGallery.SuspendLayout();
 			this.tableLayoutPanel.SuspendLayout();
@@ -76,7 +77,8 @@
 			this.listViewSources.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeaderSourcePath,
             this.columnHeaderImageCount,
-            this.columnHeaderVideoCount});
+            this.columnHeaderVideoCount,
+            this.columnHeaderScanned});
 			this.listViewSources.FullRowSelect = true;
 			this.listViewSources.HideSelection = false;
 			this.listViewSources.Location = new System.Drawing.Point(10, 19);
@@ -89,7 +91,7 @@
 			// columnHeaderSourcePath
 			// 
 			this.columnHeaderSourcePath.Text = "Source";
-			this.columnHeaderSourcePath.Width = 300;
+			this.columnHeaderSourcePath.Width = 265;
 			// 
 			// columnHeaderImageCount
 			// 
@@ -126,6 +128,36 @@
 			this.groupBoxApplication.TabIndex = 1;
 			this.groupBoxApplication.TabStop = false;
 			this.groupBoxApplication.Text = "Application";
+			// 
+			// buttonBrowserWorkingDirectory
+			// 
+			this.buttonBrowserWorkingDirectory.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonBrowserWorkingDirectory.Location = new System.Drawing.Point(537, 43);
+			this.buttonBrowserWorkingDirectory.Name = "buttonBrowserWorkingDirectory";
+			this.buttonBrowserWorkingDirectory.Size = new System.Drawing.Size(75, 23);
+			this.buttonBrowserWorkingDirectory.TabIndex = 5;
+			this.buttonBrowserWorkingDirectory.Text = "Browse...";
+			this.buttonBrowserWorkingDirectory.UseVisualStyleBackColor = true;
+			this.buttonBrowserWorkingDirectory.Click += new System.EventHandler(this.buttonBrowserWorkingDirectory_Click);
+			// 
+			// labelWorkingDirectory
+			// 
+			this.labelWorkingDirectory.AutoSize = true;
+			this.labelWorkingDirectory.Location = new System.Drawing.Point(7, 48);
+			this.labelWorkingDirectory.Name = "labelWorkingDirectory";
+			this.labelWorkingDirectory.Size = new System.Drawing.Size(93, 13);
+			this.labelWorkingDirectory.TabIndex = 4;
+			this.labelWorkingDirectory.Text = "Working directory:";
+			// 
+			// textBoxWorkingDirectory
+			// 
+			this.textBoxWorkingDirectory.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxWorkingDirectory.Location = new System.Drawing.Point(109, 45);
+			this.textBoxWorkingDirectory.Name = "textBoxWorkingDirectory";
+			this.textBoxWorkingDirectory.ReadOnly = true;
+			this.textBoxWorkingDirectory.Size = new System.Drawing.Size(422, 20);
+			this.textBoxWorkingDirectory.TabIndex = 3;
 			// 
 			// buttonBrowseDatabase
 			// 
@@ -275,35 +307,10 @@
 			this.labelVideoThumbnailsMaker.TabIndex = 0;
 			this.labelVideoThumbnailsMaker.Text = "Video Thumbnails Maker:";
 			// 
-			// buttonBrowserWorkingDirectory
+			// columnHeaderScanned
 			// 
-			this.buttonBrowserWorkingDirectory.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonBrowserWorkingDirectory.Location = new System.Drawing.Point(537, 43);
-			this.buttonBrowserWorkingDirectory.Name = "buttonBrowserWorkingDirectory";
-			this.buttonBrowserWorkingDirectory.Size = new System.Drawing.Size(75, 23);
-			this.buttonBrowserWorkingDirectory.TabIndex = 5;
-			this.buttonBrowserWorkingDirectory.Text = "Browse...";
-			this.buttonBrowserWorkingDirectory.UseVisualStyleBackColor = true;
-			this.buttonBrowserWorkingDirectory.Click += new System.EventHandler(this.buttonBrowserWorkingDirectory_Click);
-			// 
-			// labelWorkingDirectory
-			// 
-			this.labelWorkingDirectory.AutoSize = true;
-			this.labelWorkingDirectory.Location = new System.Drawing.Point(7, 48);
-			this.labelWorkingDirectory.Name = "labelWorkingDirectory";
-			this.labelWorkingDirectory.Size = new System.Drawing.Size(93, 13);
-			this.labelWorkingDirectory.TabIndex = 4;
-			this.labelWorkingDirectory.Text = "Working directory:";
-			// 
-			// textBoxWorkingDirectory
-			// 
-			this.textBoxWorkingDirectory.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-							| System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxWorkingDirectory.Location = new System.Drawing.Point(109, 45);
-			this.textBoxWorkingDirectory.Name = "textBoxWorkingDirectory";
-			this.textBoxWorkingDirectory.ReadOnly = true;
-			this.textBoxWorkingDirectory.Size = new System.Drawing.Size(422, 20);
-			this.textBoxWorkingDirectory.TabIndex = 3;
+			this.columnHeaderScanned.Text = "Scanned";
+			this.columnHeaderScanned.Width = 112;
 			// 
 			// SettingsForm
 			// 
@@ -358,5 +365,6 @@
 		private System.Windows.Forms.Button buttonBrowserWorkingDirectory;
 		private System.Windows.Forms.Label labelWorkingDirectory;
 		private System.Windows.Forms.TextBox textBoxWorkingDirectory;
+		private System.Windows.Forms.ColumnHeader columnHeaderScanned;
 	}
 }

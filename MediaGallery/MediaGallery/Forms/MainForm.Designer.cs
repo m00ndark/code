@@ -118,6 +118,7 @@
 			this.treeView.SelectedImageKey = "folder-16";
 			this.treeView.Size = new System.Drawing.Size(317, 509);
 			this.treeView.TabIndex = 0;
+			this.treeView.Enter += new System.EventHandler(this.treeView_Enter);
 			this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_AfterSelect);
 			// 
 			// imageList

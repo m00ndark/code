@@ -131,6 +131,7 @@ namespace MediaGallery.Forms
 						ListViewItem item = listViewSources.Items.Add(source.Path);
 						item.SubItems.Add(source.ImageCount.ToString());
 						item.SubItems.Add(source.VideoCount.ToString());
+						item.SubItems.Add(source.ScanDateStr);
 						item.Tag = source;
 					}
 					listViewSources.EndUpdate();
