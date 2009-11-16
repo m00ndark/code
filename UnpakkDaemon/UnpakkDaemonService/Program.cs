@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 using UnpakkDaemon;
 
 namespace UnpakkDaemonService
@@ -16,11 +18,11 @@ namespace UnpakkDaemonService
 		{
 			if (Environment.CommandLine.Contains("/debug"))
 			{
-				new Engine().Start();
+				new Engine(Application.StartupPath).Start();
 			}
 			else
 			{
-				ServiceBase[] servicesToRun = new ServiceBase[] { new Service() };
+				ServiceBase[] servicesToRun = new ServiceBase[] { new UnpakkDaemonService() };
 				ServiceBase.Run(servicesToRun);
 			}
 		}

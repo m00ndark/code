@@ -7,18 +7,19 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using UnpakkDaemon;
 
 namespace UnpakkDaemonService
 {
-	public partial class Service : ServiceBase
+	public partial class UnpakkDaemonService : ServiceBase
 	{
 		private readonly Engine _engine;
 
-		public Service()
+		public UnpakkDaemonService()
 		{
 			InitializeComponent();
-			_engine = new Engine();
+			_engine = new Engine(Application.StartupPath);
 		}
 
 		protected override void OnStart(string[] args)

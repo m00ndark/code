@@ -1,6 +1,6 @@
 ﻿namespace UnpakkDaemonService
 {
-	partial class Service
+	partial class UnpakkDaemonService
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -28,8 +28,11 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			components = new System.ComponentModel.Container();
-			this.ServiceName = "Service1";
+			// 
+			// UnpakkDaemonService
+			// 
+			this.ServiceName = "UnpakkDaemonService";
+
 		}
 
 		#endregion

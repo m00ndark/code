@@ -1,6 +1,6 @@
 ﻿namespace UnpakkDaemonService
 {
-	partial class Installer
+	partial class UnpakkDaemonServiceInstaller
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -33,14 +33,17 @@
 			// 
 			// serviceProcessInstaller
 			// 
-			this.serviceProcessInstaller.Password = null;
-			this.serviceProcessInstaller.Username = null;
+			this.serviceProcessInstaller.Account = System.ServiceProcess.ServiceAccount.LocalSystem;
+			this.serviceProcessInstaller.Password = "";
+			this.serviceProcessInstaller.Username = "";
 			// 
 			// serviceInstaller
 			// 
+			this.serviceInstaller.DisplayName = "Unpakk Daemon Service";
 			this.serviceInstaller.ServiceName = "UnpakkDaemonService";
+			this.serviceInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
 			// 
-			// Installer
+			// UnpakkDaemonServiceInstaller
 			// 
 			this.Installers.AddRange(new System.Configuration.Install.Installer[] {
             this.serviceProcessInstaller,
