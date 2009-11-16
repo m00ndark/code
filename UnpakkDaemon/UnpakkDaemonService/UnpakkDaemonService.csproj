@@ -68,6 +68,12 @@
       <DependentUpon>Installer.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnpakkDaemon\UnpakkDaemon.csproj">
+      <Project>{6BEA8658-E71D-4C6E-B645-5DD3B317C285}</Project>
+      <Name>UnpakkDaemon</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
