@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace UnpakkDaemonTray
 {
-	public partial class SettingsForm : Form
+	public partial class MainForm : Form
 	{
-		public SettingsForm()
+		public MainForm()
 		{
 			InitializeComponent();
 		}

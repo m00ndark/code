@@ -118,4 +118,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>copy $(SolutionDir)\UnpakkDaemonTray\$(OutDir)\*.exe $(TargetDir)</PostBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

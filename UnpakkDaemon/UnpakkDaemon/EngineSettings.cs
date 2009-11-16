@@ -8,7 +8,7 @@ namespace UnpakkDaemon
 {
 	public class EngineSettings
 	{
-		private const string APPLICATION_REGISTRY_PATH = @"MoleCode\Unpakk Daemon";
+		private const string APPLICATION_REGISTRY_PATH = @"Software\MoleCode\Unpakk Daemon";
 
 		private const string DEFAULT_SLEEP_TIME = "00:00:10";
 		private const string DEFAULT_ROOT_SCAN_PATH = "";

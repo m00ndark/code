@@ -79,6 +79,8 @@
   <ItemGroup>
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="EventArguments\LogEntryEventArgs.cs" />
+    <Compile Include="FileLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleFileVerification\CRC32.cs" />
     <Compile Include="SimpleFileVerification\SFVFileHandler.cs" />
