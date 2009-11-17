@@ -31,9 +31,11 @@ namespace UnpakkDaemon
 			IsRunning = true;
 
 			SetupLogging();
+
 #if !DEBUG
 			TrayHandler.LaunchTray(_startupPath);
 #endif
+
 			EnterMainLoop(new EngineSettings());
 
 			IsRunning = false;
@@ -51,7 +53,7 @@ namespace UnpakkDaemon
 			if (_fileLogger == null)
 			{
 				_fileLogger = new FileLogger();
-				SFVFileHandler.LogEntry += LogEntry;
+				SFVFile.LogEntry += LogEntry;
 			}
 		}
 
@@ -74,10 +76,19 @@ namespace UnpakkDaemon
 			{
 				settings.Load();
 
-				string[] sfvFiles = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
-				foreach (string sfvFile in sfvFiles)
+				string[] sfvFilePaths = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
+				foreach (string sfvFilePath in sfvFilePaths)
 				{
-					WriteLogEntry(sfvFile);
+					WriteLogEntry("Validating SFV file: " + sfvFilePath);
+					SFVFile sfvFile = new SFVFile(sfvFilePath);
+					if (sfvFile.Validate())
+					{
+						WriteLogEntry("Validation OK!");
+					}
+					else
+					{
+						WriteLogEntry("Validation FAILED!");
+					}
 				}
 
 				WriteLogEntry("Going to sleep: " + settings.SleepTime);
