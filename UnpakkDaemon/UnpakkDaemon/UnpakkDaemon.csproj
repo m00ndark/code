@@ -80,6 +80,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
     <Compile Include="EventArguments\LogEntryEventArgs.cs" />
+    <Compile Include="EventArguments\ProgressEventArgs.cs" />
     <Compile Include="Extraction\Unrar.cs" />
     <Compile Include="FileLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

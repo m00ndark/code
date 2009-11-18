@@ -14,6 +14,9 @@ namespace UnpakkDaemon
 		private FileLogger _fileLogger;
 		private bool _shutDown;
 
+		public event EventHandler<ProgressEventArgs> Progress;
+		public event EventHandler<ProgressEventArgs> SubProgress;
+
 		public Engine(string startupPath)
 		{
 			_startupPath = startupPath;
@@ -92,6 +95,46 @@ namespace UnpakkDaemon
 
 		#endregion
 
+		#region Event raisers
+
+		private void RaiseProgressEvent(string message, double percent)
+		{
+			if (Progress != null)
+				Progress(this, new ProgressEventArgs(message, percent));
+		}
+
+		private void RaiseProgressEvent(string message, double percent, long current)
+		{
+			if (Progress != null)
+				Progress(this, new ProgressEventArgs(message, percent, current));
+		}
+
+		private void RaiseProgressEvent(string message, double percent, long current, long max)
+		{
+			if (Progress != null)
+				Progress(this, new ProgressEventArgs(message, percent, current, max));
+		}
+
+		private void RaiseSubProgressEvent(string message, double percent)
+		{
+			if (SubProgress != null)
+				SubProgress(this, new ProgressEventArgs(message, percent));
+		}
+
+		private void RaiseSubProgressEvent(string message, double percent, long current)
+		{
+			if (SubProgress != null)
+				SubProgress(this, new ProgressEventArgs(message, percent, current));
+		}
+
+		private void RaiseSubProgressEvent(string message, double percent, long current, long max)
+		{
+			if (SubProgress != null)
+				SubProgress(this, new ProgressEventArgs(message, percent, current, max));
+		}
+
+		#endregion
+
 		private void EnterMainLoop(EngineSettings settings)
 		{
 			while (!_shutDown)
@@ -152,6 +195,9 @@ namespace UnpakkDaemon
 		{
 			bool success = true;
 			Unrar unrar = new Unrar(rarFilePath) { DestinationPath = Path.GetDirectoryName(rarFilePath) };
+			unrar.ExtractionProgress += unrar_ExtractionProgress;
+			unrar.MissingVolume += unrar_MissingVolume;
+			unrar.PasswordRequired += unrar_PasswordRequired;
 			try
 			{
 				unrar.Open(Unrar.OpenMode.Extract);
@@ -161,19 +207,45 @@ namespace UnpakkDaemon
 					unrar.Extract();
 					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName),
 						unrar.CurrentFile.UnpackedSize, unrar.CurrentFile.FileCRC);
+					if (!success)
+						WriteLogEntry(LogType.Warning, "Validation FAILED, aborting extraction");
 				}
 			}
 			catch (Exception ex)
 			{
-				WriteLogEntry("An exception occurred while extracting from RAR file, path=" + rarFilePath);
+				WriteLogEntry("An exception occurred while extracting from RAR file, path=" + rarFilePath, ex);
 				success = false;
 			}
 			finally
 			{
 				unrar.Close();
+				unrar.ExtractionProgress -= unrar_ExtractionProgress;
+				unrar.MissingVolume -= unrar_MissingVolume;
+				unrar.PasswordRequired -= unrar_PasswordRequired;
 			}
 			return success;
 		}
+
+		#region Unrar event handlers
+
+		private void unrar_PasswordRequired(object sender, PasswordRequiredEventArgs e)
+		{
+			WriteLogEntry(LogType.Warning, "Password required to extract file, aborting");
+			e.ContinueOperation = true;
+		}
+
+		private void unrar_MissingVolume(object sender, MissingVolumeEventArgs e)
+		{
+			WriteLogEntry(LogType.Warning, "RAR volume missing, aborting, volume=" + e.VolumeName);
+			e.ContinueOperation = true;
+		}
+
+		private void unrar_ExtractionProgress(object sender, ExtractionProgressEventArgs e)
+		{
+			RaiseSubProgressEvent("Extracting " + e.FileName, e.PercentComplete, e.BytesExtracted, e.FileSize);
+		}
+
+		#endregion
 
 		private bool ValidateExtractedFile(string filePath, long fileSize, long fileChecksum)
 		{
