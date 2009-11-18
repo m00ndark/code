@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Schematrix;
 using UnpakkDaemon.EventArguments;
@@ -76,45 +74,77 @@ namespace UnpakkDaemon
 				throw new SystemException("Logging not setup correctly.");
 		}
 
+		private void WriteLogEntry(Exception exception)
+		{
+			if (_fileLogger != null)
+				_fileLogger.WriteLogLine(string.Empty, exception);
+			else
+				throw new SystemException("Logging not setup correctly.");
+		}
+
+		private void WriteLogEntry(string logText, Exception exception)
+		{
+			if (_fileLogger != null)
+				_fileLogger.WriteLogLine(logText, exception);
+			else
+				throw new SystemException("Logging not setup correctly.");
+		}
+
 		#endregion
 
 		private void EnterMainLoop(EngineSettings settings)
 		{
 			while (!_shutDown)
 			{
-				settings.Load();
+				try
+				{
+					WriteLogEntry("Waking up, reloading settings..");
+					settings.Load();
 
-				string[] sfvFilePaths = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
-				sfvFilePaths.ToList().ForEach(ProcessSFVFile);
+					WriteLogEntry("Scanning root folder, path=" + settings.RootScanPath);
+					string[] sfvFilePaths = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
+					sfvFilePaths.ToList().ForEach(ProcessSFVFile);
 
-				WriteLogEntry("Going to sleep: " + settings.SleepTime);
-				Thread.Sleep(settings.SleepTime);
+					WriteLogEntry("Going to sleep, time=" + settings.SleepTime);
+					Thread.Sleep(settings.SleepTime);
+				}
+				catch (Exception ex)
+				{
+					WriteLogEntry("An exception occurred in main loop", ex);
+				}
 			}
 		}
 
 		private void ProcessSFVFile(string sfvFilePath)
 		{
-			WriteLogEntry("Validating SFV file references, sfvfile=" + sfvFilePath);
-			SFVFile sfvFile = new SFVFile(sfvFilePath);
-			string rarFilePath = sfvFile.FilePaths.FirstOrDefault(filePath => filePath.EndsWith(".rar", StringComparison.CurrentCultureIgnoreCase));
-			if (!string.IsNullOrEmpty(rarFilePath))
+			try
 			{
-				if (sfvFile.Validate())
+				WriteLogEntry("Validating SFV file references, sfvfile=" + sfvFilePath);
+				SFVFile sfvFile = new SFVFile(sfvFilePath);
+				string rarFilePath = sfvFile.ContainedFilePaths.FirstOrDefault(filePath => filePath.EndsWith(".rar", StringComparison.CurrentCultureIgnoreCase));
+				if (!string.IsNullOrEmpty(rarFilePath))
 				{
-					WriteLogEntry("Validation OK, proceeding with extraction..");
-					if (ExtractRARContent(rarFilePath))
+					if (sfvFile.Validate())
 					{
-						
+						WriteLogEntry("Validation OK, proceeding with extraction..");
+						if (ExtractRARContent(rarFilePath))
+						{
+							DeleteFiles(sfvFile);
+						}
+					}
+					else
+					{
+						WriteLogEntry(LogType.Warning, "Validation FAILED, skipping archive");
 					}
 				}
 				else
 				{
-					WriteLogEntry("Validation FAILED");
+					WriteLogEntry(LogType.Warning, "SFV file does not refer to any .rar file, skipping further processing");
 				}
 			}
-			else
+			catch (Exception ex)
 			{
-				WriteLogEntry("SFV file does not refer to any .rar file, skipping further processing");
+				WriteLogEntry("An exception occurred while processing SFV file, path=" + sfvFilePath, ex);
 			}
 		}
 
@@ -127,7 +157,7 @@ namespace UnpakkDaemon
 				unrar.Open(Unrar.OpenMode.Extract);
 				while (success && unrar.ReadHeader())
 				{
-					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName);
+					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName + ", size=" + unrar.CurrentFile.UnpackedSize);
 					unrar.Extract();
 					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName),
 						unrar.CurrentFile.UnpackedSize, unrar.CurrentFile.FileCRC);
@@ -136,6 +166,7 @@ namespace UnpakkDaemon
 			catch (Exception ex)
 			{
 				WriteLogEntry("An exception occurred while extracting from RAR file, path=" + rarFilePath);
+				success = false;
 			}
 			finally
 			{
@@ -150,14 +181,14 @@ namespace UnpakkDaemon
 
 			if (!File.Exists(filePath))
 			{
-				WriteLogEntry("Extracted file missing: " + filePath);
+				WriteLogEntry(LogType.Warning, "Extracted file missing, path=" + filePath);
 				return false;
 			}
 
 			FileInfo fileInfo = new FileInfo(filePath);
 			if (fileInfo.Length != fileSize)
 			{
-				WriteLogEntry("Extracted file size mismatch, reference=" + fileSize + ", actual=" + fileInfo.Length);
+				WriteLogEntry(LogType.Warning, "Extracted file size mismatch, reference=" + fileSize + ", actual=" + fileInfo.Length);
 				return false;
 			}
 
@@ -165,15 +196,50 @@ namespace UnpakkDaemon
 			using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
 			{
 				crc32.ComputeHash(fileStream);
-				if (!crc32.HashValueStr.Equals(CRC32.ToString(Convert.ToUInt32(fileChecksum)), StringComparison.CurrentCultureIgnoreCase))
+				string referenceChecksum = CRC32.ToString(Convert.ToUInt32(fileChecksum));
+				if (!crc32.HashValueStr.Equals(referenceChecksum, StringComparison.CurrentCultureIgnoreCase))
 				{
-					WriteLogEntry("Extracted file CRC checksum mismatch, reference=" + fileChecksum + ", actual=" + crc32.HashValueStr.ToLower());
+					WriteLogEntry(LogType.Warning, "CRC checksum mismatch, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
 					return false;
 				}
+				WriteLogEntry(LogType.Debug, "CRC checksum match, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
 			}
 
 			WriteLogEntry("Validation OK");
 			return true;
+		}
+
+		private void DeleteFiles(SFVFile sfvFile)
+		{
+			WriteLogEntry("Deleting archive files..");
+
+			try
+			{
+				foreach (string filePath in sfvFile.ContainedFilePaths)
+				{
+					try
+					{
+						if (File.Exists(filePath))
+						{
+							WriteLogEntry(LogType.Debug, "Deleting archive file, path=" + filePath);
+							File.Delete(filePath);
+						}
+					}
+					catch (Exception ex)
+					{
+						WriteLogEntry("An exception occurred while deleting archive file, path=" + filePath, ex);
+					}
+				}
+				if (File.Exists(sfvFile.SFVFilePath))
+				{
+					WriteLogEntry(LogType.Debug, "Deleting SFV file, path=" + sfvFile.SFVFilePath);
+					File.Delete(sfvFile.SFVFilePath);
+				}
+			}
+			catch (Exception ex)
+			{
+				WriteLogEntry("An exception occurred while deleting archive files, sfvfile=" + sfvFile.SFVFilePath, ex);
+			}
 		}
 	}
 }

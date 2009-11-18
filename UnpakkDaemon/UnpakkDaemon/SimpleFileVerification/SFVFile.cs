@@ -20,28 +20,37 @@ namespace UnpakkDaemon.SimpleFileVerification
 			}
 		}
 
+		private static void RaiseLogEntryEvent(LogType logType, string logText)
+		{
+			if (LogEntry != null)
+			{
+				LogEntry(null, new LogEntryEventArgs(logType, logText));
+			}
+		}
+
 		#endregion
 
-		private readonly string _sfvFilePath;
 		private readonly string _path;
 		private readonly IDictionary<string, string> _crcFiles;
 
 		public SFVFile(string sfvFilePath)
 		{
-			_sfvFilePath = sfvFilePath;
-			_path = Path.GetDirectoryName(_sfvFilePath);
+			SFVFilePath = sfvFilePath;
+			_path = Path.GetDirectoryName(SFVFilePath);
 			_crcFiles = new Dictionary<string, string>();
 			Load();
 		}
 
-		public IList<string> FilePaths
+		public string SFVFilePath { get; private set; }
+
+		public IList<string> ContainedFilePaths
 		{
 			get { return _crcFiles.Keys.Select(fileName => Path.Combine(_path, fileName)).ToList(); }
 		}
 
 		private void Load()
 		{
-			string[] lines = File.ReadAllLines(_sfvFilePath);
+			string[] lines = File.ReadAllLines(SFVFilePath);
 			foreach (string l in lines)
 			{
 				string line = l.Trim();
@@ -65,7 +74,7 @@ namespace UnpakkDaemon.SimpleFileVerification
 
 				if (!File.Exists(filePath))
 				{
-					RaiseLogEntryEvent("File missing, name=" + fileName);
+					RaiseLogEntryEvent(LogType.Warning, "File missing, name=" + fileName);
 					return false;
 				}
 
@@ -74,10 +83,10 @@ namespace UnpakkDaemon.SimpleFileVerification
 					crc32.ComputeHash(fileStream);
 					if (!crc32.HashValueStr.Equals(_crcFiles[fileName], StringComparison.CurrentCultureIgnoreCase))
 					{
-						RaiseLogEntryEvent("Checksum match, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
+						RaiseLogEntryEvent(LogType.Warning, "CRC checksum mismatch, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
 						return false;
 					}
-					RaiseLogEntryEvent("Checksum mismatch, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
+					RaiseLogEntryEvent(LogType.Debug, "CRC checksum match, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
 				}
 			}
 			return true;
