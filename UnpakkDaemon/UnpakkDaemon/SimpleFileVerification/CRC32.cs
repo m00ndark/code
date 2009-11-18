@@ -43,7 +43,7 @@ namespace UnpakkDaemon.SimpleFileVerification
 		{
 			byte[] hashBuffer = UInt32ToBigEndianBytes(~_hash);
 			HashValue = hashBuffer;
-			HashValueStr = (~_hash).ToString("X8").ToLower();
+			HashValueStr = ToString(~_hash);
 			return hashBuffer;
 		}
 
@@ -120,13 +120,18 @@ namespace UnpakkDaemon.SimpleFileVerification
 				};
 		}
 
-		public static string FormatCRC32Result(byte[] result)
+		public static string ToString(UInt32 hash)
+		{
+			return hash.ToString("X8").ToLower();
+		}
+
+		public static string ToString(byte[] result)
 		{
 			if (!BitConverter.IsLittleEndian)
 			{
 				Array.Reverse(result);
 			}
-			return BitConverter.ToUInt32(result, 0).ToString("X8").ToLower();
+			return ToString(BitConverter.ToUInt32(result, 0));
 		}
 	}
 }

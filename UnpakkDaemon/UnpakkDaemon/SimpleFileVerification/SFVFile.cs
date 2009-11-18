@@ -65,7 +65,7 @@ namespace UnpakkDaemon.SimpleFileVerification
 
 				if (!File.Exists(filePath))
 				{
-					RaiseLogEntryEvent("File missing: " + fileName);
+					RaiseLogEntryEvent("File missing, name=" + fileName);
 					return false;
 				}
 
@@ -74,10 +74,10 @@ namespace UnpakkDaemon.SimpleFileVerification
 					crc32.ComputeHash(fileStream);
 					if (!crc32.HashValueStr.Equals(_crcFiles[fileName], StringComparison.CurrentCultureIgnoreCase))
 					{
-						RaiseLogEntryEvent(fileName + ": " + crc32.HashValueStr + " != " + _crcFiles[fileName].ToLower());
+						RaiseLogEntryEvent("Checksum match, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
 						return false;
 					}
-					RaiseLogEntryEvent(fileName + ": " + crc32.HashValueStr + " == " + _crcFiles[fileName].ToLower());
+					RaiseLogEntryEvent("Checksum mismatch, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
 				}
 			}
 			return true;

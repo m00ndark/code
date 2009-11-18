@@ -15,26 +15,20 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_5AA94BAD267A487DA96668912A8133DC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_82D33646395D4AEB8C84B708CF04E71E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_8E8392EB457847D8B22B3C5F270821AB"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_E0EB61D0B22D840CD82D3BFB0DDB50BC"
-        "OwnerKey" = "8:_8E8392EB457847D8B22B3C5F270821AB"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E0EB61D0B22D840CD82D3BFB0DDB50BC"
+        "OwnerKey" = "8:_5AA94BAD267A487DA96668912A8133DC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -46,7 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_8E8392EB457847D8B22B3C5F270821AB"
+        "OwnerKey" = "8:_5AA94BAD267A487DA96668912A8133DC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_E0EB61D0B22D840CD82D3BFB0DDB50BC"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -93,7 +93,7 @@
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:_8E8392EB457847D8B22B3C5F270821AB"
+            "Object" = "8:"
             "FileType" = "3:2"
             "InstallAction" = "3:2"
             "Arguments" = "8:"
@@ -107,7 +107,7 @@
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:_8E8392EB457847D8B22B3C5F270821AB"
+            "Object" = "8:"
             "FileType" = "3:2"
             "InstallAction" = "3:3"
             "Arguments" = "8:"
@@ -121,7 +121,7 @@
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:_8E8392EB457847D8B22B3C5F270821AB"
+            "Object" = "8:"
             "FileType" = "3:2"
             "InstallAction" = "3:4"
             "Arguments" = "8:"
@@ -135,7 +135,7 @@
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:_8E8392EB457847D8B22B3C5F270821AB"
+            "Object" = "8:"
             "FileType" = "3:2"
             "InstallAction" = "3:1"
             "Arguments" = "8:"
@@ -172,7 +172,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:UnpakkDaemon, Version=1.0.3607.41254, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:UnpakkDaemon, Version=1.0.3609.1, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_E0EB61D0B22D840CD82D3BFB0DDB50BC"
@@ -256,7 +256,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Unpakk Daemon"
         "ProductCode" = "8:{779A9B8B-9E47-4E0C-A7EF-D7DA04754EE9}"
-        "PackageCode" = "8:{ED4518C8-DD9C-45A7-A8EC-C1F0702E401D}"
+        "PackageCode" = "8:{D2E4818C-8063-45AF-B3CB-E126A032845F}"
         "UpgradeCode" = "8:{B649ED8B-A979-481E-8590-DA772EA5032C}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -774,6 +774,34 @@
         }
         "ProjectOutput"
         {
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_5AA94BAD267A487DA96668912A8133DC"
+            {
+            "SourcePath" = "8:..\\UnpakkDaemonService\\obj\\Debug\\UnpakkDaemonService.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_581E9DA341F14F61A5A7C88467901A41"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{64929CC5-E17C-46E3-9AEE-A2D6E23587B6}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_82D33646395D4AEB8C84B708CF04E71E"
             {
             "SourcePath" = "8:..\\UnpakkDaemonTray\\obj\\Debug\\UnpakkDaemonTray.exe"
@@ -797,34 +825,6 @@
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{0B443266-69BE-4CD4-BBCB-48406D43573C}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8E8392EB457847D8B22B3C5F270821AB"
-            {
-            "SourcePath" = "8:..\\UnpakkDaemonService\\obj\\Debug\\UnpakkDaemonService.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_581E9DA341F14F61A5A7C88467901A41"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:"
-            "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{64929CC5-E17C-46E3-9AEE-A2D6E23587B6}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {

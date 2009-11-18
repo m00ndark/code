@@ -3,6 +3,14 @@ using System.IO;
 
 namespace UnpakkDaemon
 {
+	public enum LogType
+	{
+		Debug,
+		Flow,
+		Warning,
+		Error
+	}
+
 	public class FileLogger
 	{
 		private const string APPLICATION_DATA_FOLDER = @"MoleCode\Unpakk Daemon";
@@ -31,7 +39,7 @@ namespace UnpakkDaemon
 			get { return Path.Combine(LogPath, LogName.Replace("%date%", DateTime.Now.ToString("yyyy-MM-dd"))); }
 		}
 
-		public void WriteLogLine(string logText)
+		public void WriteLogLine(LogType logType, string logText)
 		{
 			try
 			{
@@ -40,7 +48,7 @@ namespace UnpakkDaemon
 
 				using (StreamWriter writer = new StreamWriter(LogPathName, true))
 				{
-					writer.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + logText);
+					writer.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + logType + " " + logText);
 				}
 			}
 			catch { /* swallow and be happy :) */ }
