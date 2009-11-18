@@ -141,6 +141,7 @@ namespace UnpakkDaemon
 			{
 				try
 				{
+					WriteLogEntry("======================================================");
 					WriteLogEntry("Waking up, reloading settings..");
 					settings.Load();
 
