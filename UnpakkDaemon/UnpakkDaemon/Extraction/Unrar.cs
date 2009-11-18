@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Collections;
+using System.Threading;
 
 
 /*  Author:  Michael A. McCloskey
@@ -17,37 +17,38 @@ using System.Collections;
  *  some time in building your own products.
  */
 
-namespace Schematrix
+namespace UnpakkDaemon.Extraction
 {
-	#region Event Delegate Definitions
-
 	/// <summary>
 	/// Represents the method that will handle data available events
 	/// </summary>
 	public delegate void DataAvailableHandler(object sender, DataAvailableEventArgs e);
+
 	/// <summary>
 	/// Represents the method that will handle extraction progress events
 	/// </summary>
 	public delegate void ExtractionProgressHandler(object sender, ExtractionProgressEventArgs e);
+
 	/// <summary>
 	/// Represents the method that will handle missing archive volume events
 	/// </summary>
 	public delegate void MissingVolumeHandler(object sender, MissingVolumeEventArgs e);
+
 	/// <summary>
 	/// Represents the method that will handle new volume events
 	/// </summary>
 	public delegate void NewVolumeHandler(object sender, NewVolumeEventArgs e);
+
 	/// <summary>
 	/// Represents the method that will handle new file notifications
 	/// </summary>
 	public delegate void NewFileHandler(object sender, NewFileEventArgs e);
+
 	/// <summary>
 	/// Represents the method that will handle password required events
 	/// </summary>
 	public delegate void PasswordRequiredHandler(object sender, PasswordRequiredEventArgs e);
 
-	#endregion
-	
 	/// <summary>
 	/// Wrapper class for unrar DLL supplied by RARSoft.  
 	/// Calls unrar DLL via platform invocation services (pinvoke).
@@ -65,73 +66,73 @@ namespace Schematrix
 			/// <summary>
 			/// Open archive for listing contents only
 			/// </summary>
-			List=0,
+			List = 0,
 			/// <summary>
 			/// Open archive for testing or extracting contents
 			/// </summary>
-			Extract=1
+			Extract = 1
 		}
-		
+
 		private enum RarError : uint
 		{
-			EndOfArchive=10,
-			InsufficientMemory=11,
-			BadData=12,
-			BadArchive=13,
-			UnknownFormat=14,
-			OpenError=15,
-			CreateError=16,
-			CloseError=17,
-			ReadError=18,
-			WriteError=19,
-			BufferTooSmall=20,
-			UnknownError=21
+			EndOfArchive = 10,
+			InsufficientMemory = 11,
+			BadData = 12,
+			BadArchive = 13,
+			UnknownFormat = 14,
+			OpenError = 15,
+			CreateError = 16,
+			CloseError = 17,
+			ReadError = 18,
+			WriteError = 19,
+			BufferTooSmall = 20,
+			UnknownError = 21
 		}
 
 		private enum Operation : uint
 		{
-			Skip=0,
-			Test=1,
-			Extract=2
+			Skip = 0,
+			Test = 1,
+			Extract = 2
 		}
 
 		private enum VolumeMessage : uint
 		{
-			Ask=0,
-			Notify=1
+			Ask = 0,
+			Notify = 1
 		}
 
 		[Flags]
-			private enum  ArchiveFlags : uint
+		private enum ArchiveFlags : uint
 		{
-			Volume=0x1,										// Volume attribute (archive volume)
-			CommentPresent=0x2,						// Archive comment present
-			Lock=0x4,											// Archive lock attribute
-			SolidArchive=0x8,							// Solid attribute (solid archive)
-			NewNamingScheme=0x10,					// New volume naming scheme ('volname.partN.rar')
-			AuthenticityPresent=0x20,			// Authenticity information present
-			RecoveryRecordPresent=0x40,		// Recovery record present
-			EncryptedHeaders=0x80,				// Block headers are encrypted
-			FirstVolume=0x100							// 0x0100  - First volume (set only by RAR 3.0 and later)
+			Volume = 0x1,                 // Volume attribute (archive volume)
+			CommentPresent = 0x2,         // Archive comment present
+			Lock = 0x4,                   // Archive lock attribute
+			SolidArchive = 0x8,           // Solid attribute (solid archive)
+			NewNamingScheme = 0x10,       // New volume naming scheme ('volname.partN.rar')
+			AuthenticityPresent = 0x20,   // Authenticity information present
+			RecoveryRecordPresent = 0x40, // Recovery record present
+			EncryptedHeaders = 0x80,      // Block headers are encrypted
+			FirstVolume = 0x100           // 0x0100  - First volume (set only by RAR 3.0 and later)
 		}
 
 		private enum CallbackMessages : uint
 		{
-			VolumeChange=0,
-			ProcessData=1,
-			NeedPassword=2
+			VolumeChange = 0,
+			ProcessData = 1,
+			NeedPassword = 2
 		}
 
 		#endregion
 
 		#region Unrar DLL structure definitions
 
-		[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
-			private struct RARHeaderData
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+		private struct RARHeaderData
 		{
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=260)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
 			public string ArcName;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=260)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
 			public string FileName;
 			public uint Flags;
 			public uint PackSize;
@@ -150,21 +151,21 @@ namespace Schematrix
 
 			public void Initialize()
 			{
-				this.CmtBuf=new string((char)0, 65536);
-				this.CmtBufSize=65536;
+				CmtBuf = new string((char) 0, 65536);
+				CmtBufSize = 65536;
 			}
 		}
 
-		[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
-			public struct RARHeaderDataEx
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+		public struct RARHeaderDataEx
 		{
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=512)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
 			public string ArcName;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=1024)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1024)]
 			public string ArcNameW;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=512)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
 			public string FileName;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=1024)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1024)]
 			public string FileNameW;
 			public uint Flags;
 			public uint PackSize;
@@ -182,20 +183,20 @@ namespace Schematrix
 			public uint CmtBufSize;
 			public uint CmtSize;
 			public uint CmtState;
-			[MarshalAs(UnmanagedType.ByValArray, SizeConst=1024)]
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
 			public uint[] Reserved;
 
 			public void Initialize()
 			{
-				this.CmtBuf=new string((char)0, 65536);
-				this.CmtBufSize=65536;
+				CmtBuf = new string((char) 0, 65536);
+				CmtBufSize = 65536;
 			}
 		}
 
-		[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
-			public struct RAROpenArchiveData
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+		public struct RAROpenArchiveData
 		{
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=260)]
+			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
 			public string ArcName;
 			public uint OpenMode;
 			public uint OpenResult;
@@ -207,13 +208,13 @@ namespace Schematrix
 
 			public void Initialize()
 			{
-				this.CmtBuf=new string((char)0,65536);
-				this.CmtBufSize=65536;
+				CmtBuf = new string((char) 0, 65536);
+				CmtBufSize = 65536;
 			}
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-			public struct RAROpenArchiveDataEx
+		public struct RAROpenArchiveDataEx
 		{
 			[MarshalAs(UnmanagedType.LPStr)]
 			public string ArcName;
@@ -227,14 +228,14 @@ namespace Schematrix
 			public uint CmtSize;
 			public uint CmtState;
 			public uint Flags;
-			[MarshalAs(UnmanagedType.ByValArray, SizeConst=32)]
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
 			public uint[] Reserved;
 
 			public void Initialize()
 			{
-				this.CmtBuf=new string((char)0,65536);
-				this.CmtBufSize=65536;
-				this.Reserved=new uint[32];
+				CmtBuf = new string((char) 0, 65536);
+				CmtBufSize = 65536;
+				Reserved = new uint[32];
 			}
 		}
 
@@ -245,7 +246,7 @@ namespace Schematrix
 		[DllImport("unrar.dll")]
 		private static extern IntPtr RAROpenArchive(ref RAROpenArchiveData archiveData);
 
-		[DllImport("UNRAR.DLL")]
+		[DllImport("unrar.dll")]
 		private static extern IntPtr RAROpenArchiveEx(ref RAROpenArchiveDataEx archiveData);
 
 		[DllImport("unrar.dll")]
@@ -258,19 +259,16 @@ namespace Schematrix
 		private static extern int RARReadHeaderEx(IntPtr hArcData, ref RARHeaderDataEx headerData);
 
 		[DllImport("unrar.dll")]
-		private static extern int RARProcessFile(IntPtr hArcData, int operation,
-			[MarshalAs(UnmanagedType.LPStr)] string destPath, 
-			[MarshalAs(UnmanagedType.LPStr)] string destName );
+		private static extern int RARProcessFile(IntPtr hArcData, int operation, [MarshalAs(UnmanagedType.LPStr)] string destPath, [MarshalAs(UnmanagedType.LPStr)] string destName);
 
 		[DllImport("unrar.dll")]
-		private static extern void RARSetCallback(IntPtr hArcData, UNRARCallback callback, int userData);
+		private static extern void RARSetCallback(IntPtr hArcData, UnrarCallback callback, int userData);
 
 		[DllImport("unrar.dll")]
-		private static extern void RARSetPassword(IntPtr hArcData,
-			[MarshalAs(UnmanagedType.LPStr)] string password);
+		private static extern void RARSetPassword(IntPtr hArcData, [MarshalAs(UnmanagedType.LPStr)] string password);
 
 		// Unrar callback delegate signature
-		private delegate int UNRARCallback(uint msg, int UserData, IntPtr p1, int p2);
+		private delegate int UnrarCallback(uint msg, int userData, IntPtr p1, int p2);
 
 		#endregion
 
@@ -305,46 +303,46 @@ namespace Schematrix
 
 		#region Private fields
 
-		private string archivePathName=string.Empty;
-		private IntPtr archiveHandle=new IntPtr(0);
-		private bool retrieveComment=true;
-		private string password=string.Empty;
-		private string comment=string.Empty;
-		private ArchiveFlags archiveFlags=0;
-		private RARHeaderDataEx header=new RARHeaderDataEx();
-		private string destinationPath=string.Empty;
-		private RARFileInfo currentFile=null;
-		private UNRARCallback callback=null;
+		private string _archivePathName = string.Empty;
+		private IntPtr _archiveHandle = new IntPtr(0);
+		private bool _retrieveComment = true;
+		private string _password = string.Empty;
+		private string _comment = string.Empty;
+		private ArchiveFlags _archiveFlags = 0;
+		private RARHeaderDataEx _header = new RARHeaderDataEx();
+		private string _destinationPath = string.Empty;
+		private RARFileInfo _currentFile = null;
+		private readonly UnrarCallback _callback = null;
 
 		#endregion
 
 		#region Object lifetime procedures
 
-		public Unrar() 
+		public Unrar()
 		{
-			this.callback=new UNRARCallback(RARCallback);
+			_callback = new UnrarCallback(RARCallback);
 		}
 
 		public Unrar(string archivePathName) : this()
 		{
-			this.archivePathName=archivePathName;
+			_archivePathName = archivePathName;
 		}
 
 		~Unrar()
 		{
-			if(this.archiveHandle!=IntPtr.Zero)
+			if (_archiveHandle != IntPtr.Zero)
 			{
-				Unrar.RARCloseArchive(this.archiveHandle);
-				this.archiveHandle=IntPtr.Zero;
+				RARCloseArchive(_archiveHandle);
+				_archiveHandle = IntPtr.Zero;
 			}
 		}
 
 		public void Dispose()
 		{
-			if(this.archiveHandle!=IntPtr.Zero)
+			if (_archiveHandle != IntPtr.Zero)
 			{
-				Unrar.RARCloseArchive(this.archiveHandle);
-				this.archiveHandle=IntPtr.Zero;
+				RARCloseArchive(_archiveHandle);
+				_archiveHandle = IntPtr.Zero;
 			}
 		}
 
@@ -352,22 +350,16 @@ namespace Schematrix
 
 		#region Public Properties
 
-        public bool pause = false;
-        public bool abort = false;
+		public bool Pause { get; set; }
+		public bool Abort { get; set; }
 
 		/// <summary>
 		/// Path and name of RAR archive to open
 		/// </summary>
 		public string ArchivePathName
 		{
-			get
-			{
-				return this.archivePathName;
-			}
-			set
-			{
-				this.archivePathName=value;
-			}
+			get { return _archivePathName; }
+			set { _archivePathName = value; }
 		}
 
 		/// <summary>
@@ -375,10 +367,7 @@ namespace Schematrix
 		/// </summary>
 		public string Comment
 		{
-			get
-			{
-				return(this.comment);
-			}
+			get { return _comment; }
 		}
 
 		/// <summary>
@@ -386,10 +375,7 @@ namespace Schematrix
 		/// </summary>
 		public RARFileInfo CurrentFile
 		{
-			get
-			{
-				return(this.currentFile);
-			}
+			get { return _currentFile; }
 		}
 
 		/// <summary>
@@ -397,14 +383,8 @@ namespace Schematrix
 		/// </summary>
 		public string DestinationPath
 		{
-			get
-			{
-				return this.destinationPath;
-			}
-			set
-			{
-				this.destinationPath=value;
-			}
+			get { return _destinationPath; }
+			set { _destinationPath = value; }
 		}
 
 		/// <summary>
@@ -412,15 +392,12 @@ namespace Schematrix
 		/// </summary>
 		public string Password
 		{
-			get
-			{
-				return(this.password);
-			}
+			get { return _password; }
 			set
 			{
-				this.password=value;
-				if(this.archiveHandle!=IntPtr.Zero)
-					RARSetPassword(this.archiveHandle, value);
+				_password = value;
+				if (_archiveHandle != IntPtr.Zero)
+					RARSetPassword(_archiveHandle, value);
 			}
 		}
 
@@ -431,24 +408,23 @@ namespace Schematrix
 		/// <summary>
 		/// Close the currently open archive
 		/// </summary>
-		/// <returns></returns>
 		public void Close()
 		{
 			// Exit without exception if no archive is open
-			if(this.archiveHandle==IntPtr.Zero)
+			if (_archiveHandle == IntPtr.Zero)
 				return;
 
 			// Close archive
-			int result=Unrar.RARCloseArchive(this.archiveHandle);
+			int result = RARCloseArchive(_archiveHandle);
 
 			// Check result
-			if(result!=0)
+			if (result != 0)
 			{
 				ProcessFileError(result);
 			}
 			else
 			{
-				this.archiveHandle=IntPtr.Zero;
+				_archiveHandle = IntPtr.Zero;
 			}
 		}
 
@@ -457,9 +433,9 @@ namespace Schematrix
 		/// </summary>
 		public void Open()
 		{
-			if(this.ArchivePathName.Length==0)
+			if (ArchivePathName.Length == 0)
 				throw new IOException("Archive name has not been set.");
-			this.Open(this.ArchivePathName, OpenMode.Extract);
+			Open(ArchivePathName, OpenMode.Extract);
 		}
 
 		/// <summary>
@@ -468,9 +444,9 @@ namespace Schematrix
 		/// <param name="openMode">Mode in which archive should be opened</param>
 		public void Open(OpenMode openMode)
 		{
-			if(this.ArchivePathName.Length==0)
+			if (ArchivePathName.Length == 0)
 				throw new IOException("Archive name has not been set.");
-			this.Open(this.ArchivePathName, openMode);
+			Open(ArchivePathName, openMode);
 		}
 
 		/// <summary>
@@ -480,37 +456,37 @@ namespace Schematrix
 		/// <param name="openMode">Mode in which to open archive</param>
 		public void Open(string archivePathName, OpenMode openMode)
 		{
-			IntPtr handle=IntPtr.Zero;
+			IntPtr handle = IntPtr.Zero;
 
 			// Close any previously open archives
-			if(this.archiveHandle!=IntPtr.Zero)
-				this.Close();
+			if (_archiveHandle != IntPtr.Zero)
+				Close();
 
 			// Prepare extended open archive struct
-			this.ArchivePathName=archivePathName;
-			RAROpenArchiveDataEx openStruct=new RAROpenArchiveDataEx();
+			ArchivePathName = archivePathName;
+			RAROpenArchiveDataEx openStruct = new RAROpenArchiveDataEx();
 			openStruct.Initialize();
-			openStruct.ArcName=this.archivePathName+"\0";
-			openStruct.ArcNameW=this.archivePathName+"\0";
-			openStruct.OpenMode=(uint)openMode;
-			if(this.retrieveComment)
+			openStruct.ArcName = _archivePathName + "\0";
+			openStruct.ArcNameW = _archivePathName + "\0";
+			openStruct.OpenMode = (uint) openMode;
+			if (_retrieveComment)
 			{
-				openStruct.CmtBuf=new string((char)0,65536);
-				openStruct.CmtBufSize=65536;
+				openStruct.CmtBuf = new string((char) 0, 65536);
+				openStruct.CmtBufSize = 65536;
 			}
 			else
 			{
-				openStruct.CmtBuf=null;
-				openStruct.CmtBufSize=0;
+				openStruct.CmtBuf = null;
+				openStruct.CmtBufSize = 0;
 			}
 
 			// Open archive
-			handle=Unrar.RAROpenArchiveEx(ref openStruct);
+			handle = RAROpenArchiveEx(ref openStruct);
 
 			// Check for success
-			if(openStruct.OpenResult!=0)
+			if (openStruct.OpenResult != 0)
 			{
-				switch((RarError)openStruct.OpenResult)
+				switch ((RarError) openStruct.OpenResult)
 				{
 					case RarError.InsufficientMemory:
 						throw new OutOfMemoryException("Insufficient memory to perform operation.");
@@ -527,22 +503,22 @@ namespace Schematrix
 			}
 
 			// Save handle and flags
-			this.archiveHandle=handle;
-			this.archiveFlags=(ArchiveFlags)openStruct.Flags;
+			_archiveHandle = handle;
+			_archiveFlags = (ArchiveFlags) openStruct.Flags;
 
 			// Set callback
-			Unrar.RARSetCallback(this.archiveHandle, this.callback, this.GetHashCode());
+			RARSetCallback(_archiveHandle, _callback, GetHashCode());
 
 			// If comment retrieved, save it
-			if(openStruct.CmtState==1)
-				this.comment=openStruct.CmtBuf.ToString();
+			if (openStruct.CmtState == 1)
+				_comment = openStruct.CmtBuf;
 
 			// If password supplied, set it
-			if(this.password.Length!=0)
-				Unrar.RARSetPassword(this.archiveHandle, this.password);
+			if (_password.Length != 0)
+				RARSetPassword(_archiveHandle, _password);
 
 			// Fire NewVolume event for first volume
-			this.OnNewVolume(this.archivePathName);
+			OnNewVolume(_archivePathName);
 		}
 
 		/// <summary>
@@ -552,51 +528,51 @@ namespace Schematrix
 		public bool ReadHeader()
 		{
 			// Throw exception if archive not open
-			if(this.archiveHandle==IntPtr.Zero)
+			if (_archiveHandle == IntPtr.Zero)
 				throw new IOException("Archive is not open.");
 
 			// Initialize header struct
-			this.header=new RARHeaderDataEx();
-			header.Initialize();
+			_header = new RARHeaderDataEx();
+			_header.Initialize();
 
 			// Read next entry
-			currentFile=null;
-			int result=Unrar.RARReadHeaderEx(this.archiveHandle, ref this.header);
+			_currentFile = null;
+			int result = RARReadHeaderEx(_archiveHandle, ref _header);
 
 			// Check for error or end of archive
-			if((RarError)result==RarError.EndOfArchive)
+			if ((RarError) result == RarError.EndOfArchive)
 				return false;
-			else if((RarError)result==RarError.BadData)
+			if ((RarError) result == RarError.BadData)
 				throw new IOException("Archive data is corrupt.");
 
 			// Determine if new file
-			if(((header.Flags & 0x01) != 0) && currentFile!=null)
-				currentFile.ContinuedFromPrevious=true;
+			if (((_header.Flags & 0x01) != 0) && _currentFile != null)
+				_currentFile.ContinuedFromPrevious = true;
 			else
 			{
 				// New file, prepare header
-				currentFile=new RARFileInfo();
-				currentFile.FileName=header.FileNameW.ToString();
-				if((header.Flags & 0x02) != 0)
-					currentFile.ContinuedOnNext=true;
-				if(header.PackSizeHigh != 0)
-					currentFile.PackedSize=(header.PackSizeHigh * 0x100000000) + header.PackSize;
+				_currentFile = new RARFileInfo();
+				_currentFile.FileName = _header.FileNameW;
+				if ((_header.Flags & 0x02) != 0)
+					_currentFile.ContinuedOnNext = true;
+				if (_header.PackSizeHigh != 0)
+					_currentFile.PackedSize = (_header.PackSizeHigh * 0x100000000) + _header.PackSize;
 				else
-					currentFile.PackedSize=header.PackSize;
-				if(header.UnpSizeHigh != 0)
-					currentFile.UnpackedSize=(header.UnpSizeHigh * 0x100000000) + header.UnpSize;
+					_currentFile.PackedSize = _header.PackSize;
+				if (_header.UnpSizeHigh != 0)
+					_currentFile.UnpackedSize = (_header.UnpSizeHigh * 0x100000000) + _header.UnpSize;
 				else
-					currentFile.UnpackedSize=header.UnpSize;
-				currentFile.HostOS=(int)header.HostOS;
-				currentFile.FileCRC=header.FileCRC;
-				currentFile.FileTime=FromMSDOSTime(header.FileTime);
-				currentFile.VersionToUnpack=(int)header.UnpVer;
-				currentFile.Method=(int)header.Method;
-				currentFile.FileAttributes=(int)header.FileAttr;
-				currentFile.BytesExtracted=0;
-				if((header.Flags & 0xE0) == 0xE0)
-					currentFile.IsDirectory=true;
-				this.OnNewFile();
+					_currentFile.UnpackedSize = _header.UnpSize;
+				_currentFile.HostOS = (int) _header.HostOS;
+				_currentFile.FileCRC = _header.FileCRC;
+				_currentFile.FileTime = FromMSDOSTime(_header.FileTime);
+				_currentFile.VersionToUnpack = (int) _header.UnpVer;
+				_currentFile.Method = (int) _header.Method;
+				_currentFile.FileAttributes = (int) _header.FileAttr;
+				_currentFile.BytesExtracted = 0;
+				if ((_header.Flags & 0xE0) == 0xE0)
+					_currentFile.IsDirectory = true;
+				OnNewFile();
 			}
 
 			// Return success
@@ -609,14 +585,14 @@ namespace Schematrix
 		/// <returns></returns>
 		public string[] ListFiles()
 		{
-			ArrayList fileNames=new ArrayList();
-			while(this.ReadHeader())
+			ArrayList fileNames = new ArrayList();
+			while (ReadHeader())
 			{
-				if(!currentFile.IsDirectory)
-					fileNames.Add(currentFile.FileName);
-				this.Skip();
+				if (!_currentFile.IsDirectory)
+					fileNames.Add(_currentFile.FileName);
+				Skip();
 			}
-			string[] files=new string[fileNames.Count];
+			string[] files = new string[fileNames.Count];
 			fileNames.CopyTo(files);
 			return files;
 		}
@@ -624,13 +600,12 @@ namespace Schematrix
 		/// <summary>
 		/// Moves the current archive position to the next available header
 		/// </summary>
-		/// <returns></returns>
 		public void Skip()
 		{
-			int result=Unrar.RARProcessFile(this.archiveHandle, (int)Operation.Skip, string.Empty, string.Empty);
+			int result = RARProcessFile(_archiveHandle, (int) Operation.Skip, string.Empty, string.Empty);
 
 			// Check result
-			if(result!=0)
+			if (result != 0)
 			{
 				ProcessFileError(result);
 			}
@@ -639,13 +614,12 @@ namespace Schematrix
 		/// <summary>
 		/// Tests the ability to extract the current file without saving extracted data to disk
 		/// </summary>
-		/// <returns></returns>
 		public void Test()
 		{
-			int result=Unrar.RARProcessFile(this.archiveHandle, (int)Operation.Test, string.Empty, string.Empty);
+			int result = RARProcessFile(_archiveHandle, (int) Operation.Test, string.Empty, string.Empty);
 
 			// Check result
-			if(result!=0)
+			if (result != 0)
 			{
 				ProcessFileError(result);
 			}
@@ -654,30 +628,27 @@ namespace Schematrix
 		/// <summary>
 		/// Extracts the current file to the default destination path
 		/// </summary>
-		/// <returns></returns>
 		public void Extract()
 		{
-			this.Extract(this.destinationPath, string.Empty);
+			Extract(_destinationPath, string.Empty);
 		}
 
 		/// <summary>
 		/// Extracts the current file to a specified destination path and filename
 		/// </summary>
 		/// <param name="destinationName">Path and name of extracted file</param>
-		/// <returns></returns>
 		public void Extract(string destinationName)
 		{
-			this.Extract(string.Empty, destinationName);
+			Extract(string.Empty, destinationName);
 		}
 
 		/// <summary>
 		/// Extracts the current file to a specified directory without renaming file
 		/// </summary>
 		/// <param name="destinationPath"></param>
-		/// <returns></returns>
 		public void ExtractToDirectory(string destinationPath)
 		{
-			this.Extract(destinationPath, string.Empty);
+			Extract(destinationPath, string.Empty);
 		}
 
 		#endregion
@@ -686,39 +657,31 @@ namespace Schematrix
 
 		private void Extract(string destinationPath, string destinationName)
 		{
-			int result=Unrar.RARProcessFile(this.archiveHandle, (int)Operation.Extract, destinationPath, destinationName);
+			int result = RARProcessFile(_archiveHandle, (int) Operation.Extract, destinationPath, destinationName);
 
 			// Check result
-			if(result!=0)
+			if (result != 0)
 			{
 				ProcessFileError(result);
 			}
 		}
 
-		private DateTime FromMSDOSTime(uint dosTime)
+		private static DateTime FromMSDOSTime(uint dosTime)
 		{
-			int day=0;
-			int month=0;
-			int year=0;
-			int second=0;
-			int hour=0;
-			int minute=0;
-			ushort hiWord;
-			ushort loWord;
-			hiWord=(ushort)((dosTime & 0xFFFF0000) >> 16);
-			loWord=(ushort)(dosTime & 0xFFFF);
-			year=((hiWord & 0xFE00) >> 9)+1980;
-			month=(hiWord & 0x01E0) >> 5;
-			day=hiWord & 0x1F;
-			hour=(loWord & 0xF800) >> 11;
-			minute=(loWord & 0x07E0) >> 5;
-			second=(loWord & 0x1F) << 1;
+			ushort hiWord = (ushort) ((dosTime & 0xFFFF0000) >> 16);
+			ushort loWord = (ushort) (dosTime & 0xFFFF);
+			int year = ((hiWord & 0xFE00) >> 9) + 1980;
+			int month = (hiWord & 0x01E0) >> 5;
+			int day = hiWord & 0x1F;
+			int hour = (loWord & 0xF800) >> 11;
+			int minute = (loWord & 0x07E0) >> 5;
+			int second = (loWord & 0x1F) << 1;
 			return new DateTime(year, month, day, hour, minute, second);
 		}
 
-		private void ProcessFileError(int result)
+		private static void ProcessFileError(int result)
 		{
-			switch((RarError)result)
+			switch ((RarError) result)
 			{
 				case RarError.UnknownFormat:
 					throw new OutOfMemoryException("Unknown archive format.");
@@ -746,44 +709,44 @@ namespace Schematrix
 			}
 		}
 
-		private int RARCallback(uint msg, int UserData, IntPtr p1, int p2)
+		private int RARCallback(uint msg, int userData, IntPtr p1, int p2)
 		{
-			string volume=string.Empty;
-			string newVolume=string.Empty;
-			int result=-1;
+			string volume = string.Empty;
+			string newVolume = string.Empty;
+			int result = -1;
 
-			switch((CallbackMessages)msg)
+			switch ((CallbackMessages) msg)
 			{
 				case CallbackMessages.VolumeChange:
-					volume=Marshal.PtrToStringAnsi(p1);
-					if((VolumeMessage)p2==VolumeMessage.Notify)
-						result=OnNewVolume(volume);
-					else if((VolumeMessage)p2==VolumeMessage.Ask)
+					volume = Marshal.PtrToStringAnsi(p1);
+					if ((VolumeMessage) p2 == VolumeMessage.Notify)
+						result = OnNewVolume(volume);
+					else if ((VolumeMessage) p2 == VolumeMessage.Ask)
 					{
-						newVolume=OnMissingVolume(volume);
-						if(newVolume.Length==0)
-							result=-1;
+						newVolume = OnMissingVolume(volume);
+						if (newVolume.Length == 0)
+							result = -1;
 						else
 						{
-							if(newVolume!=volume)
+							if (newVolume != volume)
 							{
-								for(int i=0; i<newVolume.Length; i++)
+								for (int i = 0; i < newVolume.Length; i++)
 								{
-									Marshal.WriteByte(p1, i, (byte)newVolume[i]);
+									Marshal.WriteByte(p1, i, (byte) newVolume[i]);
 								}
-								Marshal.WriteByte(p1, newVolume.Length, (byte)0);
+								Marshal.WriteByte(p1, newVolume.Length, 0);
 							}
-							result=1;
+							result = 1;
 						}
 					}
 					break;
 
 				case CallbackMessages.ProcessData:
-					result=OnDataAvailable(p1, p2);
+					result = OnDataAvailable(p1, p2);
 					break;
 
 				case CallbackMessages.NeedPassword:
-					result=OnPasswordRequired(p1, p2);
+					result = OnPasswordRequired(p1, p2);
 					break;
 			}
 			return result;
@@ -795,26 +758,25 @@ namespace Schematrix
 
 		protected virtual void OnNewFile()
 		{
-			if(this.NewFile!=null)
+			if (NewFile != null)
 			{
-				NewFileEventArgs e = new NewFileEventArgs(this.currentFile);
-				this.NewFile(this, e);
+				NewFile(this, new NewFileEventArgs(_currentFile));
 			}
 		}
 
 		protected virtual int OnPasswordRequired(IntPtr p1, int p2)
 		{
-			int result=-1;
-			if(this.PasswordRequired!=null)
+			int result = -1;
+			if (PasswordRequired != null)
 			{
-				PasswordRequiredEventArgs e=new PasswordRequiredEventArgs();
-				this.PasswordRequired(this, e);
-				if(e.ContinueOperation && e.Password.Length>0)
+				PasswordRequiredEventArgs e = new PasswordRequiredEventArgs();
+				PasswordRequired(this, e);
+				if (e.ContinueOperation && e.Password.Length > 0)
 				{
-					for(int i=0; (i<e.Password.Length) && (i<p2); i++)
-						Marshal.WriteByte(p1, i, (byte)e.Password[i]);
-					Marshal.WriteByte(p1, e.Password.Length, (byte)0);
-					result=1;
+					for (int i = 0; (i < e.Password.Length) && (i < p2); i++)
+						Marshal.WriteByte(p1, i, (byte) e.Password[i]);
+					Marshal.WriteByte(p1, e.Password.Length, 0);
+					result = 1;
 				}
 			}
 			else
@@ -826,62 +788,62 @@ namespace Schematrix
 
 		protected virtual int OnDataAvailable(IntPtr p1, int p2)
 		{
-			int result=1;
-			if(this.currentFile!=null)
-				this.currentFile.BytesExtracted+=p2;
-			if(this.DataAvailable!=null)
+			int result = 1;
+			if (_currentFile != null)
+				_currentFile.BytesExtracted += p2;
+			if (DataAvailable != null)
 			{
-				byte[] data=new byte[p2];
+				byte[] data = new byte[p2];
 				Marshal.Copy(p1, data, 0, p2);
-				DataAvailableEventArgs e=new DataAvailableEventArgs(data);
-				this.DataAvailable(this, e);
-				if(!e.ContinueOperation)
-					result=-1;
+				DataAvailableEventArgs e = new DataAvailableEventArgs(data);
+				DataAvailable(this, e);
+				if (!e.ContinueOperation)
+					result = -1;
 			}
-			if((this.ExtractionProgress!=null) && (this.currentFile!=null))
+			if (ExtractionProgress != null && _currentFile != null)
 			{
 				ExtractionProgressEventArgs e = new ExtractionProgressEventArgs();
-				e.FileName=this.currentFile.FileName;
-				e.FileSize=this.currentFile.UnpackedSize;
-				e.BytesExtracted=this.currentFile.BytesExtracted;
-				e.PercentComplete=this.currentFile.PercentComplete;
-				this.ExtractionProgress(this, e);
-				if(!e.ContinueOperation)
-					result=-1;
+				e.FileName = _currentFile.FileName;
+				e.FileSize = _currentFile.UnpackedSize;
+				e.BytesExtracted = _currentFile.BytesExtracted;
+				e.PercentComplete = _currentFile.PercentComplete;
+				ExtractionProgress(this, e);
+				if (!e.ContinueOperation)
+					result = -1;
 			}
 			return result;
 		}
 
 		protected virtual int OnNewVolume(string volume)
 		{
-            while (pause)
-            {
-                System.Threading.Thread.Sleep(10);
-                if (abort)
-                    return -1;
-            }
-            if (abort)
-                return -1;
-			int result=1;
-			if(this.NewVolume!=null)
+			while (Pause)
 			{
-				NewVolumeEventArgs e=new NewVolumeEventArgs(volume);
-				this.NewVolume(this, e);
-				if(!e.ContinueOperation)
-					result=-1;
+				Thread.Sleep(10);
+				if (Abort)
+					return -1;
+			}
+			if (Abort)
+				return -1;
+			int result = 1;
+			if (NewVolume != null)
+			{
+				NewVolumeEventArgs e = new NewVolumeEventArgs(volume);
+				NewVolume(this, e);
+				if (!e.ContinueOperation)
+					result = -1;
 			}
 			return result;
 		}
 
 		protected virtual string OnMissingVolume(string volume)
 		{
-			string result=string.Empty;
-			if(this.MissingVolume!=null)
+			string result = string.Empty;
+			if (MissingVolume != null)
 			{
-				MissingVolumeEventArgs e=new MissingVolumeEventArgs(volume);
-				this.MissingVolume(this, e);
-				if(e.ContinueOperation)
-					result=e.VolumeName;
+				MissingVolumeEventArgs e = new MissingVolumeEventArgs(volume);
+				MissingVolume(this, e);
+				if (e.ContinueOperation)
+					result = e.VolumeName;
 			}
 			return result;
 		}
@@ -889,92 +851,88 @@ namespace Schematrix
 		#endregion
 	}
 
-	#region Event Argument Classes
-
 	public class NewVolumeEventArgs
 	{
 		public string VolumeName;
-		public bool ContinueOperation=true;
+		public bool ContinueOperation = true;
 
 		public NewVolumeEventArgs(string volumeName)
 		{
-			this.VolumeName=volumeName;
+			VolumeName = volumeName;
 		}
 	}
 
 	public class MissingVolumeEventArgs
 	{
 		public string VolumeName;
-		public bool ContinueOperation=false;
+		public bool ContinueOperation = false;
 
 		public MissingVolumeEventArgs(string volumeName)
 		{
-			this.VolumeName=volumeName;
+			VolumeName = volumeName;
 		}
 	}
 
 	public class DataAvailableEventArgs
 	{
 		public readonly byte[] Data;
-		public bool ContinueOperation=true;
+		public bool ContinueOperation = true;
 
 		public DataAvailableEventArgs(byte[] data)
 		{
-			this.Data=data;
+			Data = data;
 		}
 	}
 
 	public class PasswordRequiredEventArgs
 	{
-		public string Password=string.Empty;
-		public bool ContinueOperation=true;
+		public string Password = string.Empty;
+		public bool ContinueOperation = true;
 	}
 
 	public class NewFileEventArgs
 	{
-		public RARFileInfo fileInfo;
+		public RARFileInfo FileInfo;
 		public NewFileEventArgs(RARFileInfo fileInfo)
 		{
-			this.fileInfo=fileInfo;
+			FileInfo = fileInfo;
 		}
 	}
 
 	public class ExtractionProgressEventArgs
 	{
 		public string FileName;
-		public long   FileSize;
-		public long   BytesExtracted;
+		public long FileSize;
+		public long BytesExtracted;
 		public double PercentComplete;
-		public bool ContinueOperation=true;
+		public bool ContinueOperation = true;
 	}
 
 	public class RARFileInfo
 	{
 		public string FileName;
-		public bool		ContinuedFromPrevious=false;
-		public bool		ContinuedOnNext=false;
-		public bool		IsDirectory=false;
-		public long		PackedSize=0;
-		public long		UnpackedSize=0;
-		public int		HostOS=0;
-		public long		FileCRC=0;
-		public				DateTime FileTime;
-		public int		VersionToUnpack=0;
-		public int		Method=0;
-		public int		FileAttributes=0;
-		public long		BytesExtracted=0;
+		public bool ContinuedFromPrevious = false;
+		public bool ContinuedOnNext = false;
+		public bool IsDirectory = false;
+		public long PackedSize = 0;
+		public long UnpackedSize = 0;
+		public int HostOS = 0;
+		public long FileCRC = 0;
+		public DateTime FileTime;
+		public int VersionToUnpack = 0;
+		public int Method = 0;
+		public int FileAttributes = 0;
+		public long BytesExtracted = 0;
 
 		public double PercentComplete
 		{
 			get
 			{
-				if(this.UnpackedSize!=0)
-					return(((double)this.BytesExtracted/(double)this.UnpackedSize) * (double)100.0);
-				else
-					return (double)0;
+				if (UnpackedSize != 0)
+					return (((double) BytesExtracted / UnpackedSize) * 100.0);
+
+				return 0;
 			}
 		}
 	}
-
-	#endregion
 }

@@ -66,7 +66,7 @@ namespace UnpakkDaemon
 					Directory.CreateDirectory(LogPath);
 
 				using (StreamWriter writer = new StreamWriter(LogPathName, true))
-					writer.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " "
+					writer.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " > "
 						+ logType.ToString().PadRight(_logTypeIndentationDepth) + " " + logText);
 			}
 			catch { /* swallow and be happy :) */ }

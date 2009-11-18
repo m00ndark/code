@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Schematrix;
 using UnpakkDaemon.EventArguments;
+using UnpakkDaemon.Extraction;
 using UnpakkDaemon.SimpleFileVerification;
 
 namespace UnpakkDaemon
