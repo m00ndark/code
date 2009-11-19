@@ -8,7 +8,7 @@ namespace UnpakkDaemon.EventArguments
 			: this(message, percent, -1, -1) { }
 
 		public ProgressEventArgs(string message, double percent, long current)
-			: this(message, percent, current, (int) (current / (percent / 100))) {}
+			: this(message, percent, current, (int) (current / (percent / 100))) { }
 
 		public ProgressEventArgs(string message, double percent, long current, long max)
 		{

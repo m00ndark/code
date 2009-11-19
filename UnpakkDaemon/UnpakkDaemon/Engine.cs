@@ -4,18 +4,23 @@ using System.Linq;
 using System.Threading;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Extraction;
+using UnpakkDaemon.Service;
 using UnpakkDaemon.SimpleFileVerification;
 
 namespace UnpakkDaemon
 {
-	public class Engine
+	public class Engine : IStatusProvider
 	{
 		private readonly string _startupPath;
 		private FileLogger _fileLogger;
 		private bool _shutDown;
 
+		#region Implementation of IStatusProvider
+
 		public event EventHandler<ProgressEventArgs> Progress;
 		public event EventHandler<ProgressEventArgs> SubProgress;
+
+		#endregion
 
 		public Engine(string startupPath)
 		{
@@ -34,11 +39,17 @@ namespace UnpakkDaemon
 
 			SetupLogging();
 
+			StatusServiceHost.Open(this);
+
 #if !DEBUG
 			TrayHandler.LaunchTray(_startupPath);
 #endif
 
+			Thread.Sleep(1000000);
+
 			EnterMainLoop(new EngineSettings());
+
+			StatusServiceHost.Close();
 
 			IsRunning = false;
 		}
