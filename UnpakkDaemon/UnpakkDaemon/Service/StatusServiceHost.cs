@@ -18,7 +18,7 @@ namespace UnpakkDaemon.Service
 				_statusProvider.Progress += _statusService.statusProvider_Progress;
 				_statusProvider.SubProgress += _statusService.statusProvider_SubProgress;
 				_serviceHost = new ServiceHost(_statusService, new Uri("net.pipe://localhost/UnpakkDaemonStatus"));
-				_serviceHost.AddServiceEndpoint(typeof(IStatusService), new NetNamedPipeBinding(), new Uri("net.pipe://localhost/UnpakkDaemonStatus"));
+				_serviceHost.AddServiceEndpoint(typeof(IStatusService), new NetNamedPipeBinding(), string.Empty);
 				_serviceHost.Open();
 			}
 		}
