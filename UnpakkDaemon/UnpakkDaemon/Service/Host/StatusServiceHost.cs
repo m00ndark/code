@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ServiceModel;
+using UnpakkDaemon.Service.Common;
 
-namespace UnpakkDaemon.Service
+namespace UnpakkDaemon.Service.Host
 {
 	public static class StatusServiceHost
 	{
@@ -18,6 +19,8 @@ namespace UnpakkDaemon.Service
 				_statusProvider.Progress += _statusService.statusProvider_Progress;
 				_statusProvider.SubProgress += _statusService.statusProvider_SubProgress;
 				_serviceHost = new ServiceHost(_statusService, new Uri("net.pipe://localhost/UnpakkDaemonStatus"));
+				//_serviceHost.Description.Behaviors.Add(new System.ServiceModel.Description.ServiceMetadataBehavior() { HttpGetEnabled = true, HttpGetUrl = new Uri("http://localhost/UnpakkDaemonStatus") });
+				//_serviceHost.AddServiceEndpoint(typeof(System.ServiceModel.Description.IMetadataExchange), System.ServiceModel.Description.MetadataExchangeBindings.CreateMexHttpBinding(), "http://localhost/UnpakkDaemonStatus/MEX");
 				_serviceHost.AddServiceEndpoint(typeof(IStatusService), new NetNamedPipeBinding(), string.Empty);
 				_serviceHost.Open();
 			}

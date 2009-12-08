@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Extraction;
-using UnpakkDaemon.Service;
+using UnpakkDaemon.Service.Host;
 using UnpakkDaemon.SimpleFileVerification;
 
 namespace UnpakkDaemon
@@ -41,11 +41,11 @@ namespace UnpakkDaemon
 
 			StatusServiceHost.Open(this);
 
-#if !DEBUG
-			TrayHandler.LaunchTray(_startupPath);
-#endif
+			//Thread.Sleep(1000000);
 
-			Thread.Sleep(1000000);
+//#if !DEBUG
+			TrayHandler.LaunchTray(_startupPath);
+//#endif
 
 			EnterMainLoop(new EngineSettings());
 
@@ -156,11 +156,32 @@ namespace UnpakkDaemon
 					WriteLogEntry("Waking up, reloading settings..");
 					settings.Load();
 
+					//Thread.Sleep(5000);
+					//for (int j = 0; j < 10; j++)
+					//{
+					//   for (int i = 0; i < 20; i++)
+					//   {
+					//      Thread.Sleep(50);
+					//      RaiseSubProgressEvent("test", (i + 1) * 5, i);
+					//   }
+					//   RaiseProgressEvent("test", (j + 1) * 10, j);
+					//   Console.WriteLine("**************** DONE " + j + " ***************");
+					//}
+					//Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
+
 					WriteLogEntry("Scanning root folder, path=" + settings.RootScanPath);
+					RaiseSubProgressEvent(string.Empty, 0);
+					RaiseProgressEvent("Scanning root folder...", 0);
 					string[] sfvFilePaths = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
-					sfvFilePaths.ToList().ForEach(ProcessSFVFile);
+					for (int i = 0; i < sfvFilePaths.Length; i++)
+					{
+						RaiseSubProgressEvent(string.Empty, 0);
+						RaiseProgressEvent("Processing SFV file " + Path.GetFileName(sfvFilePaths[0]), 100 * (i / (double) sfvFilePaths.Length), i);
+						ProcessSFVFile(sfvFilePaths[i]);
+					}
 
 					WriteLogEntry("Going to sleep, time=" + settings.SleepTime);
+					RaiseProgressEvent("Going to sleep, waking up at " + (DateTime.Now + settings.SleepTime), 100);
 					Thread.Sleep(settings.SleepTime);
 				}
 				catch (Exception ex)
@@ -175,13 +196,15 @@ namespace UnpakkDaemon
 			try
 			{
 				WriteLogEntry("Validating SFV file references, sfvfile=" + sfvFilePath);
+				RaiseSubProgressEvent("Validating SFV file references...", 0);
 				SFVFile sfvFile = new SFVFile(sfvFilePath);
 				string rarFilePath = sfvFile.ContainedFilePaths.FirstOrDefault(filePath => filePath.EndsWith(".rar", StringComparison.CurrentCultureIgnoreCase));
 				if (!string.IsNullOrEmpty(rarFilePath))
 				{
 					if (sfvFile.Validate())
 					{
-						WriteLogEntry("Validation OK, proceeding with extraction..");
+						WriteLogEntry("Validation OK, proceeding with extraction...");
+						RaiseSubProgressEvent("Validation OK, proceeding with extraction...", 0);
 						if (ExtractRARContent(rarFilePath))
 						{
 							DeleteFiles(sfvFile);

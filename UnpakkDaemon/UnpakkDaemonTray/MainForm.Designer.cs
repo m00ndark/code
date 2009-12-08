@@ -30,13 +30,13 @@
 		{
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.tabPageProgress = new System.Windows.Forms.TabPage();
+			this.labelSubProgress = new System.Windows.Forms.Label();
+			this.labelMainProgress = new System.Windows.Forms.Label();
+			this.progressBarMainProgress = new System.Windows.Forms.ProgressBar();
+			this.progressBarSubProgress = new System.Windows.Forms.ProgressBar();
 			this.listViewLog = new System.Windows.Forms.ListView();
 			this.columnHeaderLog = new System.Windows.Forms.ColumnHeader();
 			this.tabPageSettings = new System.Windows.Forms.TabPage();
-			this.progressBarSubProgress = new System.Windows.Forms.ProgressBar();
-			this.progressBarMainProgress = new System.Windows.Forms.ProgressBar();
-			this.labelMainProgress = new System.Windows.Forms.Label();
-			this.labelSubProgress = new System.Windows.Forms.Label();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
 			this.SuspendLayout();
@@ -70,6 +70,36 @@
 			this.tabPageProgress.Text = "Progress";
 			this.tabPageProgress.UseVisualStyleBackColor = true;
 			// 
+			// labelSubProgress
+			// 
+			this.labelSubProgress.AutoSize = true;
+			this.labelSubProgress.Location = new System.Drawing.Point(6, 58);
+			this.labelSubProgress.Name = "labelSubProgress";
+			this.labelSubProgress.Size = new System.Drawing.Size(0, 13);
+			this.labelSubProgress.TabIndex = 4;
+			// 
+			// labelMainProgress
+			// 
+			this.labelMainProgress.AutoSize = true;
+			this.labelMainProgress.Location = new System.Drawing.Point(6, 24);
+			this.labelMainProgress.Name = "labelMainProgress";
+			this.labelMainProgress.Size = new System.Drawing.Size(0, 13);
+			this.labelMainProgress.TabIndex = 3;
+			// 
+			// progressBarMainProgress
+			// 
+			this.progressBarMainProgress.Location = new System.Drawing.Point(6, 6);
+			this.progressBarMainProgress.Name = "progressBarMainProgress";
+			this.progressBarMainProgress.Size = new System.Drawing.Size(779, 15);
+			this.progressBarMainProgress.TabIndex = 2;
+			// 
+			// progressBarSubProgress
+			// 
+			this.progressBarSubProgress.Location = new System.Drawing.Point(6, 40);
+			this.progressBarSubProgress.Name = "progressBarSubProgress";
+			this.progressBarSubProgress.Size = new System.Drawing.Size(779, 15);
+			this.progressBarSubProgress.TabIndex = 1;
+			// 
 			// listViewLog
 			// 
 			this.listViewLog.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -97,40 +127,10 @@
 			this.tabPageSettings.Location = new System.Drawing.Point(4, 22);
 			this.tabPageSettings.Name = "tabPageSettings";
 			this.tabPageSettings.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageSettings.Size = new System.Drawing.Size(791, 330);
+			this.tabPageSettings.Size = new System.Drawing.Size(791, 370);
 			this.tabPageSettings.TabIndex = 1;
 			this.tabPageSettings.Text = "Settings";
 			this.tabPageSettings.UseVisualStyleBackColor = true;
-			// 
-			// progressBarSubProgress
-			// 
-			this.progressBarSubProgress.Location = new System.Drawing.Point(6, 40);
-			this.progressBarSubProgress.Name = "progressBarSubProgress";
-			this.progressBarSubProgress.Size = new System.Drawing.Size(779, 15);
-			this.progressBarSubProgress.TabIndex = 1;
-			// 
-			// progressBarMainProgress
-			// 
-			this.progressBarMainProgress.Location = new System.Drawing.Point(6, 6);
-			this.progressBarMainProgress.Name = "progressBarMainProgress";
-			this.progressBarMainProgress.Size = new System.Drawing.Size(779, 15);
-			this.progressBarMainProgress.TabIndex = 2;
-			// 
-			// labelMainProgress
-			// 
-			this.labelMainProgress.AutoSize = true;
-			this.labelMainProgress.Location = new System.Drawing.Point(6, 24);
-			this.labelMainProgress.Name = "labelMainProgress";
-			this.labelMainProgress.Size = new System.Drawing.Size(0, 13);
-			this.labelMainProgress.TabIndex = 3;
-			// 
-			// labelSubProgress
-			// 
-			this.labelSubProgress.AutoSize = true;
-			this.labelSubProgress.Location = new System.Drawing.Point(6, 58);
-			this.labelSubProgress.Name = "labelSubProgress";
-			this.labelSubProgress.Size = new System.Drawing.Size(0, 13);
-			this.labelSubProgress.TabIndex = 4;
 			// 
 			// MainForm
 			// 
@@ -143,6 +143,7 @@
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Unpakk Daemon";
+			this.Load += new System.EventHandler(this.MainForm_Load);
 			this.tabControl.ResumeLayout(false);
 			this.tabPageProgress.ResumeLayout(false);
 			this.tabPageProgress.PerformLayout();
