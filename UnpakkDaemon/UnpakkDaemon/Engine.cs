@@ -45,6 +45,7 @@ namespace UnpakkDaemon
 
 //#if !DEBUG
 			TrayHandler.LaunchTray(_startupPath);
+			Thread.Sleep(2000);
 //#endif
 
 			EnterMainLoop(new EngineSettings());
@@ -173,21 +174,33 @@ namespace UnpakkDaemon
 					RaiseSubProgressEvent(string.Empty, 0);
 					RaiseProgressEvent("Scanning root folder...", 0);
 					string[] sfvFilePaths = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
-					for (int i = 0; i < sfvFilePaths.Length; i++)
+					for (int i = 0; i < sfvFilePaths.Length && !_shutDown; i++)
 					{
 						RaiseSubProgressEvent(string.Empty, 0);
-						RaiseProgressEvent("Processing SFV file " + Path.GetFileName(sfvFilePaths[0]), 100 * (i / (double) sfvFilePaths.Length), i);
+						RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[0]), 100 * (i / (double) sfvFilePaths.Length), i + 1, sfvFilePaths.Length);
 						ProcessSFVFile(sfvFilePaths[i]);
 					}
 
-					WriteLogEntry("Going to sleep, time=" + settings.SleepTime);
-					RaiseProgressEvent("Going to sleep, waking up at " + (DateTime.Now + settings.SleepTime), 100);
-					Thread.Sleep(settings.SleepTime);
+					if (!_shutDown)
+					{
+						WriteLogEntry("Going to sleep, time=" + settings.SleepTime);
+						RaiseSubProgressEvent(string.Empty, 100);
+						RaiseProgressEvent("Done, going to sleep...", 100);
+					}
 				}
 				catch (Exception ex)
 				{
 					WriteLogEntry("An exception occurred in main loop", ex);
 				}
+
+				if (_shutDown)
+				{
+					WriteLogEntry("ABORTING -- Shutdown initiated");
+					RaiseSubProgressEvent(string.Empty, 100);
+					RaiseProgressEvent("Unpakk Daemon Service is shutting down...", 100);
+				}
+				else
+					Thread.Sleep(settings.SleepTime);
 			}
 		}
 
@@ -204,7 +217,6 @@ namespace UnpakkDaemon
 					if (sfvFile.Validate())
 					{
 						WriteLogEntry("Validation OK, proceeding with extraction...");
-						RaiseSubProgressEvent("Validation OK, proceeding with extraction...", 0);
 						if (ExtractRARContent(rarFilePath))
 						{
 							DeleteFiles(sfvFile);
@@ -277,14 +289,15 @@ namespace UnpakkDaemon
 
 		private void unrar_ExtractionProgress(object sender, ExtractionProgressEventArgs e)
 		{
-			RaiseSubProgressEvent("Extracting " + e.FileName, e.PercentComplete, e.BytesExtracted, e.FileSize);
+			RaiseSubProgressEvent("Extracting file: " + e.FileName, e.PercentComplete, e.BytesExtracted, e.FileSize);
 		}
 
 		#endregion
 
 		private bool ValidateExtractedFile(string filePath, long fileSize, long fileChecksum)
 		{
-			WriteLogEntry("Validating extracted file..");
+			WriteLogEntry("Validating extracted file...");
+			RaiseSubProgressEvent("Validating extracted file: " + Path.GetFileName(filePath), 100);
 
 			if (!File.Exists(filePath))
 			{
@@ -318,7 +331,8 @@ namespace UnpakkDaemon
 
 		private void DeleteFiles(SFVFile sfvFile)
 		{
-			WriteLogEntry("Deleting archive files..");
+			WriteLogEntry("Deleting archive files...");
+			RaiseSubProgressEvent("Deleting archive files...", 100);
 
 			try
 			{

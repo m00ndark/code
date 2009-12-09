@@ -27,16 +27,23 @@ namespace UnpakkDaemonTray
 			ObjectPool.StatusServiceHandler.Subscribe();
 		}
 
+		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			ObjectPool.StatusServiceHandler.Unsubscribe();
+		}
+
 		private void statusChangedHandler_ProgressChanged(object sender, ProgressEventArgs e)
 		{
 			progressBarMainProgress.Value = (int) e.Percent;
-			labelMainProgress.Text = e.Message + " " + (int) e.Percent + "%";
+			labelMainMessage.Text = e.Message;
+			labelMainProgress.Text = (e.Current < 0 ? string.Empty : e.Current + "/" + e.Max);
 		}
 
 		private void statusChangedHandler_SubProgressChanged(object sender, ProgressEventArgs e)
 		{
 			progressBarSubProgress.Value = (int) e.Percent;
-			labelSubProgress.Text = e.Message + " " + (int) e.Percent + "%";
+			labelSubMessage.Text = e.Message;
+			labelSubProgress.Text = (e.Current < 0 ? string.Empty : (int) e.Percent + "%");
 		}
 	}
 }

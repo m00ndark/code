@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.ServiceModel;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Service.Common;
@@ -33,17 +34,31 @@ namespace UnpakkDaemon.Service.Host
 
 		public void statusProvider_Progress(object sender, ProgressEventArgs e)
 		{
-			foreach (IStatusChangedHandler subscriber in _subscribers)
+			foreach (IStatusChangedHandler subscriber in _subscribers.ToList())
 			{
-				subscriber.Progress(new ProgressData(e.Message, e.Percent, e.Current, e.Max));
+				try
+				{
+					subscriber.Progress(new ProgressData(e.Message, e.Percent, e.Current, e.Max));
+				}
+				catch
+				{
+					_subscribers.Remove(subscriber);
+				}
 			}
 		}
 
 		public void statusProvider_SubProgress(object sender, ProgressEventArgs e)
 		{
-			foreach (IStatusChangedHandler subscriber in _subscribers)
+			foreach (IStatusChangedHandler subscriber in _subscribers.ToList())
 			{
-				subscriber.SubProgress(new ProgressData(e.Message, e.Percent, e.Current, e.Max));
+				try
+				{
+					subscriber.SubProgress(new ProgressData(e.Message, e.Percent, e.Current, e.Max));
+				}
+				catch
+				{
+					_subscribers.Remove(subscriber);
+				}
 			}
 		}
 	}
