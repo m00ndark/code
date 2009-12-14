@@ -28,6 +28,8 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.tabPageProgress = new System.Windows.Forms.TabPage();
 			this.labelSubProgress = new System.Windows.Forms.Label();
@@ -51,11 +53,16 @@
 			this.labelSleepTime = new System.Windows.Forms.Label();
 			this.textBoxApplicationDataFolder = new System.Windows.Forms.TextBox();
 			this.labelApplicationDataFolder = new System.Windows.Forms.Label();
+			this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+			this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.toolStripMenuItemRestore = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
 			this.tabPageSettings.SuspendLayout();
 			this.groupBoxScanSettings.SuspendLayout();
 			this.groupBoxApplicationSettings.SuspendLayout();
+			this.contextMenuStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl
@@ -303,6 +310,37 @@
 			this.labelApplicationDataFolder.TabIndex = 1;
 			this.labelApplicationDataFolder.Text = "Application data folder:";
 			// 
+			// notifyIcon
+			// 
+			this.notifyIcon.ContextMenuStrip = this.contextMenuStrip;
+			this.notifyIcon.Icon = ((System.Drawing.Icon) (resources.GetObject("notifyIcon.Icon")));
+			this.notifyIcon.Text = "Unpakk Daemon";
+			this.notifyIcon.Visible = true;
+			this.notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
+			// 
+			// contextMenuStrip
+			// 
+			this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemRestore,
+            this.toolStripMenuItemClose});
+			this.contextMenuStrip.Name = "contextMenuStrip";
+			this.contextMenuStrip.Size = new System.Drawing.Size(119, 48);
+			// 
+			// toolStripMenuItemRestore
+			// 
+			this.toolStripMenuItemRestore.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+			this.toolStripMenuItemRestore.Name = "toolStripMenuItemRestore";
+			this.toolStripMenuItemRestore.Size = new System.Drawing.Size(118, 22);
+			this.toolStripMenuItemRestore.Text = "Restore";
+			this.toolStripMenuItemRestore.Click += new System.EventHandler(this.toolStripMenuItemRestore_Click);
+			// 
+			// toolStripMenuItemClose
+			// 
+			this.toolStripMenuItemClose.Name = "toolStripMenuItemClose";
+			this.toolStripMenuItemClose.Size = new System.Drawing.Size(118, 22);
+			this.toolStripMenuItemClose.Text = "Close";
+			this.toolStripMenuItemClose.Click += new System.EventHandler(this.toolStripMenuItemClose_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -310,12 +348,14 @@
 			this.ClientSize = new System.Drawing.Size(817, 414);
 			this.Controls.Add(this.tabControl);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Unpakk Daemon";
 			this.Load += new System.EventHandler(this.MainForm_Load);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+			this.Resize += new System.EventHandler(this.MainForm_Resize);
 			this.tabControl.ResumeLayout(false);
 			this.tabPageProgress.ResumeLayout(false);
 			this.tabPageProgress.PerformLayout();
@@ -323,6 +363,7 @@
 			this.groupBoxScanSettings.ResumeLayout(false);
 			this.groupBoxApplicationSettings.ResumeLayout(false);
 			this.groupBoxApplicationSettings.PerformLayout();
+			this.contextMenuStrip.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -352,5 +393,9 @@
 		private System.Windows.Forms.Button buttonAddRootPath;
 		private System.Windows.Forms.ListView listViewRootPath;
 		private System.Windows.Forms.ColumnHeader columnHeaderRootPath;
+		private System.Windows.Forms.NotifyIcon notifyIcon;
+		private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRestore;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemClose;
 	}
 }

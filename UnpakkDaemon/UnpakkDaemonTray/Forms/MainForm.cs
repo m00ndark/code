@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Service.Client;
@@ -15,11 +9,13 @@ namespace UnpakkDaemonTray.Forms
 {
 	public partial class MainForm : Form
 	{
+		private bool _closing;
 		private SettingsWorker _settingsWorker;
 
 		public MainForm()
 		{
 			InitializeComponent();
+			_closing = false;
 			_settingsWorker = null;
 			CommonWorker.ShowMessage += CommonWorker_ShowMessage;
 		}
@@ -28,6 +24,7 @@ namespace UnpakkDaemonTray.Forms
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
+			Restore();
 			StatusChangedHandler statusChangedHandler = new StatusChangedHandler();
 			statusChangedHandler.ProgressChanged += StatusChangedHandler_ProgressChanged;
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
@@ -37,11 +34,41 @@ namespace UnpakkDaemonTray.Forms
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			try
+			if (_closing)
 			{
-				ObjectPool.StatusServiceHandler.Unsubscribe();
+				try
+				{
+					ObjectPool.StatusServiceHandler.Unsubscribe();
+				}
+				catch { }
 			}
-			catch {}
+			else
+			{
+				Minimize();
+				e.Cancel = true;
+			}
+		}
+
+		private void MainForm_Resize(object sender, EventArgs e)
+		{
+			if (WindowState == FormWindowState.Minimized)
+				Minimize();
+		}
+
+		private void notifyIcon_DoubleClick(object sender, EventArgs e)
+		{
+			Restore();
+		}
+
+		private void toolStripMenuItemRestore_Click(object sender, EventArgs e)
+		{
+			Restore();
+		}
+
+		private void toolStripMenuItemClose_Click(object sender, EventArgs e)
+		{
+			_closing = true;
+			Close();
 		}
 
 		private void tabControl_Selecting(object sender, TabControlCancelEventArgs e)
@@ -197,6 +224,20 @@ namespace UnpakkDaemonTray.Forms
 		private void EnableControls(bool enable)
 		{
 			buttonRemoveRootPath.Enabled = (enable && listViewRootPath.SelectedItems.Count > 0);
+		}
+
+		private void Minimize()
+		{
+			Hide();
+			toolStripMenuItemRestore.Visible = true;
+		}
+
+		private void Restore()
+		{
+			Show();
+			WindowState = FormWindowState.Normal;
+			Refresh();
+			toolStripMenuItemRestore.Visible = false;
 		}
 
 		#endregion
