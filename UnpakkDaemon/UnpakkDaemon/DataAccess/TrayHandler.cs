@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 
-namespace UnpakkDaemon
+namespace UnpakkDaemon.DataAccess
 {
 	public static class TrayHandler
 	{

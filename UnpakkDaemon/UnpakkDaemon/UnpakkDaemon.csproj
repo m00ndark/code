@@ -83,12 +83,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\RegistryHandler.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="EventArguments\TimeSpanEventArgs.cs" />
     <Compile Include="EventArguments\LogEntryEventArgs.cs" />
     <Compile Include="EventArguments\ProgressEventArgs.cs" />
+    <Compile Include="EventArguments\RootPathListEventArgs.cs" />
+    <Compile Include="EventArguments\StringEventArgs.cs" />
     <Compile Include="Extraction\Unrar.cs" />
-    <Compile Include="FileLogger.cs" />
+    <Compile Include="DataAccess\FileLogger.cs" />
     <Compile Include="IStatusProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\Client\IStatusServiceChannel.cs" />
@@ -102,7 +106,7 @@
     <Compile Include="Service\Host\StatusServiceHost.cs" />
     <Compile Include="SimpleFileVerification\CRC32.cs" />
     <Compile Include="SimpleFileVerification\SFVFile.cs" />
-    <Compile Include="TrayHandler.cs" />
+    <Compile Include="DataAccess\TrayHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="unrar.dll">

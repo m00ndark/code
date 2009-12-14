@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using UnpakkDaemon.DataAccess;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Extraction;
 using UnpakkDaemon.Service.Host;
@@ -48,7 +50,7 @@ namespace UnpakkDaemon
 			Thread.Sleep(2000);
 //#endif
 
-			EnterMainLoop(new EngineSettings());
+			EnterMainLoop();
 
 			StatusServiceHost.Close();
 
@@ -147,7 +149,7 @@ namespace UnpakkDaemon
 
 		#endregion
 
-		private void EnterMainLoop(EngineSettings settings)
+		private void EnterMainLoop()
 		{
 			while (!_shutDown)
 			{
@@ -155,35 +157,28 @@ namespace UnpakkDaemon
 				{
 					WriteLogEntry("======================================================");
 					WriteLogEntry("Waking up, reloading settings..");
-					settings.Load();
+					EngineSettings.Load();
 
-					//Thread.Sleep(5000);
-					//for (int j = 0; j < 10; j++)
-					//{
-					//   for (int i = 0; i < 20; i++)
-					//   {
-					//      Thread.Sleep(50);
-					//      RaiseSubProgressEvent("test", (i + 1) * 5, i);
-					//   }
-					//   RaiseProgressEvent("test", (j + 1) * 10, j);
-					//   Console.WriteLine("**************** DONE " + j + " ***************");
-					//}
-					//Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
-
-					WriteLogEntry("Scanning root folder, path=" + settings.RootScanPath);
 					RaiseSubProgressEvent(string.Empty, 0);
-					RaiseProgressEvent("Scanning root folder...", 0);
-					string[] sfvFilePaths = Directory.GetFiles(settings.RootScanPath, "*.sfv", SearchOption.AllDirectories);
-					for (int i = 0; i < sfvFilePaths.Length && !_shutDown; i++)
+					RaiseProgressEvent("Scanning root folders...", 0);
+					List<string> sfvFilePaths = new List<string>();
+					foreach (string rootPath in EngineSettings.RootPaths)
+					{
+						WriteLogEntry("Scanning root folder, path=" + rootPath);
+						sfvFilePaths.AddRange(Directory.GetFiles(rootPath, "*.sfv", SearchOption.AllDirectories));
+						if (_shutDown) break;
+					}
+
+					for (int i = 0; i < sfvFilePaths.Count && !_shutDown; i++)
 					{
 						RaiseSubProgressEvent(string.Empty, 0);
-						RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[0]), 100 * (i / (double) sfvFilePaths.Length), i + 1, sfvFilePaths.Length);
+						RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[i]), 100 * (i / (double) sfvFilePaths.Count), i + 1, sfvFilePaths.Count);
 						ProcessSFVFile(sfvFilePaths[i]);
 					}
 
 					if (!_shutDown)
 					{
-						WriteLogEntry("Going to sleep, time=" + settings.SleepTime);
+						WriteLogEntry("Going to sleep, time=" + EngineSettings.SleepTime);
 						RaiseSubProgressEvent(string.Empty, 100);
 						RaiseProgressEvent("Done, going to sleep...", 100);
 					}
@@ -200,7 +195,7 @@ namespace UnpakkDaemon
 					RaiseProgressEvent("Unpakk Daemon Service is shutting down...", 100);
 				}
 				else
-					Thread.Sleep(settings.SleepTime);
+					Thread.Sleep(EngineSettings.SleepTime);
 			}
 		}
 

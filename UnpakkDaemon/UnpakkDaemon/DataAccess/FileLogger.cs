@@ -2,7 +2,7 @@
 using System.Linq;
 using System.IO;
 
-namespace UnpakkDaemon
+namespace UnpakkDaemon.DataAccess
 {
 	public enum LogType
 	{

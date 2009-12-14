@@ -1,0 +1,41 @@
+﻿using System;
+using System.Windows.Forms;
+using UnpakkDaemonTray.EventArguments;
+
+namespace UnpakkDaemonTray.Workers
+{
+	public class CommonWorker
+	{
+		public delegate object EventHandler<TEventArgs>(Object sender, TEventArgs e) where TEventArgs : EventArgs;
+
+		public static event EventHandler<MessageEventArgs> ShowMessage;
+
+		public static void ShowError(Exception ex)
+		{
+			ShowError("An exception occurred.\r\n\r\n" + ex);
+		}
+
+		public static void ShowError(string message)
+		{
+			RaiseShowMessageEvent(message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+
+		public static void ShowInformation(string message)
+		{
+			RaiseShowMessageEvent(message, MessageBoxButtons.OK, MessageBoxIcon.Information);
+		}
+
+		public static DialogResult ShowQuestion(string message)
+		{
+			return RaiseShowMessageEvent(message, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+		}
+
+		private static DialogResult RaiseShowMessageEvent(string message, MessageBoxButtons buttons, MessageBoxIcon icon)
+		{
+			if (ShowMessage != null)
+				return (DialogResult) ShowMessage(null, new MessageEventArgs(message, buttons, icon));
+
+			return DialogResult.None;
+		}
+	}
+}
