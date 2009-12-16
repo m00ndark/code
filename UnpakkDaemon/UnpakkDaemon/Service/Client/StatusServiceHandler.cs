@@ -1,28 +1,57 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Threading;
 
 namespace UnpakkDaemon.Service.Client
 {
 	public class StatusServiceHandler
 	{
-		private readonly StatusServiceClient _statusServiceClient;
+		private readonly StatusChangedHandler _statusChangedHandler;
+		private StatusServiceClient _statusServiceClient;
+		private bool _shutdownInitiated;
 
 		public StatusServiceHandler(StatusChangedHandler statusChangedHandler)
 		{
+			_statusChangedHandler = statusChangedHandler;
+			SetupClient();
+		}
+
+		private void SetupClient()
+		{
 			Binding binding = new NetNamedPipeBinding();
 			EndpointAddress endpointAddress = new EndpointAddress("net.pipe://localhost/UnpakkDaemonStatus");
-			InstanceContext context = new InstanceContext(statusChangedHandler);
+			InstanceContext context = new InstanceContext(_statusChangedHandler);
 			_statusServiceClient = new StatusServiceClient(context, binding, endpointAddress);
 		}
 
-		public void Subscribe()
+		public void Start()
 		{
-			_statusServiceClient.Subscribe();
+			_shutdownInitiated = false;
+			new Thread(ConnectionWatcher).Start();
 		}
 
-		public void Unsubscribe()
+		public void Stop()
 		{
-			_statusServiceClient.Unsubscribe();
+			_shutdownInitiated = true;
+			try { _statusServiceClient.Unsubscribe(); } catch {}
+		}
+
+		private void ConnectionWatcher()
+		{
+			while (!_shutdownInitiated)
+			{
+				if (_statusServiceClient.State == CommunicationState.Faulted)
+					_statusServiceClient.Abort();
+
+				if (_statusServiceClient.State == CommunicationState.Closed)
+					SetupClient();
+
+				if (_statusServiceClient.State == CommunicationState.Created)
+					try { _statusServiceClient.Subscribe(); } catch {}
+
+				Thread.Sleep(1000);
+			}
 		}
 	}
 }

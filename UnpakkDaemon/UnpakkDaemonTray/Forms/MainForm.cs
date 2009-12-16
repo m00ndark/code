@@ -29,18 +29,14 @@ namespace UnpakkDaemonTray.Forms
 			statusChangedHandler.ProgressChanged += StatusChangedHandler_ProgressChanged;
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
 			ObjectPool.StatusServiceHandler = new StatusServiceHandler(statusChangedHandler);
-			ObjectPool.StatusServiceHandler.Subscribe();
+			ObjectPool.StatusServiceHandler.Start();
 		}
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			if (_closing)
 			{
-				try
-				{
-					ObjectPool.StatusServiceHandler.Unsubscribe();
-				}
-				catch { }
+				ObjectPool.StatusServiceHandler.Stop();
 			}
 			else
 			{
@@ -130,16 +126,30 @@ namespace UnpakkDaemonTray.Forms
 
 		private void StatusChangedHandler_ProgressChanged(object sender, ProgressEventArgs e)
 		{
-			progressBarMainProgress.Value = (int) e.Percent;
-			labelMainMessage.Text = e.Message;
-			labelMainProgress.Text = (e.Current < 0 ? string.Empty : e.Current + "/" + e.Max);
+			if (InvokeRequired)
+			{
+				Invoke(new EventHandler<ProgressEventArgs>(StatusChangedHandler_ProgressChanged), new object[] { sender, e });
+			}
+			else
+			{
+				progressBarMainProgress.Value = (int) e.Percent;
+				labelMainMessage.Text = e.Message;
+				labelMainProgress.Text = (e.Current < 0 ? string.Empty : e.Current + "/" + e.Max);
+			}
 		}
 
 		private void StatusChangedHandler_SubProgressChanged(object sender, ProgressEventArgs e)
 		{
-			progressBarSubProgress.Value = (int) e.Percent;
-			labelSubMessage.Text = e.Message;
-			labelSubProgress.Text = (e.Current < 0 ? string.Empty : (int) e.Percent + "%");
+			if (InvokeRequired)
+			{
+				Invoke(new EventHandler<ProgressEventArgs>(StatusChangedHandler_SubProgressChanged), new object[] { sender, e });
+			}
+			else
+			{
+				progressBarSubProgress.Value = (int) e.Percent;
+				labelSubMessage.Text = e.Message;
+				labelSubProgress.Text = (e.Current < 0 ? string.Empty : (int) e.Percent + "%");
+			}
 		}
 
 		#endregion

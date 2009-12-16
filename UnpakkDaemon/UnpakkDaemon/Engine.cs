@@ -46,7 +46,7 @@ namespace UnpakkDaemon
 			//Thread.Sleep(1000000);
 
 //#if !DEBUG
-			TrayHandler.LaunchTray(_startupPath);
+//			TrayHandler.LaunchTray(_startupPath);
 			Thread.Sleep(2000);
 //#endif
 
