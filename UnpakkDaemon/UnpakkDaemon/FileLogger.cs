@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.IO;
+using UnpakkDaemon.DataAccess;
 
-namespace UnpakkDaemon.DataAccess
+namespace UnpakkDaemon
 {
 	public enum LogType
 	{
@@ -62,12 +63,9 @@ namespace UnpakkDaemon.DataAccess
 		{
 			try
 			{
-				if (!Directory.Exists(LogPath))
-					Directory.CreateDirectory(LogPath);
-
-				using (StreamWriter writer = new StreamWriter(LogPathName, true))
-					writer.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " > "
-						+ logType.ToString().PadRight(_logTypeIndentationDepth) + " " + logText);
+				FileHandler.MakeDirectory(LogPath);
+				FileHandler.FileWriteLine(LogPathName, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
+					+ " > " + logType.ToString().PadRight(_logTypeIndentationDepth) + " " + logText);
 			}
 			catch { /* swallow and be happy :) */ }
 		}

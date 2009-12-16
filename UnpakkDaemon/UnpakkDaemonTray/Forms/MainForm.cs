@@ -30,6 +30,22 @@ namespace UnpakkDaemonTray.Forms
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
 			ObjectPool.StatusServiceHandler = new StatusServiceHandler(statusChangedHandler);
 			ObjectPool.StatusServiceHandler.Start();
+
+			//UnpakkDaemon.DataObjects.SubRecord sr1 = new UnpakkDaemon.DataObjects.SubRecord() { Name = "subrec1", Size = 2 };
+			//UnpakkDaemon.DataObjects.SubRecord sr2 = new UnpakkDaemon.DataObjects.SubRecord() { Name = "subrec2", Size = 4 };
+			//UnpakkDaemon.DataObjects.Record r = new UnpakkDaemon.DataObjects.Record() { ID = Guid.NewGuid(), Name = "testname", Folder = "testfolder", Size = 10 };
+			//r.SubRecords.Add(sr1);
+			//r.SubRecords.Add(sr2);
+			//UnpakkDaemon.DataObjects.SubRecord asr1 = new UnpakkDaemon.DataObjects.SubRecord() { Name = "subrec1_a", Size = 3 };
+			//UnpakkDaemon.DataObjects.SubRecord asr2 = new UnpakkDaemon.DataObjects.SubRecord() { Name = "subrec2_a", Size = 6 };
+			//UnpakkDaemon.DataObjects.Record ar = new UnpakkDaemon.DataObjects.Record() { ID = Guid.NewGuid(), Name = "testname_a", Folder = "testfolder_a", Size = 11 };
+			//ar.SubRecords.Add(asr1);
+			//ar.SubRecords.Add(asr2);
+			//UnpakkDaemon.DataObjects.RecordList rlist1 = new UnpakkDaemon.DataObjects.RecordList();
+			//rlist1.Add(r);
+			//rlist1.Add(ar);
+			//UnpakkDaemon.DataAccess.FileHandler.Serialize("c:\\test.xml", rlist1);
+			//UnpakkDaemon.DataObjects.RecordList rlist2 = UnpakkDaemon.DataAccess.FileHandler.Deserialize<UnpakkDaemon.DataObjects.RecordList>("c:\\test.xml");
 		}
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

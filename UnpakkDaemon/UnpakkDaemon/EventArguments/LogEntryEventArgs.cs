@@ -1,5 +1,4 @@
 ﻿using System;
-using UnpakkDaemon.DataAccess;
 
 namespace UnpakkDaemon.EventArguments
 {

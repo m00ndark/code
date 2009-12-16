@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using UnpakkDaemon.DataAccess;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Extraction;
 using UnpakkDaemon.Service.Host;
