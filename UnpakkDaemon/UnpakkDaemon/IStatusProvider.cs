@@ -7,5 +7,6 @@ namespace UnpakkDaemon
 	{
 		event EventHandler<ProgressEventArgs> Progress;
 		event EventHandler<ProgressEventArgs> SubProgress;
+		event EventHandler<LogEntryEventArgs> Log;
 	}
 }

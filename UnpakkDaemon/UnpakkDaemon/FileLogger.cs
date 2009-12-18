@@ -2,6 +2,7 @@
 using System.Linq;
 using System.IO;
 using UnpakkDaemon.DataAccess;
+using UnpakkDaemon.EventArguments;
 
 namespace UnpakkDaemon
 {
@@ -21,6 +22,8 @@ namespace UnpakkDaemon
 
 		private readonly string _fullAppDataFolder;
 		private int _logTypeIndentationDepth;
+
+		public event EventHandler<LogEntryEventArgs> LogEntryWritten;
 
 		public FileLogger()
 		{
@@ -47,6 +50,16 @@ namespace UnpakkDaemon
 
 		#endregion
 
+		#region Event raisers
+
+		private void RaiseLogEntryWrittenEvent(DateTime logTime, LogType logType, string logText)
+		{
+			if (LogEntryWritten != null)
+				LogEntryWritten(this, new LogEntryEventArgs(logTime, logType, logText));
+		}
+
+		#endregion
+
 		private void SetupLogTypeIndentationDepth()
 		{
 			string[] logTypeNames = Enum.GetNames(typeof(LogType));
@@ -63,9 +76,11 @@ namespace UnpakkDaemon
 		{
 			try
 			{
+				DateTime logTime = DateTime.Now;
 				FileHandler.MakeDirectory(LogPath);
-				FileHandler.FileWriteLine(LogPathName, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
+				FileHandler.FileWriteLine(LogPathName, logTime.ToString("yyyy-MM-dd HH:mm:ss.fff")
 					+ " > " + logType.ToString().PadRight(_logTypeIndentationDepth) + " " + logText);
+				RaiseLogEntryWrittenEvent(logTime, logType, logText);
 			}
 			catch { /* swallow and be happy :) */ }
 		}

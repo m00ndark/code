@@ -16,8 +16,9 @@ namespace UnpakkDaemon.Service.Host
 			{
 				_statusProvider = statusProvider;
 				_statusService = new StatusService();
-				_statusProvider.Progress += _statusService.statusProvider_Progress;
-				_statusProvider.SubProgress += _statusService.statusProvider_SubProgress;
+				_statusProvider.Progress += _statusService.StatusProvider_Progress;
+				_statusProvider.SubProgress += _statusService.StatusProvider_SubProgress;
+				_statusProvider.Log += _statusService.StatusProvider_Log;
 				_serviceHost = new ServiceHost(_statusService, new Uri("net.pipe://localhost/UnpakkDaemonStatus"));
 				//_serviceHost.Description.Behaviors.Add(new System.ServiceModel.Description.ServiceMetadataBehavior() { HttpGetEnabled = true, HttpGetUrl = new Uri("http://localhost/UnpakkDaemonStatus") });
 				//_serviceHost.AddServiceEndpoint(typeof(System.ServiceModel.Description.IMetadataExchange), System.ServiceModel.Description.MetadataExchangeBindings.CreateMexHttpBinding(), "http://localhost/UnpakkDaemonStatus/MEX");
@@ -32,8 +33,8 @@ namespace UnpakkDaemon.Service.Host
 			{
 				_serviceHost.Close();
 				_serviceHost = null;
-				_statusProvider.Progress -= _statusService.statusProvider_Progress;
-				_statusProvider.SubProgress -= _statusService.statusProvider_SubProgress;
+				_statusProvider.Progress -= _statusService.StatusProvider_Progress;
+				_statusProvider.SubProgress -= _statusService.StatusProvider_SubProgress;
 				_statusService = null;
 			}
 		}

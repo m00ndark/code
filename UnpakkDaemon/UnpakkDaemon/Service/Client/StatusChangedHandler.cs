@@ -9,6 +9,7 @@ namespace UnpakkDaemon.Service.Client
 	{
 		public event EventHandler<ProgressEventArgs> ProgressChanged;
 		public event EventHandler<ProgressEventArgs> SubProgressChanged;
+		public event EventHandler<LogEntryEventArgs> LogEntryAdded;
 
 		#region Implementation of IStatusChangedHandler
 
@@ -20,6 +21,11 @@ namespace UnpakkDaemon.Service.Client
 		public void SubProgress(ProgressData progressData)
 		{
 			RaiseSubProgressChangedEvent(progressData);
+		}
+
+		public void Log(LogData logData)
+		{
+			RaiseLogEntryAddedEvent(logData);
 		}
 
 		#endregion
@@ -36,6 +42,12 @@ namespace UnpakkDaemon.Service.Client
 		{
 			if (SubProgressChanged != null)
 				SubProgressChanged(this, new ProgressEventArgs(progressData.Message, progressData.Percent, progressData.Current, progressData.Max));
+		}
+
+		private void RaiseLogEntryAddedEvent(LogData logData)
+		{
+			if (LogEntryAdded != null)
+				LogEntryAdded(this, new LogEntryEventArgs(logData.LogTime, (LogType) Enum.Parse(typeof(LogType), logData.LogType.ToString()), logData.LogText));
 		}
 
 		#endregion

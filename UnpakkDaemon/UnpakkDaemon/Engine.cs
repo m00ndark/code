@@ -20,6 +20,7 @@ namespace UnpakkDaemon
 
 		public event EventHandler<ProgressEventArgs> Progress;
 		public event EventHandler<ProgressEventArgs> SubProgress;
+		public event EventHandler<LogEntryEventArgs> Log;
 
 		#endregion
 
@@ -68,8 +69,14 @@ namespace UnpakkDaemon
 			if (_fileLogger == null)
 			{
 				_fileLogger = new FileLogger();
+				_fileLogger.LogEntryWritten += LogEntryWritten;
 				SFVFile.LogEntry += LogEntry;
 			}
+		}
+
+		private void LogEntryWritten(object sender, LogEntryEventArgs e)
+		{
+			RaiseLogEvent(e);
 		}
 
 		private void LogEntry(object sender, LogEntryEventArgs e)
@@ -144,6 +151,18 @@ namespace UnpakkDaemon
 		{
 			if (SubProgress != null)
 				SubProgress(this, new ProgressEventArgs(message, percent, current, max));
+		}
+
+		private void RaiseLogEvent(LogType logType, string logText)
+		{
+			if (Log != null)
+				Log(this, new LogEntryEventArgs(logType, logText));
+		}
+
+		private void RaiseLogEvent(LogEntryEventArgs e)
+		{
+			if (Log != null)
+				Log(this, e);
 		}
 
 		#endregion

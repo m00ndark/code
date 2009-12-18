@@ -104,6 +104,7 @@
     <Compile Include="Service\Client\StatusChangedHandler.cs" />
     <Compile Include="Service\Client\StatusServiceClient.cs" />
     <Compile Include="Service\Client\StatusServiceHandler.cs" />
+    <Compile Include="Service\DataObjects\LogData.cs" />
     <Compile Include="Service\DataObjects\ProgressData.cs" />
     <Compile Include="Service\Common\IStatusChangedHandler.cs" />
     <Compile Include="Service\Common\IStatusService.cs" />
