@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Extraction;
 using UnpakkDaemon.Service.Host;
@@ -143,6 +144,27 @@ namespace UnpakkDaemon
 			RaiseSubRecordEvent(e);
 		}
 
+		private void AddRecord(Record record)
+		{
+			if (_fileRecorder != null)
+				_fileRecorder.AddRecord(record);
+			else
+				throw new SystemException("Recording not setup correctly.");
+		}
+
+		private void AddSubRecord(Record parentRecord, SubRecord subRecord)
+		{
+			AddSubRecord(parentRecord.ID, subRecord);
+		}
+
+		private void AddSubRecord(Guid parentID, SubRecord subRecord)
+		{
+			if (_fileRecorder != null)
+				_fileRecorder.AddSubRecord(parentID, subRecord);
+			else
+				throw new SystemException("Recording not setup correctly.");
+		}
+
 		#endregion
 
 		#region Event raisers
@@ -215,6 +237,8 @@ namespace UnpakkDaemon
 			{
 				try
 				{
+					// TODO: make recordings
+
 					WriteLogEntry("======================================================");
 					WriteLogEntry("Waking up, reloading settings..");
 					EngineSettings.Load();

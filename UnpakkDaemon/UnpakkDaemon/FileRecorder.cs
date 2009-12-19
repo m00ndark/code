@@ -96,11 +96,6 @@ namespace UnpakkDaemon
 			}
 		}
 
-		public void AddSubRecord(Record parentRecord, SubRecord subRecord)
-		{
-			AddSubRecord(parentRecord.ID, subRecord);
-		}
-
 		public void AddSubRecord(Guid parentID, SubRecord subRecord)
 		{
 			try

@@ -163,6 +163,7 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
+				// TODO: add to GUI
 			}
 		}
 
@@ -174,6 +175,7 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
+				// TODO: add to GUI
 			}
 		}
 
