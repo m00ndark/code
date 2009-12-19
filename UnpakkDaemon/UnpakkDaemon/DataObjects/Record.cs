@@ -12,6 +12,15 @@ namespace UnpakkDaemon.DataObjects
 			SubRecords = new List<SubRecord>();
 		}
 
+		public Record(Guid id, string name, string folder, int size)
+		{
+			ID = id;
+			Name = name;
+			Folder = folder;
+			Size = size;
+			SubRecords = new List<SubRecord>();
+		}
+
 		public Record(XmlReader xmlReader)
 		{
 			SubRecords = new List<SubRecord>();

@@ -5,6 +5,11 @@ namespace UnpakkDaemon.DataAccess
 {
 	public static class FileHandler
 	{
+		public static bool FileExists(string filePath)
+		{
+			return File.Exists(filePath);
+		}
+
 		public static void MakeDirectory(string path)
 		{
 			if (!Directory.Exists(path))

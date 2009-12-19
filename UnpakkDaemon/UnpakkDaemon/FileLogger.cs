@@ -16,18 +16,15 @@ namespace UnpakkDaemon
 
 	public class FileLogger
 	{
-		private const string APPLICATION_DATA_FOLDER = @"MoleCode\Unpakk Daemon";
 		private const string DEFAULT_LOG_FOLDER = "Logs";
 		private const string DEFAULT_LOG_NAME = "unpakkdaemon_%date%.log";
 
-		private readonly string _fullAppDataFolder;
 		private int _logTypeIndentationDepth;
 
 		public event EventHandler<LogEntryEventArgs> LogEntryWritten;
 
 		public FileLogger()
 		{
-			_fullAppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), APPLICATION_DATA_FOLDER);
 			LogFolder = DEFAULT_LOG_FOLDER;
 			LogName = DEFAULT_LOG_NAME;
 			SetupLogTypeIndentationDepth();
@@ -40,7 +37,7 @@ namespace UnpakkDaemon
 
 		public string LogPath
 		{
-			get { return Path.Combine(_fullAppDataFolder, LogFolder); }
+			get { return Path.Combine(EngineSettings.ApplicationDataFolderComplete, LogFolder); }
 		}
 
 		public string LogPathName

@@ -91,6 +91,8 @@
     <Compile Include="DataObjects\SubRecord.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="EventArguments\SubRecordEventArgs.cs" />
+    <Compile Include="EventArguments\RecordEventArgs.cs" />
     <Compile Include="EventArguments\TimeSpanEventArgs.cs" />
     <Compile Include="EventArguments\LogEntryEventArgs.cs" />
     <Compile Include="EventArguments\ProgressEventArgs.cs" />
@@ -98,6 +100,7 @@
     <Compile Include="EventArguments\StringEventArgs.cs" />
     <Compile Include="Extraction\Unrar.cs" />
     <Compile Include="FileLogger.cs" />
+    <Compile Include="FileRecorder.cs" />
     <Compile Include="IStatusProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\Client\IStatusServiceChannel.cs" />

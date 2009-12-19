@@ -63,6 +63,36 @@ namespace UnpakkDaemon.Service.Host
 			}
 		}
 
+		public void StatusProvider_Record(object sender, RecordEventArgs e)
+		{
+			foreach (IStatusChangedHandler subscriber in _subscribers.ToList())
+			{
+				try
+				{
+					subscriber.Record(new RecordData(e.Record.ID, e.Record.Name, e.Record.Folder, e.Record.Size));
+				}
+				catch
+				{
+					_subscribers.Remove(subscriber);
+				}
+			}
+		}
+
+		public void StatusProvider_SubRecord(object sender, SubRecordEventArgs e)
+		{
+			foreach (IStatusChangedHandler subscriber in _subscribers.ToList())
+			{
+				try
+				{
+					subscriber.SubRecord(new SubRecordData(e.ParentID, e.SubRecord.Name, e.SubRecord.Size));
+				}
+				catch
+				{
+					_subscribers.Remove(subscriber);
+				}
+			}
+		}
+
 		public void StatusProvider_Log(object sender, LogEntryEventArgs e)
 		{
 			foreach (IStatusChangedHandler subscriber in _subscribers.ToList())

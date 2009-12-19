@@ -28,6 +28,8 @@ namespace UnpakkDaemonTray.Forms
 			StatusChangedHandler statusChangedHandler = new StatusChangedHandler();
 			statusChangedHandler.ProgressChanged += StatusChangedHandler_ProgressChanged;
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
+			statusChangedHandler.RecordAdded += StatusChangedHandler_RecordAdded;
+			statusChangedHandler.SubRecordAdded += StatusChangedHandler_SubRecordAdded;
 			statusChangedHandler.LogEntryAdded += StatusChangedHandler_LogEntryAdded;
 			ObjectPool.StatusServiceHandler = new StatusServiceHandler(statusChangedHandler);
 			ObjectPool.StatusServiceHandler.Start();
@@ -150,6 +152,28 @@ namespace UnpakkDaemonTray.Forms
 				progressBarSubProgress.Value = (int) e.Percent;
 				labelSubMessage.Text = e.Message;
 				labelSubProgress.Text = (e.Current < 0 ? string.Empty : (int) e.Percent + "%");
+			}
+		}
+
+		private void StatusChangedHandler_RecordAdded(object sender, RecordEventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new EventHandler<RecordEventArgs>(StatusChangedHandler_RecordAdded), new object[] { sender, e });
+			}
+			else
+			{
+			}
+		}
+
+		private void StatusChangedHandler_SubRecordAdded(object sender, SubRecordEventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new EventHandler<SubRecordEventArgs>(StatusChangedHandler_SubRecordAdded), new object[] { sender, e });
+			}
+			else
+			{
 			}
 		}
 

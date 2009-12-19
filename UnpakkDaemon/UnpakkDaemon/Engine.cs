@@ -14,12 +14,15 @@ namespace UnpakkDaemon
 	{
 		private readonly string _startupPath;
 		private FileLogger _fileLogger;
+		private FileRecorder _fileRecorder;
 		private bool _shutDown;
 
 		#region Implementation of IStatusProvider
 
 		public event EventHandler<ProgressEventArgs> Progress;
 		public event EventHandler<ProgressEventArgs> SubProgress;
+		public event EventHandler<RecordEventArgs> Record;
+		public event EventHandler<SubRecordEventArgs> SubRecord;
 		public event EventHandler<LogEntryEventArgs> Log;
 
 		#endregion
@@ -28,6 +31,7 @@ namespace UnpakkDaemon
 		{
 			_startupPath = startupPath;
 			_fileLogger = null;
+			_fileRecorder = null;
 			_shutDown = false;
 			IsRunning = false;
 		}
@@ -40,6 +44,7 @@ namespace UnpakkDaemon
 			IsRunning = true;
 
 			SetupLogging();
+			SetupRecording();
 
 			StatusServiceHost.Open(this);
 
@@ -115,6 +120,31 @@ namespace UnpakkDaemon
 
 		#endregion
 
+		#region Recording
+
+		private void SetupRecording()
+		{
+			if (_fileRecorder == null)
+			{
+				_fileRecorder = new FileRecorder();
+				_fileRecorder.LogEntry += LogEntry;
+				_fileRecorder.RecordAdded += RecordAdded;
+				_fileRecorder.SubRecordAdded += SubRecordAdded;
+			}
+		}
+
+		private void RecordAdded(object sender, RecordEventArgs e)
+		{
+			RaiseRecordEvent(e);
+		}
+
+		private void SubRecordAdded(object sender, SubRecordEventArgs e)
+		{
+			RaiseSubRecordEvent(e);
+		}
+
+		#endregion
+
 		#region Event raisers
 
 		private void RaiseProgressEvent(string message, double percent)
@@ -163,6 +193,18 @@ namespace UnpakkDaemon
 		{
 			if (Log != null)
 				Log(this, e);
+		}
+
+		private void RaiseRecordEvent(RecordEventArgs e)
+		{
+			if (Record != null)
+				Record(this, e);
+		}
+
+		private void RaiseSubRecordEvent(SubRecordEventArgs e)
+		{
+			if (SubRecord != null)
+				SubRecord(this, e);
 		}
 
 		#endregion

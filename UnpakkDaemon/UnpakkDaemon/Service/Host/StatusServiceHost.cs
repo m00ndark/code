@@ -18,6 +18,8 @@ namespace UnpakkDaemon.Service.Host
 				_statusService = new StatusService();
 				_statusProvider.Progress += _statusService.StatusProvider_Progress;
 				_statusProvider.SubProgress += _statusService.StatusProvider_SubProgress;
+				_statusProvider.Record += _statusService.StatusProvider_Record;
+				_statusProvider.SubRecord += _statusService.StatusProvider_SubRecord;
 				_statusProvider.Log += _statusService.StatusProvider_Log;
 				_serviceHost = new ServiceHost(_statusService, new Uri("net.pipe://localhost/UnpakkDaemonStatus"));
 				//_serviceHost.Description.Behaviors.Add(new System.ServiceModel.Description.ServiceMetadataBehavior() { HttpGetEnabled = true, HttpGetUrl = new Uri("http://localhost/UnpakkDaemonStatus") });

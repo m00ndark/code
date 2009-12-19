@@ -12,6 +12,12 @@ namespace UnpakkDaemon.Service.Common
 		void SubProgress(ProgressData progressData);
 
 		[OperationContract(IsOneWay = true)]
+		void Record(RecordData recordData);
+
+		[OperationContract(IsOneWay = true)]
+		void SubRecord(SubRecordData subRecordData);
+
+		[OperationContract(IsOneWay = true)]
 		void Log(LogData logData);
 	}
 }

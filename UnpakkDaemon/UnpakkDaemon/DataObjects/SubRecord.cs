@@ -7,6 +7,12 @@ namespace UnpakkDaemon.DataObjects
 	{
 		public SubRecord() {}
 
+		public SubRecord(string name, int size)
+		{
+			Name = name;
+			Size = size;
+		}
+
 		public SubRecord(XmlReader xmlReader)
 		{
 			ReadXml(xmlReader);
