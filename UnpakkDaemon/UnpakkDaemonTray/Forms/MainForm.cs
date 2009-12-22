@@ -1,5 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
+using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Service.Client;
 using UnpakkDaemonTray.EventArguments;
@@ -25,6 +31,8 @@ namespace UnpakkDaemonTray.Forms
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			Restore();
+			pictureBoxRecord.Image = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Record-48.png"));
+			pictureBoxSubRecord.Image = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.SubRecord-48.png"));
 			StatusChangedHandler statusChangedHandler = new StatusChangedHandler();
 			statusChangedHandler.ProgressChanged += StatusChangedHandler_ProgressChanged;
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
@@ -72,7 +80,7 @@ namespace UnpakkDaemonTray.Forms
 
 		private void tabControl_Selecting(object sender, TabControlCancelEventArgs e)
 		{
-			if (e.TabPageIndex == 1)
+			if (e.TabPageIndex == 2)
 			{
 				_settingsWorker = new SettingsWorker();
 				_settingsWorker.ApplicationDataFolderUpdated += SettingsWorker_ApplicationDataFolderUpdated;
@@ -95,6 +103,72 @@ namespace UnpakkDaemonTray.Forms
 			}
 			EnableControls(true);
 		}
+
+		#region Progress tab
+
+		private void treeViewRecords_AfterSelect(object sender, TreeViewEventArgs e)
+		{
+			if (e.Node.Tag is Record)
+			{
+				Record record = (Record) e.Node.Tag;
+				groupBoxRecordDetails.Visible = true;
+				groupBoxSubRecordDetails.Visible = false;
+				textBoxRecordPath.Text = record.Folder;
+				textBoxRecordSFVFile.Text = record.SFVName;
+				textBoxRecordRARFile.Text = record.RARName;
+				labelRecordRARPartsValue.Text = record.RARCount.ToString();
+				labelRecordRARSizeValue.Text = MakeFileSize(record.RARSize);
+				linkLabelRecordOpenFolder.Tag = record;
+			}
+			else if (e.Node.Tag is SubRecord)
+			{
+				SubRecord subRecord = (SubRecord) e.Node.Tag;
+				groupBoxRecordDetails.Visible = false;
+				groupBoxSubRecordDetails.Visible = true;
+				textBoxSubRecordPath.Text = subRecord.Folder;
+				textBoxSubRecordFile.Text = subRecord.Name;
+				labelSubRecordFileSizeValue.Text = MakeFileSize(subRecord.Size);
+				linkLabelSubRecordOpenFile.Tag = subRecord;
+				linkLabelSubRecordOpenFolder.Tag = subRecord;
+			}
+			else
+			{
+				groupBoxRecordDetails.Visible = false;
+				groupBoxSubRecordDetails.Visible = false;
+			}
+		}
+
+		private void linkLabelRecordOpenFolder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			Record record = (Record) ((LinkLabel) sender).Tag;
+			Process.Start(new ProcessStartInfo()
+			{
+				FileName = record.Folder,
+				Verb = "open"
+			});
+		}
+
+		private void linkLabelSubRecordOpenFile_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			SubRecord subRecord = (SubRecord) ((LinkLabel) sender).Tag;
+			Process.Start(new ProcessStartInfo()
+				{
+					FileName = Path.Combine(subRecord.Folder, subRecord.Name),
+					Verb = "open"
+				});
+		}
+
+		private void linkLabelSubRecordOpenFolder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			SubRecord subRecord = (SubRecord) ((LinkLabel) sender).Tag;
+			Process.Start(new ProcessStartInfo()
+			{
+				FileName = subRecord.Folder,
+				Verb = "open"
+			});
+		}
+
+		#endregion
 
 		#region Settings tab
 
@@ -163,7 +237,9 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
-				// TODO: add to GUI
+				TreeNode node = treeViewRecords.Nodes.Add(e.Record.ID.ToString(), e.Record.SFVName, 0, 0);
+				node.Tag = e.Record;
+				node.EnsureVisible();
 			}
 		}
 
@@ -175,7 +251,12 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
-				// TODO: add to GUI
+				TreeNode parentNode = treeViewRecords.Nodes.Find(e.ParentID.ToString(), false).FirstOrDefault();
+				if (parentNode != null)
+				{
+					TreeNode node = parentNode.Nodes.Add(e.SubRecord.Name, e.SubRecord.Name, 1, 1);
+					node.Tag = e.SubRecord;
+				}
 			}
 		}
 
@@ -190,6 +271,7 @@ namespace UnpakkDaemonTray.Forms
 				ListViewItem item = listViewLog.Items.Add(e.LogTime.ToString("yyyy-MM-dd HH:mm:ss"));
 				item.SubItems.Add(e.LogType.ToString());
 				item.SubItems.Add(e.LogText);
+				listViewLog.EnsureVisible(item.Index);
 			}
 		}
 
@@ -289,6 +371,19 @@ namespace UnpakkDaemonTray.Forms
 			WindowState = FormWindowState.Normal;
 			Refresh();
 			toolStripMenuItemRestore.Visible = false;
+		}
+
+		private string MakeFileSize(long bytes)
+		{
+			int i = 0;
+			double value = bytes;
+			while (value / 1024 > 1)
+			{
+				value /= 1024;
+				i++;
+			}
+			string[] units = new string[] { "bytes", "kB", "MB", "GB", "TB" };
+			return value.ToString("0.0") + " " + units[i];
 		}
 
 		#endregion

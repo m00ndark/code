@@ -60,13 +60,13 @@ namespace UnpakkDaemon.Service.Client
 		private void RaiseRecordAddedEvent(RecordData recordData)
 		{
 			if (RecordAdded != null)
-				RecordAdded(this, new RecordEventArgs(new Record(recordData.ID, recordData.Name, recordData.Folder, recordData.Size)));
+				RecordAdded(this, new RecordEventArgs(new Record(recordData.ID, recordData.Folder, recordData.SFVName, recordData.RARName, recordData.RARCount, recordData.RARSize)));
 		}
 
 		private void RaiseSubRecordAddedEvent(SubRecordData subRecordData)
 		{
 			if (SubRecordAdded != null)
-				SubRecordAdded(this, new SubRecordEventArgs(subRecordData.ParentID, new SubRecord(subRecordData.Name, subRecordData.Size)));
+				SubRecordAdded(this, new SubRecordEventArgs(subRecordData.ParentID, new SubRecord(subRecordData.Folder, subRecordData.Name, subRecordData.Size)));
 		}
 
 		private void RaiseLogEntryAddedEvent(LogData logData)

@@ -69,7 +69,7 @@ namespace UnpakkDaemon.Service.Host
 			{
 				try
 				{
-					subscriber.Record(new RecordData(e.Record.ID, e.Record.Name, e.Record.Folder, e.Record.Size));
+					subscriber.Record(new RecordData(e.Record.ID, e.Record.Folder, e.Record.SFVName, e.Record.RARName, e.Record.RARCount, e.Record.RARSize));
 				}
 				catch
 				{
@@ -84,7 +84,7 @@ namespace UnpakkDaemon.Service.Host
 			{
 				try
 				{
-					subscriber.SubRecord(new SubRecordData(e.ParentID, e.SubRecord.Name, e.SubRecord.Size));
+					subscriber.SubRecord(new SubRecordData(e.ParentID, e.SubRecord.Folder, e.SubRecord.Name, e.SubRecord.Size));
 				}
 				catch
 				{

@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <ApplicationIcon>Resources\unpakkdaemon.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\UnpakkDaemon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -126,7 +126,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\unpakkdaemon.ico" />
+    <None Include="Resources\UnpakkDaemon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Record-16.ico" />
+    <EmbeddedResource Include="Resources\Record-48.png" />
+    <Content Include="Resources\SubRecord-16.ico" />
+    <EmbeddedResource Include="Resources\SubRecord-48.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

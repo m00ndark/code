@@ -2,22 +2,28 @@
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace UnpakkDaemon.DataObjects
 {
-	public class Record : IRecord
+	public class Record : IXmlSerializable
 	{
 		public Record()
 		{
 			SubRecords = new List<SubRecord>();
 		}
 
-		public Record(Guid id, string name, string folder, int size)
+		public Record(string folder, string sfvName, string rarName, int rarCount, long rarSize)
+			: this(Guid.NewGuid(), folder, sfvName, rarName, rarCount, rarSize) {}
+
+		public Record(Guid id, string folder, string sfvName, string rarName, int rarCount, long rarSize)
 		{
 			ID = id;
-			Name = name;
 			Folder = folder;
-			Size = size;
+			SFVName = sfvName;
+			RARName = rarName;
+			RARCount = rarCount;
+			RARSize = rarSize;
 			SubRecords = new List<SubRecord>();
 		}
 
@@ -30,9 +36,11 @@ namespace UnpakkDaemon.DataObjects
 		#region Properties
 
 		public Guid ID { get; set; }
-		public string Name { get; set; }
 		public string Folder { get; set; }
-		public int Size { get; set; }
+		public string SFVName { get; set; }
+		public string RARName { get; set; }
+		public int RARCount { get; set; }
+		public long RARSize { get; set; }
 		public IList<SubRecord> SubRecords { get; private set; }
 
 		#endregion
@@ -56,14 +64,17 @@ namespace UnpakkDaemon.DataObjects
 					case "ID":
 						ID = new Guid(reader.Value);
 						break;
-					case "Name":
-						Name = reader.Value;
-						break;
 					case "Folder":
 						Folder = reader.Value;
 						break;
-					case "Size":
-						Size = int.Parse(reader.Value);
+					case "SFVName":
+						SFVName = reader.Value;
+						break;
+					case "RARName":
+						RARName = reader.Value;
+						break;
+					case "RARSize":
+						RARSize = long.Parse(reader.Value);
 						break;
 				}
 			}
@@ -86,9 +97,10 @@ namespace UnpakkDaemon.DataObjects
 		{
 			writer.WriteStartElement("Record");
 			writer.WriteAttributeString("ID", ID.ToString());
-			writer.WriteAttributeString("Name", Name);
 			writer.WriteAttributeString("Folder", Folder);
-			writer.WriteAttributeString("Size", Size.ToString());
+			writer.WriteAttributeString("SFVName", SFVName);
+			writer.WriteAttributeString("RARName", RARName);
+			writer.WriteAttributeString("RARSize", RARSize.ToString());
 			foreach (SubRecord subRecord in SubRecords)
 			{
 				subRecord.WriteXml(writer);

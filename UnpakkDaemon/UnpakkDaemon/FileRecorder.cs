@@ -71,10 +71,7 @@ namespace UnpakkDaemon
 		{
 			try
 			{
-				if (FileHandler.FileExists(RecordListPathName))
-					RecordList = FileHandler.Deserialize<RecordList>(RecordListPathName);
-				else
-					RecordList = new RecordList();
+				RecordList = (FileHandler.FileExists(RecordListPathName) ? FileHandler.Deserialize<RecordList>(RecordListPathName) : new RecordList());
 			}
 			catch (Exception ex)
 			{

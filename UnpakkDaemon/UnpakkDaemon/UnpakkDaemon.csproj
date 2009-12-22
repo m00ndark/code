@@ -85,7 +85,6 @@
   <ItemGroup>
     <Compile Include="DataAccess\FileHandler.cs" />
     <Compile Include="DataAccess\RegistryHandler.cs" />
-    <Compile Include="DataObjects\IRecord.cs" />
     <Compile Include="DataObjects\Record.cs" />
     <Compile Include="DataObjects\RecordList.cs" />
     <Compile Include="DataObjects\SubRecord.cs" />

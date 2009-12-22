@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using UnpakkDaemon.DataAccess;
 using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Extraction;
@@ -44,6 +45,8 @@ namespace UnpakkDaemon
 			_shutDown = false;
 			IsRunning = true;
 
+			EngineSettings.Load();
+
 			SetupLogging();
 			SetupRecording();
 
@@ -52,7 +55,7 @@ namespace UnpakkDaemon
 			//Thread.Sleep(1000000);
 
 //#if !DEBUG
-//			TrayHandler.LaunchTray(_startupPath);
+			TrayHandler.LaunchTray(_startupPath);
 			Thread.Sleep(2000);
 //#endif
 
@@ -296,9 +299,12 @@ namespace UnpakkDaemon
 					if (sfvFile.Validate())
 					{
 						WriteLogEntry("Validation OK, proceeding with extraction...");
-						if (ExtractRARContent(rarFilePath))
+						Record record = new Record(Path.GetDirectoryName(sfvFile.SFVFilePath), Path.GetFileName(sfvFile.SFVFilePath),
+							Path.GetFileName(rarFilePath), sfvFile.ContainedFilePaths.Count, new FileInfo(rarFilePath).Length);
+						AddRecord(record);
+						if (ExtractRARContent(rarFilePath, record))
 						{
-							DeleteFiles(sfvFile);
+							//DeleteFiles(sfvFile);
 						}
 					}
 					else
@@ -317,7 +323,7 @@ namespace UnpakkDaemon
 			}
 		}
 
-		private bool ExtractRARContent(string rarFilePath)
+		private bool ExtractRARContent(string rarFilePath, Record record)
 		{
 			bool success = true;
 			Unrar unrar = new Unrar(rarFilePath) { DestinationPath = Path.GetDirectoryName(rarFilePath) };
@@ -333,7 +339,9 @@ namespace UnpakkDaemon
 					unrar.Extract();
 					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName),
 						unrar.CurrentFile.UnpackedSize, unrar.CurrentFile.FileCRC);
-					if (!success)
+					if (success)
+						AddSubRecord(record.ID, new SubRecord(unrar.DestinationPath, unrar.CurrentFile.FileName, unrar.CurrentFile.UnpackedSize));
+					else
 						WriteLogEntry(LogType.Warning, "Validation FAILED, aborting extraction");
 				}
 			}

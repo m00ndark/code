@@ -1,14 +1,16 @@
 ﻿using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace UnpakkDaemon.DataObjects
 {
-	public class SubRecord : IRecord
+	public class SubRecord : IXmlSerializable
 	{
 		public SubRecord() {}
 
-		public SubRecord(string name, int size)
+		public SubRecord(string folder, string name, long size)
 		{
+			Folder = folder;
 			Name = name;
 			Size = size;
 		}
@@ -20,8 +22,9 @@ namespace UnpakkDaemon.DataObjects
 
 		#region Properties
 
+		public string Folder { get; set; }
 		public string Name { get; set; }
-		public int Size { get; set; }
+		public long Size { get; set; }
 
 		#endregion
 
@@ -41,11 +44,14 @@ namespace UnpakkDaemon.DataObjects
 			{
 				switch (reader.Name)
 				{
+					case "Folder":
+						Folder = reader.Value;
+						break;
 					case "Name":
 						Name = reader.Value;
 						break;
 					case "Size":
-						Size = int.Parse(reader.Value);
+						Size = long.Parse(reader.Value);
 						break;
 				}
 			}
@@ -64,6 +70,7 @@ namespace UnpakkDaemon.DataObjects
 		public void WriteXml(XmlWriter writer)
 		{
 			writer.WriteStartElement("SubRecord");
+			writer.WriteAttributeString("Folder", Folder);
 			writer.WriteAttributeString("Name", Name);
 			writer.WriteAttributeString("Size", Size.ToString());
 			writer.WriteEndElement();
