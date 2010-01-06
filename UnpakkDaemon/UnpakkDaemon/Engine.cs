@@ -56,7 +56,7 @@ namespace UnpakkDaemon
 
 //#if !DEBUG
 			TrayHandler.LaunchTray(_startupPath);
-			Thread.Sleep(2000);
+			Thread.Sleep(5000);
 //#endif
 
 			EnterMainLoop();
@@ -240,8 +240,6 @@ namespace UnpakkDaemon
 			{
 				try
 				{
-					// TODO: make recordings
-
 					WriteLogEntry("======================================================");
 					WriteLogEntry("Waking up, reloading settings..");
 					EngineSettings.Load();
@@ -256,6 +254,7 @@ namespace UnpakkDaemon
 						if (_shutDown) break;
 					}
 
+					sfvFilePaths.Sort();
 					for (int i = 0; i < sfvFilePaths.Count && !_shutDown; i++)
 					{
 						RaiseSubProgressEvent(string.Empty, 0);
@@ -300,7 +299,7 @@ namespace UnpakkDaemon
 					{
 						WriteLogEntry("Validation OK, proceeding with extraction...");
 						Record record = new Record(Path.GetDirectoryName(sfvFile.SFVFilePath), Path.GetFileName(sfvFile.SFVFilePath),
-							Path.GetFileName(rarFilePath), sfvFile.ContainedFilePaths.Count, new FileInfo(rarFilePath).Length);
+							Path.GetFileName(rarFilePath), sfvFile.ContainedFilePaths.Count, FileHandler.GetTotalFileSize(sfvFile.ContainedFilePaths));
 						AddRecord(record);
 						if (ExtractRARContent(rarFilePath, record))
 						{

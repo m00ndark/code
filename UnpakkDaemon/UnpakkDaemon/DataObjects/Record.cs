@@ -73,6 +73,9 @@ namespace UnpakkDaemon.DataObjects
 					case "RARName":
 						RARName = reader.Value;
 						break;
+					case "RARCount":
+						RARCount = int.Parse(reader.Value);
+						break;
 					case "RARSize":
 						RARSize = long.Parse(reader.Value);
 						break;
@@ -100,6 +103,7 @@ namespace UnpakkDaemon.DataObjects
 			writer.WriteAttributeString("Folder", Folder);
 			writer.WriteAttributeString("SFVName", SFVName);
 			writer.WriteAttributeString("RARName", RARName);
+			writer.WriteAttributeString("RARCount", RARCount.ToString());
 			writer.WriteAttributeString("RARSize", RARSize.ToString());
 			foreach (SubRecord subRecord in SubRecords)
 			{

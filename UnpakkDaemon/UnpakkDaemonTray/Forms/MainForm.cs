@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using UnpakkDaemon;
 using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Service.Client;
@@ -41,6 +42,7 @@ namespace UnpakkDaemonTray.Forms
 			statusChangedHandler.LogEntryAdded += StatusChangedHandler_LogEntryAdded;
 			ObjectPool.StatusServiceHandler = new StatusServiceHandler(statusChangedHandler);
 			ObjectPool.StatusServiceHandler.Start();
+			LoadRecords();
 		}
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -119,6 +121,7 @@ namespace UnpakkDaemonTray.Forms
 				labelRecordRARPartsValue.Text = record.RARCount.ToString();
 				labelRecordRARSizeValue.Text = MakeFileSize(record.RARSize);
 				linkLabelRecordOpenFolder.Tag = record;
+				toolTip.SetToolTip(linkLabelRecordOpenFolder, record.Folder);
 			}
 			else if (e.Node.Tag is SubRecord)
 			{
@@ -130,6 +133,7 @@ namespace UnpakkDaemonTray.Forms
 				labelSubRecordFileSizeValue.Text = MakeFileSize(subRecord.Size);
 				linkLabelSubRecordOpenFile.Tag = subRecord;
 				linkLabelSubRecordOpenFolder.Tag = subRecord;
+				toolTip.SetToolTip(linkLabelSubRecordOpenFolder, subRecord.Folder);
 			}
 			else
 			{
@@ -237,9 +241,7 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
-				TreeNode node = treeViewRecords.Nodes.Add(e.Record.ID.ToString(), e.Record.SFVName, 0, 0);
-				node.Tag = e.Record;
-				node.EnsureVisible();
+				AddRecord(e.Record, true);
 			}
 		}
 
@@ -251,12 +253,7 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
-				TreeNode parentNode = treeViewRecords.Nodes.Find(e.ParentID.ToString(), false).FirstOrDefault();
-				if (parentNode != null)
-				{
-					TreeNode node = parentNode.Nodes.Add(e.SubRecord.Name, e.SubRecord.Name, 1, 1);
-					node.Tag = e.SubRecord;
-				}
+				AddSubRecord(e.ParentID, e.SubRecord, true);
 			}
 		}
 
@@ -359,6 +356,47 @@ namespace UnpakkDaemonTray.Forms
 			buttonRemoveRootPath.Enabled = (enable && listViewRootPath.SelectedItems.Count > 0);
 		}
 
+		private void LoadRecords()
+		{
+			EngineSettings.Load();
+			FileRecorder fileRecorder = new FileRecorder();
+			foreach (Record record in fileRecorder.RecordList)
+			{
+				AddRecord(record, false);
+				foreach (SubRecord subRecord in record.SubRecords)
+				{
+					AddSubRecord(record.ID, subRecord, false);
+				}
+			}
+		}
+
+		private void AddRecord(Record record, bool update)
+		{
+			TreeNode node = treeViewRecords.Nodes.Find(record.ID.ToString(), false).FirstOrDefault();
+
+			if (node == null)
+				node = treeViewRecords.Nodes.Add(record.ID.ToString(), Path.GetFileNameWithoutExtension(record.SFVName), 0, 0);
+			else if (update)
+				node.Text = Path.GetFileNameWithoutExtension(record.SFVName);
+
+			node.Tag = record;
+			node.EnsureVisible();
+		}
+
+		private void AddSubRecord(Guid parentID, SubRecord subRecord, bool update)
+		{
+			TreeNode parentNode = treeViewRecords.Nodes.Find(parentID.ToString(), false).FirstOrDefault();
+			if (parentNode != null)
+			{
+				TreeNode node = parentNode.Nodes.Find(subRecord.Name, false).FirstOrDefault();
+				if (node == null)
+					node = parentNode.Nodes.Add(subRecord.Name, subRecord.Name, 1, 1);
+				else if (update)
+					node.Text = subRecord.Name;
+				node.Tag = subRecord;
+			}
+		}
+
 		private void Minimize()
 		{
 			Hide();
@@ -373,7 +411,7 @@ namespace UnpakkDaemonTray.Forms
 			toolStripMenuItemRestore.Visible = false;
 		}
 
-		private string MakeFileSize(long bytes)
+		private static string MakeFileSize(long bytes)
 		{
 			int i = 0;
 			double value = bytes;

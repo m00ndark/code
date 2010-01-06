@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace UnpakkDaemon.DataAccess
@@ -14,6 +16,11 @@ namespace UnpakkDaemon.DataAccess
 		{
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
+		}
+
+		public static long GetTotalFileSize(IEnumerable<string> filePaths)
+		{
+			return filePaths.Sum(filePath => new FileInfo(filePath).Length);
 		}
 
 		public static void FileWriteLine(string filePath, string text)
