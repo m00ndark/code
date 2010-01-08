@@ -6,9 +6,11 @@ namespace UnpakkDaemon.Service.DataObjects
 	[DataContract]
 	public class SubRecordData
 	{
-		public SubRecordData(Guid parentID, string folder, string name, long size)
+		public SubRecordData(Guid parentID, DateTime time, RecordStatusData status, string folder, string name, long size)
 		{
 			ParentID = parentID;
+			Time = time;
+			Status = status;
 			Folder = folder;
 			Name = name;
 			Size = size;
@@ -16,6 +18,12 @@ namespace UnpakkDaemon.Service.DataObjects
 
 		[DataMember]
 		public Guid ParentID { get; private set; }
+
+		[DataMember]
+		public DateTime Time { get; private set; }
+
+		[DataMember]
+		public RecordStatusData Status { get; private set; }
 
 		[DataMember]
 		public string Folder { get; private set; }

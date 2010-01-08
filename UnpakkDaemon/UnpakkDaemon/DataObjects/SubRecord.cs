@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System;
+using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
@@ -9,7 +10,15 @@ namespace UnpakkDaemon.DataObjects
 		public SubRecord() {}
 
 		public SubRecord(string folder, string name, long size)
+			: this(RecordStatus.Success, folder, name, size) {}
+
+		public SubRecord(RecordStatus status, string folder, string name, long size)
+			: this(DateTime.Now, status, folder, name, size) { }
+
+		public SubRecord(DateTime time, RecordStatus status, string folder, string name, long size)
 		{
+			Time = time;
+			Status = status;
 			Folder = folder;
 			Name = name;
 			Size = size;
@@ -20,8 +29,25 @@ namespace UnpakkDaemon.DataObjects
 			ReadXml(xmlReader);
 		}
 
+		public void CopyFrom(SubRecord subRecord)
+		{
+			// do not copy name - it's the unique key
+			Time = subRecord.Time;
+			Status = subRecord.Status;
+			Folder = subRecord.Folder;
+			Size = subRecord.Size;
+		}
+
+		public SubRecord Fail()
+		{
+			Status = RecordStatus.Failure;
+			return this;
+		}
+
 		#region Properties
 
+		public DateTime Time { get; set; }
+		public RecordStatus Status { get; set; }
 		public string Folder { get; set; }
 		public string Name { get; set; }
 		public long Size { get; set; }
@@ -44,6 +70,12 @@ namespace UnpakkDaemon.DataObjects
 			{
 				switch (reader.Name)
 				{
+					case "Time":
+						Time = DateTime.Parse(reader.Value);
+						break;
+					case "Status":
+						Status = (RecordStatus) Enum.Parse(typeof(RecordStatus), reader.Value);
+						break;
 					case "Folder":
 						Folder = reader.Value;
 						break;
@@ -70,6 +102,8 @@ namespace UnpakkDaemon.DataObjects
 		public void WriteXml(XmlWriter writer)
 		{
 			writer.WriteStartElement("SubRecord");
+			writer.WriteAttributeString("Time", Time.ToString());
+			writer.WriteAttributeString("Status", Status.ToString());
 			writer.WriteAttributeString("Folder", Folder);
 			writer.WriteAttributeString("Name", Name);
 			writer.WriteAttributeString("Size", Size.ToString());

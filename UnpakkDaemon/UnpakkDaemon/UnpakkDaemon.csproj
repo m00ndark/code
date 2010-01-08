@@ -87,6 +87,7 @@
     <Compile Include="DataAccess\RegistryHandler.cs" />
     <Compile Include="DataObjects\Record.cs" />
     <Compile Include="DataObjects\RecordList.cs" />
+    <Compile Include="DataObjects\RecordStatus.cs" />
     <Compile Include="DataObjects\SubRecord.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
@@ -106,11 +107,13 @@
     <Compile Include="Service\Client\StatusChangedHandler.cs" />
     <Compile Include="Service\Client\StatusServiceClient.cs" />
     <Compile Include="Service\Client\StatusServiceHandler.cs" />
+    <Compile Include="Service\Common\EnumConverter.cs" />
     <Compile Include="Service\DataObjects\LogData.cs" />
     <Compile Include="Service\DataObjects\ProgressData.cs" />
     <Compile Include="Service\Common\IStatusChangedHandler.cs" />
     <Compile Include="Service\Common\IStatusService.cs" />
     <Compile Include="Service\DataObjects\RecordData.cs" />
+    <Compile Include="Service\DataObjects\RecordStatusData.cs" />
     <Compile Include="Service\DataObjects\SubRecordData.cs" />
     <Compile Include="Service\Host\StatusService.cs" />
     <Compile Include="Service\Host\StatusServiceHost.cs" />

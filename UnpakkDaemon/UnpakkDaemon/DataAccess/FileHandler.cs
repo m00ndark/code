@@ -12,6 +12,16 @@ namespace UnpakkDaemon.DataAccess
 			return File.Exists(filePath);
 		}
 
+		public static void DeleteFile(string filePath)
+		{
+			File.Delete(filePath);
+		}
+
+		public static long FileSize(string filePath)
+		{
+			return new FileInfo(filePath).Length;
+		}
+
 		public static void MakeDirectory(string path)
 		{
 			if (!Directory.Exists(path))

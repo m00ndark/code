@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -14,34 +15,71 @@ namespace UnpakkDaemon.DataObjects
 		}
 
 		public Record(string folder, string sfvName, string rarName, int rarCount, long rarSize)
-			: this(Guid.NewGuid(), folder, sfvName, rarName, rarCount, rarSize) {}
+			: this(RecordStatus.Success, folder, sfvName, rarName, rarCount, rarSize) { }
 
-		public Record(Guid id, string folder, string sfvName, string rarName, int rarCount, long rarSize)
+		public Record(RecordStatus status, string folder, string sfvName, string rarName, int rarCount, long rarSize)
+			: this(Guid.NewGuid(), DateTime.Now, status, folder, sfvName, rarName, rarCount, rarSize) { }
+
+		public Record(DateTime time, RecordStatus status, string folder, string sfvName, string rarName, int rarCount, long rarSize)
+			: this(Guid.NewGuid(), time, status, folder, sfvName, rarName, rarCount, rarSize) { }
+
+		public Record(Guid id, DateTime time, RecordStatus status, string folder, string sfvName, string rarName, int rarCount, long rarSize)
+			: this()
 		{
 			ID = id;
+			Time = time;
+			Status = status;
 			Folder = folder;
 			SFVName = sfvName;
 			RARName = rarName;
 			RARCount = rarCount;
 			RARSize = rarSize;
-			SubRecords = new List<SubRecord>();
 		}
 
-		public Record(XmlReader xmlReader)
+		public Record(XmlReader xmlReader) : this()
 		{
-			SubRecords = new List<SubRecord>();
 			ReadXml(xmlReader);
+		}
+
+		public void CopyFrom(Record record)
+		{
+			// do not copy id - it's the unique key
+			Time = record.Time;
+			Status = record.Status;
+			Folder = record.Folder;
+			SFVName = record.SFVName;
+			RARName = record.RARName;
+			RARCount = record.RARCount;
+			RARSize = record.RARSize;
+		}
+
+		public Record Fail()
+		{
+			Status = RecordStatus.Failure;
+			return this;
 		}
 
 		#region Properties
 
 		public Guid ID { get; set; }
+		public DateTime Time { get; set; }
+		public RecordStatus Status { get; set; }
 		public string Folder { get; set; }
 		public string SFVName { get; set; }
 		public string RARName { get; set; }
 		public int RARCount { get; set; }
 		public long RARSize { get; set; }
 		public IList<SubRecord> SubRecords { get; private set; }
+
+		public RecordStatus SubRecordStatus
+		{
+			get
+			{
+				return (SubRecords.Count > 0
+					? SubRecords.Select(sr => sr.Status).Aggregate((x, y) => (x == RecordStatus.Failure || y == RecordStatus.Failure ? RecordStatus.Failure : RecordStatus.Success))
+					: RecordStatus.Success);
+			}
+		}
 
 		#endregion
 
@@ -63,6 +101,12 @@ namespace UnpakkDaemon.DataObjects
 				{
 					case "ID":
 						ID = new Guid(reader.Value);
+						break;
+					case "Time":
+						Time = DateTime.Parse(reader.Value);
+						break;
+					case "Status":
+						Status = (RecordStatus) Enum.Parse(typeof(RecordStatus), reader.Value);
 						break;
 					case "Folder":
 						Folder = reader.Value;
@@ -100,6 +144,8 @@ namespace UnpakkDaemon.DataObjects
 		{
 			writer.WriteStartElement("Record");
 			writer.WriteAttributeString("ID", ID.ToString());
+			writer.WriteAttributeString("Time", Time.ToString());
+			writer.WriteAttributeString("Status", Status.ToString());
 			writer.WriteAttributeString("Folder", Folder);
 			writer.WriteAttributeString("SFVName", SFVName);
 			writer.WriteAttributeString("RARName", RARName);

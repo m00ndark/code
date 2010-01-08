@@ -83,7 +83,11 @@ namespace UnpakkDaemon
 		{
 			try
 			{
-				RecordList.Add(record);
+				Record existingRecord = RecordList.SingleOrDefault(r => (r == record));
+				if (existingRecord == null)
+					RecordList.Add(record);
+				else
+					existingRecord.CopyFrom(record);
 				FileHandler.Serialize(RecordListPathName, RecordList);
 				RaiseRecordAddedEvent(record);
 			}
@@ -98,7 +102,11 @@ namespace UnpakkDaemon
 			try
 			{
 				Record parentRecord = RecordList.Single(record => record.ID == parentID);
-				parentRecord.SubRecords.Add(subRecord);
+				SubRecord existingSubRecord = parentRecord.SubRecords.SingleOrDefault(sr => (sr == subRecord));
+				if (existingSubRecord == null)
+					parentRecord.SubRecords.Add(subRecord);
+				else
+					existingSubRecord.CopyFrom(subRecord);
 				FileHandler.Serialize(RecordListPathName, RecordList);
 				RaiseSubRecordAddedEvent(parentID, subRecord);
 			}

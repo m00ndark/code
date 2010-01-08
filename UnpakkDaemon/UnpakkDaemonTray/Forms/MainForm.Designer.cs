@@ -86,6 +86,14 @@
 			this.toolStripMenuItemRestore = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+			this.labelRecordStatus = new System.Windows.Forms.Label();
+			this.labelRecordStatusValue = new System.Windows.Forms.Label();
+			this.labelSubRecordStatusValue = new System.Windows.Forms.Label();
+			this.labelSubRecordStatus = new System.Windows.Forms.Label();
+			this.labelRecordTimeValue = new System.Windows.Forms.Label();
+			this.labelRecordTime = new System.Windows.Forms.Label();
+			this.labelSubRecordTimeValue = new System.Windows.Forms.Label();
+			this.labelSubRecordTime = new System.Windows.Forms.Label();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
 			this.groupBoxSubRecordDetails.SuspendLayout();
@@ -152,7 +160,9 @@
 			this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer) (resources.GetObject("imageList.ImageStream")));
 			this.imageList.TransparentColor = System.Drawing.Color.Transparent;
 			this.imageList.Images.SetKeyName(0, "Record-16.ico");
-			this.imageList.Images.SetKeyName(1, "SubRecord-16.ico");
+			this.imageList.Images.SetKeyName(1, "Record-Red-16.ico");
+			this.imageList.Images.SetKeyName(2, "SubRecord-16.ico");
+			this.imageList.Images.SetKeyName(3, "SubRecord-Red-16.ico");
 			// 
 			// labelSubProgress
 			// 
@@ -204,6 +214,10 @@
 			// 
 			// groupBoxSubRecordDetails
 			// 
+			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordTimeValue);
+			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordTime);
+			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordStatusValue);
+			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordStatus);
 			this.groupBoxSubRecordDetails.Controls.Add(this.pictureBoxSubRecord);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordFileSizeValue);
 			this.groupBoxSubRecordDetails.Controls.Add(this.linkLabelSubRecordOpenFile);
@@ -308,6 +322,10 @@
 			// 
 			// groupBoxRecordDetails
 			// 
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTimeValue);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTime);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordStatusValue);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordStatus);
 			this.groupBoxRecordDetails.Controls.Add(this.pictureBoxRecord);
 			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARSizeValue);
 			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARPartsValue);
@@ -661,6 +679,74 @@
 			this.toolTip.InitialDelay = 100;
 			this.toolTip.ReshowDelay = 20;
 			// 
+			// labelRecordStatus
+			// 
+			this.labelRecordStatus.AutoSize = true;
+			this.labelRecordStatus.Location = new System.Drawing.Point(6, 178);
+			this.labelRecordStatus.Name = "labelRecordStatus";
+			this.labelRecordStatus.Size = new System.Drawing.Size(40, 13);
+			this.labelRecordStatus.TabIndex = 21;
+			this.labelRecordStatus.Text = "Status:";
+			// 
+			// labelRecordStatusValue
+			// 
+			this.labelRecordStatusValue.AutoSize = true;
+			this.labelRecordStatusValue.Location = new System.Drawing.Point(71, 178);
+			this.labelRecordStatusValue.Name = "labelRecordStatusValue";
+			this.labelRecordStatusValue.Size = new System.Drawing.Size(0, 13);
+			this.labelRecordStatusValue.TabIndex = 22;
+			// 
+			// labelSubRecordStatusValue
+			// 
+			this.labelSubRecordStatusValue.AutoSize = true;
+			this.labelSubRecordStatusValue.Location = new System.Drawing.Point(71, 126);
+			this.labelSubRecordStatusValue.Name = "labelSubRecordStatusValue";
+			this.labelSubRecordStatusValue.Size = new System.Drawing.Size(0, 13);
+			this.labelSubRecordStatusValue.TabIndex = 24;
+			// 
+			// labelSubRecordStatus
+			// 
+			this.labelSubRecordStatus.AutoSize = true;
+			this.labelSubRecordStatus.Location = new System.Drawing.Point(6, 126);
+			this.labelSubRecordStatus.Name = "labelSubRecordStatus";
+			this.labelSubRecordStatus.Size = new System.Drawing.Size(40, 13);
+			this.labelSubRecordStatus.TabIndex = 23;
+			this.labelSubRecordStatus.Text = "Status:";
+			// 
+			// labelRecordTimeValue
+			// 
+			this.labelRecordTimeValue.AutoSize = true;
+			this.labelRecordTimeValue.Location = new System.Drawing.Point(71, 152);
+			this.labelRecordTimeValue.Name = "labelRecordTimeValue";
+			this.labelRecordTimeValue.Size = new System.Drawing.Size(0, 13);
+			this.labelRecordTimeValue.TabIndex = 24;
+			// 
+			// labelRecordTime
+			// 
+			this.labelRecordTime.AutoSize = true;
+			this.labelRecordTime.Location = new System.Drawing.Point(6, 152);
+			this.labelRecordTime.Name = "labelRecordTime";
+			this.labelRecordTime.Size = new System.Drawing.Size(33, 13);
+			this.labelRecordTime.TabIndex = 23;
+			this.labelRecordTime.Text = "Time:";
+			// 
+			// labelSubRecordTimeValue
+			// 
+			this.labelSubRecordTimeValue.AutoSize = true;
+			this.labelSubRecordTimeValue.Location = new System.Drawing.Point(71, 100);
+			this.labelSubRecordTimeValue.Name = "labelSubRecordTimeValue";
+			this.labelSubRecordTimeValue.Size = new System.Drawing.Size(0, 13);
+			this.labelSubRecordTimeValue.TabIndex = 26;
+			// 
+			// labelSubRecordTime
+			// 
+			this.labelSubRecordTime.AutoSize = true;
+			this.labelSubRecordTime.Location = new System.Drawing.Point(6, 100);
+			this.labelSubRecordTime.Name = "labelSubRecordTime";
+			this.labelSubRecordTime.Size = new System.Drawing.Size(33, 13);
+			this.labelSubRecordTime.TabIndex = 25;
+			this.labelSubRecordTime.Text = "Time:";
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -753,5 +839,13 @@
 		private System.Windows.Forms.PictureBox pictureBoxSubRecord;
 		private System.Windows.Forms.PictureBox pictureBoxRecord;
 		private System.Windows.Forms.ToolTip toolTip;
+		private System.Windows.Forms.Label labelSubRecordStatusValue;
+		private System.Windows.Forms.Label labelSubRecordStatus;
+		private System.Windows.Forms.Label labelRecordStatusValue;
+		private System.Windows.Forms.Label labelRecordStatus;
+		private System.Windows.Forms.Label labelRecordTimeValue;
+		private System.Windows.Forms.Label labelRecordTime;
+		private System.Windows.Forms.Label labelSubRecordTimeValue;
+		private System.Windows.Forms.Label labelSubRecordTime;
 	}
 }

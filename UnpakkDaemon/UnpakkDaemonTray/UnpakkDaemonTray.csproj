@@ -131,7 +131,11 @@
   <ItemGroup>
     <Content Include="Resources\Record-16.ico" />
     <EmbeddedResource Include="Resources\Record-48.png" />
+    <Content Include="Resources\Record-Red-16.ico" />
+    <EmbeddedResource Include="Resources\Record-Red-48.png" />
     <Content Include="Resources\SubRecord-16.ico" />
+    <Content Include="Resources\SubRecord-Red-16.ico" />
+    <EmbeddedResource Include="Resources\SubRecord-Red-48.png" />
     <EmbeddedResource Include="Resources\SubRecord-48.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

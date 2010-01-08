@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
+using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Service.Common;
 using UnpakkDaemon.Service.DataObjects;
@@ -69,7 +70,8 @@ namespace UnpakkDaemon.Service.Host
 			{
 				try
 				{
-					subscriber.Record(new RecordData(e.Record.ID, e.Record.Folder, e.Record.SFVName, e.Record.RARName, e.Record.RARCount, e.Record.RARSize));
+					subscriber.Record(new RecordData(e.Record.ID, e.Record.Time, EnumConverter.ConvertEnumValue<RecordStatus, RecordStatusData>(e.Record.Status),
+						e.Record.Folder, e.Record.SFVName, e.Record.RARName, e.Record.RARCount, e.Record.RARSize));
 				}
 				catch
 				{
@@ -84,7 +86,8 @@ namespace UnpakkDaemon.Service.Host
 			{
 				try
 				{
-					subscriber.SubRecord(new SubRecordData(e.ParentID, e.SubRecord.Folder, e.SubRecord.Name, e.SubRecord.Size));
+					subscriber.SubRecord(new SubRecordData(e.ParentID, e.SubRecord.Time,
+						EnumConverter.ConvertEnumValue<RecordStatus, RecordStatusData>(e.SubRecord.Status), e.SubRecord.Folder, e.SubRecord.Name, e.SubRecord.Size));
 				}
 				catch
 				{

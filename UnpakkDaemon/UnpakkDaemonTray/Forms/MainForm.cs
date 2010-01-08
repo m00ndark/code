@@ -18,6 +18,10 @@ namespace UnpakkDaemonTray.Forms
 	{
 		private bool _closing;
 		private SettingsWorker _settingsWorker;
+		private Image _record;
+		private Image _recordRed;
+		private Image _subRecord;
+		private Image _subRecordRed;
 
 		public MainForm()
 		{
@@ -32,8 +36,14 @@ namespace UnpakkDaemonTray.Forms
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			Restore();
-			pictureBoxRecord.Image = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Record-48.png"));
-			pictureBoxSubRecord.Image = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.SubRecord-48.png"));
+// ReSharper disable AssignNullToNotNullAttribute
+			_record = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Record-48.png"));
+			_recordRed = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Record-Red-48.png"));
+			_subRecord = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.SubRecord-48.png"));
+			_subRecordRed = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.SubRecord-Red-48.png"));
+// ReSharper restore AssignNullToNotNullAttribute
+			pictureBoxRecord.Image = _record;
+			pictureBoxSubRecord.Image = _subRecord;
 			StatusChangedHandler statusChangedHandler = new StatusChangedHandler();
 			statusChangedHandler.ProgressChanged += StatusChangedHandler_ProgressChanged;
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
@@ -110,36 +120,7 @@ namespace UnpakkDaemonTray.Forms
 
 		private void treeViewRecords_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			if (e.Node.Tag is Record)
-			{
-				Record record = (Record) e.Node.Tag;
-				groupBoxRecordDetails.Visible = true;
-				groupBoxSubRecordDetails.Visible = false;
-				textBoxRecordPath.Text = record.Folder;
-				textBoxRecordSFVFile.Text = record.SFVName;
-				textBoxRecordRARFile.Text = record.RARName;
-				labelRecordRARPartsValue.Text = record.RARCount.ToString();
-				labelRecordRARSizeValue.Text = MakeFileSize(record.RARSize);
-				linkLabelRecordOpenFolder.Tag = record;
-				toolTip.SetToolTip(linkLabelRecordOpenFolder, record.Folder);
-			}
-			else if (e.Node.Tag is SubRecord)
-			{
-				SubRecord subRecord = (SubRecord) e.Node.Tag;
-				groupBoxRecordDetails.Visible = false;
-				groupBoxSubRecordDetails.Visible = true;
-				textBoxSubRecordPath.Text = subRecord.Folder;
-				textBoxSubRecordFile.Text = subRecord.Name;
-				labelSubRecordFileSizeValue.Text = MakeFileSize(subRecord.Size);
-				linkLabelSubRecordOpenFile.Tag = subRecord;
-				linkLabelSubRecordOpenFolder.Tag = subRecord;
-				toolTip.SetToolTip(linkLabelSubRecordOpenFolder, subRecord.Folder);
-			}
-			else
-			{
-				groupBoxRecordDetails.Visible = false;
-				groupBoxSubRecordDetails.Visible = false;
-			}
+			ShowRecordDetails(e.Node.Tag);
 		}
 
 		private void linkLabelRecordOpenFolder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -373,11 +354,16 @@ namespace UnpakkDaemonTray.Forms
 		private void AddRecord(Record record, bool update)
 		{
 			TreeNode node = treeViewRecords.Nodes.Find(record.ID.ToString(), false).FirstOrDefault();
+			int imageIndex = (record.Status == RecordStatus.Success && record.SubRecordStatus == RecordStatus.Success ? 0 : 1);
 
 			if (node == null)
-				node = treeViewRecords.Nodes.Add(record.ID.ToString(), Path.GetFileNameWithoutExtension(record.SFVName), 0, 0);
+				node = treeViewRecords.Nodes.Add(record.ID.ToString(), Path.GetFileNameWithoutExtension(record.SFVName), imageIndex, imageIndex);
 			else if (update)
+			{
 				node.Text = Path.GetFileNameWithoutExtension(record.SFVName);
+				node.ImageIndex = node.SelectedImageIndex = imageIndex;
+				if (node.IsSelected) ShowRecordDetails(record);
+			}
 
 			node.Tag = record;
 			node.EnsureVisible();
@@ -389,11 +375,69 @@ namespace UnpakkDaemonTray.Forms
 			if (parentNode != null)
 			{
 				TreeNode node = parentNode.Nodes.Find(subRecord.Name, false).FirstOrDefault();
+				int imageIndex = (subRecord.Status == RecordStatus.Success ? 2 : 3);
+
 				if (node == null)
-					node = parentNode.Nodes.Add(subRecord.Name, subRecord.Name, 1, 1);
+					node = parentNode.Nodes.Add(subRecord.Name, subRecord.Name, imageIndex, imageIndex);
 				else if (update)
+				{
 					node.Text = subRecord.Name;
+					node.ImageIndex = node.SelectedImageIndex = imageIndex;
+					if (node.IsSelected) ShowRecordDetails(subRecord);
+				}
+
 				node.Tag = subRecord;
+
+				Record parentRecord = (Record) parentNode.Tag;
+				SubRecord existingSubRecord = parentRecord.SubRecords.FirstOrDefault(sr => (sr.Name == subRecord.Name));
+				if (existingSubRecord == null)
+					parentRecord.SubRecords.Add(subRecord);
+				else
+					existingSubRecord.CopyFrom(subRecord);
+
+				AddRecord(parentRecord, true);
+			}
+		}
+
+		private void ShowRecordDetails(object obj)
+		{
+			if (obj is Record)
+			{
+				Record record = (Record) obj;
+				bool success = (record.Status == RecordStatus.Success && record.SubRecordStatus == RecordStatus.Success);
+				groupBoxRecordDetails.Visible = true;
+				groupBoxSubRecordDetails.Visible = false;
+				textBoxRecordPath.Text = record.Folder;
+				textBoxRecordSFVFile.Text = record.SFVName;
+				textBoxRecordRARFile.Text = record.RARName;
+				labelRecordRARPartsValue.Text = record.RARCount.ToString();
+				labelRecordRARSizeValue.Text = MakeFileSize(record.RARSize);
+				labelRecordTimeValue.Text = record.Time.ToString("yyyy-MM-dd HH:mm:ss");
+				labelRecordStatusValue.Text = (success ? RecordStatus.Success.ToString() : RecordStatus.Failure.ToString())
+					+ (!success && record.Status == RecordStatus.Success ? " (sub record failed)" : string.Empty);
+				pictureBoxRecord.Image = (success ? _record : _recordRed);
+				linkLabelRecordOpenFolder.Tag = record;
+				toolTip.SetToolTip(linkLabelRecordOpenFolder, record.Folder);
+			}
+			else if (obj is SubRecord)
+			{
+				SubRecord subRecord = (SubRecord) obj;
+				groupBoxRecordDetails.Visible = false;
+				groupBoxSubRecordDetails.Visible = true;
+				textBoxSubRecordPath.Text = subRecord.Folder;
+				textBoxSubRecordFile.Text = subRecord.Name;
+				labelSubRecordFileSizeValue.Text = MakeFileSize(subRecord.Size);
+				labelSubRecordTimeValue.Text = subRecord.Time.ToString("yyyy-MM-dd HH:mm:ss");
+				labelSubRecordStatusValue.Text = subRecord.Status.ToString();
+				pictureBoxSubRecord.Image = (subRecord.Status == RecordStatus.Success ? _subRecord : _subRecordRed);
+				linkLabelSubRecordOpenFile.Tag = subRecord;
+				linkLabelSubRecordOpenFolder.Tag = subRecord;
+				toolTip.SetToolTip(linkLabelSubRecordOpenFolder, subRecord.Folder);
+			}
+			else
+			{
+				groupBoxRecordDetails.Visible = false;
+				groupBoxSubRecordDetails.Visible = false;
 			}
 		}
 

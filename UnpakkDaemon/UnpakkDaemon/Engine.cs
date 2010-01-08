@@ -18,6 +18,7 @@ namespace UnpakkDaemon
 		private FileLogger _fileLogger;
 		private FileRecorder _fileRecorder;
 		private bool _shutDown;
+		private string _lastRARVolume;
 
 		#region Implementation of IStatusProvider
 
@@ -35,6 +36,7 @@ namespace UnpakkDaemon
 			_fileLogger = null;
 			_fileRecorder = null;
 			_shutDown = false;
+			_lastRARVolume = string.Empty;
 			IsRunning = false;
 		}
 
@@ -153,11 +155,6 @@ namespace UnpakkDaemon
 				_fileRecorder.AddRecord(record);
 			else
 				throw new SystemException("Recording not setup correctly.");
-		}
-
-		private void AddSubRecord(Record parentRecord, SubRecord subRecord)
-		{
-			AddSubRecord(parentRecord.ID, subRecord);
 		}
 
 		private void AddSubRecord(Guid parentID, SubRecord subRecord)
@@ -292,14 +289,15 @@ namespace UnpakkDaemon
 				WriteLogEntry("Validating SFV file references, sfvfile=" + sfvFilePath);
 				RaiseSubProgressEvent("Validating SFV file references...", 0);
 				SFVFile sfvFile = new SFVFile(sfvFilePath);
-				string rarFilePath = sfvFile.ContainedFilePaths.FirstOrDefault(filePath => filePath.EndsWith(".rar", StringComparison.CurrentCultureIgnoreCase));
+				string rarFilePath = sfvFile.ContainedFilePaths.OrderBy(filePath => filePath)
+					.FirstOrDefault(filePath => filePath.EndsWith(".rar", StringComparison.CurrentCultureIgnoreCase));
+				Record record = new Record(Path.GetDirectoryName(sfvFile.SFVFilePath), Path.GetFileName(sfvFile.SFVFilePath),
+					Path.GetFileName(rarFilePath), sfvFile.ContainedFilePaths.Count, FileHandler.GetTotalFileSize(sfvFile.ContainedFilePaths));
 				if (!string.IsNullOrEmpty(rarFilePath))
 				{
 					if (sfvFile.Validate())
 					{
 						WriteLogEntry("Validation OK, proceeding with extraction...");
-						Record record = new Record(Path.GetDirectoryName(sfvFile.SFVFilePath), Path.GetFileName(sfvFile.SFVFilePath),
-							Path.GetFileName(rarFilePath), sfvFile.ContainedFilePaths.Count, FileHandler.GetTotalFileSize(sfvFile.ContainedFilePaths));
 						AddRecord(record);
 						if (ExtractRARContent(rarFilePath, record))
 						{
@@ -309,44 +307,52 @@ namespace UnpakkDaemon
 					else
 					{
 						WriteLogEntry(LogType.Warning, "Validation FAILED, skipping archive");
+						AddRecord(record.Fail());
 					}
 				}
 				else
 				{
 					WriteLogEntry(LogType.Warning, "SFV file does not refer to any .rar file, skipping further processing");
+					AddRecord(record.Fail());
 				}
 			}
 			catch (Exception ex)
 			{
 				WriteLogEntry("An exception occurred while processing SFV file, path=" + sfvFilePath, ex);
+				AddRecord(new Record(RecordStatus.Failure, Path.GetDirectoryName(sfvFilePath), Path.GetFileName(sfvFilePath), string.Empty, 0, 0));
 			}
 		}
 
 		private bool ExtractRARContent(string rarFilePath, Record record)
 		{
 			bool success = true;
+			SubRecord subRecord = null;
+			_lastRARVolume = string.Empty;
 			Unrar unrar = new Unrar(rarFilePath) { DestinationPath = Path.GetDirectoryName(rarFilePath) };
 			unrar.ExtractionProgress += unrar_ExtractionProgress;
 			unrar.MissingVolume += unrar_MissingVolume;
+			unrar.NewVolume += unrar_NewVolume;
 			unrar.PasswordRequired += unrar_PasswordRequired;
 			try
 			{
 				unrar.Open(Unrar.OpenMode.Extract);
+				//int a = 0;
 				while (success && unrar.ReadHeader())
 				{
 					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName + ", size=" + unrar.CurrentFile.UnpackedSize);
+					subRecord = new SubRecord(unrar.DestinationPath, unrar.CurrentFile.FileName, unrar.CurrentFile.UnpackedSize);
 					unrar.Extract();
-					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName),
-						unrar.CurrentFile.UnpackedSize, unrar.CurrentFile.FileCRC);
-					if (success)
-						AddSubRecord(record.ID, new SubRecord(unrar.DestinationPath, unrar.CurrentFile.FileName, unrar.CurrentFile.UnpackedSize));
-					else
+					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName), 
+						unrar.CurrentFile.UnpackedSize, GetRARFileCRC(_lastRARVolume, unrar.CurrentFile.FileName/* + (a++ > 0 ? "x" : "")*/));
+					AddSubRecord(record.ID, (success ? subRecord : subRecord.Fail()));
+					if (!success)
 						WriteLogEntry(LogType.Warning, "Validation FAILED, aborting extraction");
 				}
 			}
 			catch (Exception ex)
 			{
 				WriteLogEntry("An exception occurred while extracting from RAR file, path=" + rarFilePath, ex);
+				if (subRecord != null) AddSubRecord(record.ID, subRecord.Fail());
 				success = false;
 			}
 			finally
@@ -354,9 +360,33 @@ namespace UnpakkDaemon
 				unrar.Close();
 				unrar.ExtractionProgress -= unrar_ExtractionProgress;
 				unrar.MissingVolume -= unrar_MissingVolume;
+				unrar.NewVolume -= unrar_NewVolume;
 				unrar.PasswordRequired -= unrar_PasswordRequired;
 			}
 			return success;
+		}
+
+		private static string GetRARFileCRC(string rarVolumePath, string fileName)
+		{
+			if (!FileHandler.FileExists(rarVolumePath))
+				return string.Empty;
+
+			Unrar unrar = new Unrar(rarVolumePath);
+			try
+			{
+				unrar.Open();
+
+				while (unrar.ReadHeader() && unrar.CurrentFile.FileName != fileName)
+					unrar.Skip();
+
+				if (unrar.CurrentFile != null && unrar.CurrentFile.FileName == fileName)
+					return unrar.CurrentFile.FileCRC.ToString("X8").ToLower();
+			}
+			finally
+			{
+				unrar.Close();
+			}
+			return string.Empty;
 		}
 
 		#region Unrar event handlers
@@ -373,6 +403,12 @@ namespace UnpakkDaemon
 			e.ContinueOperation = true;
 		}
 
+		private void unrar_NewVolume(object sender, NewVolumeEventArgs e)
+		{
+			_lastRARVolume = e.VolumeName;
+			e.ContinueOperation = true;
+		}
+
 		private void unrar_ExtractionProgress(object sender, ExtractionProgressEventArgs e)
 		{
 			RaiseSubProgressEvent("Extracting file: " + e.FileName, e.PercentComplete, e.BytesExtracted, e.FileSize);
@@ -380,21 +416,21 @@ namespace UnpakkDaemon
 
 		#endregion
 
-		private bool ValidateExtractedFile(string filePath, long fileSize, long fileChecksum)
+		private bool ValidateExtractedFile(string filePath, long fileSize, string referenceChecksum)
 		{
 			WriteLogEntry("Validating extracted file...");
 			RaiseSubProgressEvent("Validating extracted file: " + Path.GetFileName(filePath), 100);
 
-			if (!File.Exists(filePath))
+			if (!FileHandler.FileExists(filePath))
 			{
 				WriteLogEntry(LogType.Warning, "Extracted file missing, path=" + filePath);
 				return false;
 			}
 
-			FileInfo fileInfo = new FileInfo(filePath);
-			if (fileInfo.Length != fileSize)
+			long actualFileSize = FileHandler.FileSize(filePath);
+			if (actualFileSize != fileSize)
 			{
-				WriteLogEntry(LogType.Warning, "Extracted file size mismatch, reference=" + fileSize + ", actual=" + fileInfo.Length);
+				WriteLogEntry(LogType.Warning, "Extracted file size mismatch, reference=" + fileSize + ", actual=" + actualFileSize);
 				return false;
 			}
 
@@ -402,7 +438,6 @@ namespace UnpakkDaemon
 			using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
 			{
 				crc32.ComputeHash(fileStream);
-				string referenceChecksum = CRC32.ToString(Convert.ToUInt32(fileChecksum));
 				if (!crc32.HashValueStr.Equals(referenceChecksum, StringComparison.CurrentCultureIgnoreCase))
 				{
 					WriteLogEntry(LogType.Warning, "CRC checksum mismatch, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
@@ -426,10 +461,10 @@ namespace UnpakkDaemon
 				{
 					try
 					{
-						if (File.Exists(filePath))
+						if (FileHandler.FileExists(filePath))
 						{
 							WriteLogEntry(LogType.Debug, "Deleting archive file, path=" + filePath);
-							File.Delete(filePath);
+							FileHandler.DeleteFile(filePath);
 						}
 					}
 					catch (Exception ex)
@@ -437,10 +472,10 @@ namespace UnpakkDaemon
 						WriteLogEntry("An exception occurred while deleting archive file, path=" + filePath, ex);
 					}
 				}
-				if (File.Exists(sfvFile.SFVFilePath))
+				if (FileHandler.FileExists(sfvFile.SFVFilePath))
 				{
 					WriteLogEntry(LogType.Debug, "Deleting SFV file, path=" + sfvFile.SFVFilePath);
-					File.Delete(sfvFile.SFVFilePath);
+					FileHandler.DeleteFile(sfvFile.SFVFilePath);
 				}
 			}
 			catch (Exception ex)
