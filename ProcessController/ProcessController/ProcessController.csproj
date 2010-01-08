@@ -56,6 +56,7 @@
     <Compile Include="AddApplicationForm.Designer.cs">
       <DependentUpon>AddApplicationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataAccess\FileHandler.cs" />
     <Compile Include="ListViewItemComparer.cs" />
     <Compile Include="NewGroupForm.cs">
       <SubType>Form</SubType>

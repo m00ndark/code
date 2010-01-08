@@ -30,10 +30,7 @@ namespace ProcessController
             _timer.Start();
             toolStripMenuItemSystemTrayOptionsStartWithWindows.Checked = _config.StartWithWindows;
             listViewApplications.ListViewItemSorter = new ListViewItemComparer(0, 1);
-            foreach (Application application in _config.Applications)
-            {
-                AddApplicationToList(application);
-            }
+            FillApplicationList();
         }
 
         #region Timer events
@@ -394,6 +391,30 @@ namespace ProcessController
             }
         }
 
+        private void buttonImport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ImportApplications();
+            }
+            catch (Exception ex)
+            {
+                FormUtilities.ShowError(this, ex);
+            }
+        }
+
+        private void buttonExport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ExportApplications();
+            }
+            catch (Exception ex)
+            {
+                FormUtilities.ShowError(this, ex);
+            }
+        }
+
         private void buttonExit_Click(object sender, EventArgs e)
         {
             try
@@ -489,6 +510,38 @@ namespace ProcessController
                 StopApplication(application);
         }
 
+        private void ImportApplications()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.CheckFileExists = true;
+            openFileDialog.Title = "Please select a configuration file to import...";
+            openFileDialog.Filter = "XML Files (*.xml)|*.xml|All Files (*.*)|*.*";
+            if (openFileDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                Configuration importedConfig = FileHandler.Deserialize<Configuration>(openFileDialog.FileName);
+                foreach (Application application in importedConfig.Applications)
+                {
+                    _config.Applications.Add(application);
+                }
+                RegistryHandler.SaveConfiguration(_config);
+                FillApplicationList();
+                FormUtilities.ShowInformation(this, "Successfully imported " + importedConfig.Applications.Count + " applications.");
+            }
+        }
+
+        private void ExportApplications()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Please select a target file...";
+            saveFileDialog.Filter = "XML Files (*.xml)|*.xml|All Files (*.*)|*.*";
+            saveFileDialog.FileName = "processcontroller_applications.xml";
+            if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                FileHandler.Serialize(saveFileDialog.FileName, _config);
+                FormUtilities.ShowInformation(this, "Successfully exported " + _config.Applications.Count + " applications to" + Environment.NewLine + saveFileDialog.FileName);
+            }
+        }
+
         private void ToggleOptionStartWithWindows()
         {
             _config.StartWithWindows = !_config.StartWithWindows;
@@ -554,6 +607,15 @@ namespace ProcessController
             }
             UpdateSystemTrayContextMenuSets();
             _discardEvents = false;
+        }
+
+        private void FillApplicationList()
+        {
+            listViewApplications.Items.Clear();
+            foreach (Application application in _config.Applications)
+            {
+                AddApplicationToList(application);
+            }
         }
 
         private void AddApplicationToList(Application application)

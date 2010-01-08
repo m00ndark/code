@@ -71,6 +71,8 @@
             this.toolStripMenuItemApplicationListEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemApplicationListRemove = new System.Windows.Forms.ToolStripMenuItem();
             this.comboBoxSets = new System.Windows.Forms.ComboBox();
+            this.buttonExport = new System.Windows.Forms.Button();
+            this.buttonImport = new System.Windows.Forms.Button();
             this.groupBoxSelectedApplication.SuspendLayout();
             this.contextMenuStripSystemTray.SuspendLayout();
             this.contextMenuStripApplicationList.SuspendLayout();
@@ -256,7 +258,7 @@
             // buttonAdd
             // 
             this.buttonAdd.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAdd.Location = new System.Drawing.Point(734, 41);
+            this.buttonAdd.Location = new System.Drawing.Point(734, 40);
             this.buttonAdd.Name = "buttonAdd";
             this.buttonAdd.Size = new System.Drawing.Size(75, 23);
             this.buttonAdd.TabIndex = 2;
@@ -267,7 +269,7 @@
             // buttonRemove
             // 
             this.buttonRemove.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemove.Location = new System.Drawing.Point(734, 70);
+            this.buttonRemove.Location = new System.Drawing.Point(734, 69);
             this.buttonRemove.Name = "buttonRemove";
             this.buttonRemove.Size = new System.Drawing.Size(75, 23);
             this.buttonRemove.TabIndex = 3;
@@ -313,36 +315,36 @@
             // toolStripMenuItemSystemTrayStartSingle
             // 
             this.toolStripMenuItemSystemTrayStartSingle.Name = "toolStripMenuItemSystemTrayStartSingle";
-            this.toolStripMenuItemSystemTrayStartSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStartSingle.Size = new System.Drawing.Size(133, 22);
             this.toolStripMenuItemSystemTrayStartSingle.Text = "Start Single";
             // 
             // toolStripMenuItemSystemTrayStartBySet
             // 
             this.toolStripMenuItemSystemTrayStartBySet.Name = "toolStripMenuItemSystemTrayStartBySet";
-            this.toolStripMenuItemSystemTrayStartBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStartBySet.Size = new System.Drawing.Size(133, 22);
             this.toolStripMenuItemSystemTrayStartBySet.Text = "Start By Set";
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(130, 6);
             // 
             // toolStripMenuItemSystemTrayStopSingle
             // 
             this.toolStripMenuItemSystemTrayStopSingle.Name = "toolStripMenuItemSystemTrayStopSingle";
-            this.toolStripMenuItemSystemTrayStopSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStopSingle.Size = new System.Drawing.Size(133, 22);
             this.toolStripMenuItemSystemTrayStopSingle.Text = "Stop Single";
             // 
             // toolStripMenuItemSystemTrayStopBySet
             // 
             this.toolStripMenuItemSystemTrayStopBySet.Name = "toolStripMenuItemSystemTrayStopBySet";
-            this.toolStripMenuItemSystemTrayStopBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStopBySet.Size = new System.Drawing.Size(133, 22);
             this.toolStripMenuItemSystemTrayStopBySet.Text = "Stop By Set";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(130, 6);
             // 
             // toolStripMenuItemSystemTrayOptions
             // 
@@ -362,20 +364,20 @@
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(130, 6);
             // 
             // toolStripMenuItemSystemTrayRestoreMinimize
             // 
             this.toolStripMenuItemSystemTrayRestoreMinimize.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripMenuItemSystemTrayRestoreMinimize.Name = "toolStripMenuItemSystemTrayRestoreMinimize";
-            this.toolStripMenuItemSystemTrayRestoreMinimize.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayRestoreMinimize.Size = new System.Drawing.Size(133, 22);
             this.toolStripMenuItemSystemTrayRestoreMinimize.Text = "Restore";
             this.toolStripMenuItemSystemTrayRestoreMinimize.Click += new System.EventHandler(this.toolStripMenuItemSystemTrayRestoreMinimize_Click);
             // 
             // toolStripMenuItemSystemTrayExit
             // 
             this.toolStripMenuItemSystemTrayExit.Name = "toolStripMenuItemSystemTrayExit";
-            this.toolStripMenuItemSystemTrayExit.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayExit.Size = new System.Drawing.Size(133, 22);
             this.toolStripMenuItemSystemTrayExit.Text = "Exit";
             this.toolStripMenuItemSystemTrayExit.Click += new System.EventHandler(this.toolStripMenuItemSystemTrayExit_Click);
             // 
@@ -435,11 +437,35 @@
             this.comboBoxSets.TabIndex = 5;
             this.comboBoxSets.SelectedIndexChanged += new System.EventHandler(this.comboBoxSets_SelectedIndexChanged);
             // 
+            // buttonExport
+            // 
+            this.buttonExport.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExport.Location = new System.Drawing.Point(734, 211);
+            this.buttonExport.Name = "buttonExport";
+            this.buttonExport.Size = new System.Drawing.Size(75, 23);
+            this.buttonExport.TabIndex = 7;
+            this.buttonExport.Text = "Export";
+            this.buttonExport.UseVisualStyleBackColor = true;
+            this.buttonExport.Click += new System.EventHandler(this.buttonExport_Click);
+            // 
+            // buttonImport
+            // 
+            this.buttonImport.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonImport.Location = new System.Drawing.Point(734, 182);
+            this.buttonImport.Name = "buttonImport";
+            this.buttonImport.Size = new System.Drawing.Size(75, 23);
+            this.buttonImport.TabIndex = 6;
+            this.buttonImport.Text = "Import";
+            this.buttonImport.UseVisualStyleBackColor = true;
+            this.buttonImport.Click += new System.EventHandler(this.buttonImport_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(821, 370);
+            this.Controls.Add(this.buttonExport);
+            this.Controls.Add(this.buttonImport);
             this.Controls.Add(this.comboBoxSets);
             this.Controls.Add(this.buttonExit);
             this.Controls.Add(this.buttonRemove);
@@ -505,6 +531,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayOptions;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayOptionsStartWithWindows;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.Button buttonExport;
+        private System.Windows.Forms.Button buttonImport;
     }
 }
 

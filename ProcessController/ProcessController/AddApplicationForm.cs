@@ -82,7 +82,9 @@ namespace ProcessController
             if (newSetForm.ShowDialog(this) == DialogResult.OK && newSetForm.SetName != null)
             {
                 ListViewItem item = listViewSets.Items.Add(newSetForm.SetName);
+                listViewSets.Sort();
                 item.Selected = true;
+                item.EnsureVisible();
             }
         }
 
