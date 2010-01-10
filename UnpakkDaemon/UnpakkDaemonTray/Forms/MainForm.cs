@@ -221,7 +221,6 @@ namespace UnpakkDaemonTray.Forms
 				progressBarSubProgress.Value = (int) e.Percent;
 				labelSubMessage.Text = e.Message;
 				labelSubProgress.Text = (e.Current < 0 ? string.Empty : (int) e.Percent + "%");
-				Console.WriteLine(e.Message + "\t" + e.Percent + "\t" + e.Current + "\t" + e.Max);
 			}
 		}
 
