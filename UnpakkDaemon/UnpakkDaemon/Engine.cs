@@ -19,6 +19,8 @@ namespace UnpakkDaemon
 		private FileRecorder _fileRecorder;
 		private bool _shutDown;
 		private string _lastRARVolume;
+		private ProgressEventArgs _lastSentProgressEventArgs;
+		private ProgressEventArgs _lastSentSubProgressEventArgs;
 
 		#region Implementation of IStatusProvider
 
@@ -37,6 +39,8 @@ namespace UnpakkDaemon
 			_fileRecorder = null;
 			_shutDown = false;
 			_lastRARVolume = string.Empty;
+			_lastSentProgressEventArgs = null;
+			_lastSentSubProgressEventArgs = null;
 			IsRunning = false;
 		}
 
@@ -171,44 +175,57 @@ namespace UnpakkDaemon
 
 		private void RaiseProgressEvent(string message, double percent)
 		{
-			if (Progress != null)
-				Progress(this, new ProgressEventArgs(message, percent));
+			RaiseProgressEvent(new ProgressEventArgs(message, percent));
 		}
 
 		private void RaiseProgressEvent(string message, double percent, long current)
 		{
-			if (Progress != null)
-				Progress(this, new ProgressEventArgs(message, percent, current));
+			RaiseProgressEvent(new ProgressEventArgs(message, percent, current));
 		}
 
 		private void RaiseProgressEvent(string message, double percent, long current, long max)
 		{
-			if (Progress != null)
-				Progress(this, new ProgressEventArgs(message, percent, current, max));
+			RaiseProgressEvent(new ProgressEventArgs(message, percent, current, max));
+		}
+
+		private void RaiseProgressEvent(ProgressEventArgs progressEventArgs)
+		{
+			if (_lastSentProgressEventArgs == null || !progressEventArgs.IsSame(_lastSentProgressEventArgs))
+			{
+				_lastSentProgressEventArgs = progressEventArgs;
+				if (Progress != null)
+					Progress(this, progressEventArgs);
+			}
 		}
 
 		private void RaiseSubProgressEvent(string message, double percent)
 		{
-			if (SubProgress != null)
-				SubProgress(this, new ProgressEventArgs(message, percent));
+			RaiseSubProgressEvent(new ProgressEventArgs(message, percent));
 		}
 
 		private void RaiseSubProgressEvent(string message, double percent, long current)
 		{
-			if (SubProgress != null)
-				SubProgress(this, new ProgressEventArgs(message, percent, current));
+			RaiseSubProgressEvent(new ProgressEventArgs(message, percent, current));
 		}
 
 		private void RaiseSubProgressEvent(string message, double percent, long current, long max)
 		{
-			if (SubProgress != null)
-				SubProgress(this, new ProgressEventArgs(message, percent, current, max));
+			RaiseSubProgressEvent(new ProgressEventArgs(message, percent, current, max));
+		}
+
+		private void RaiseSubProgressEvent(ProgressEventArgs progressEventArgs)
+		{
+			if (_lastSentSubProgressEventArgs == null || !progressEventArgs.IsSame(_lastSentSubProgressEventArgs))
+			{
+				_lastSentSubProgressEventArgs = progressEventArgs;
+				if (SubProgress != null)
+					SubProgress(this, progressEventArgs);
+			}
 		}
 
 		private void RaiseLogEvent(LogType logType, string logText)
 		{
-			if (Log != null)
-				Log(this, new LogEntryEventArgs(logType, logText));
+			RaiseLogEvent(new LogEntryEventArgs(logType, logText));
 		}
 
 		private void RaiseLogEvent(LogEntryEventArgs e)
@@ -284,21 +301,24 @@ namespace UnpakkDaemon
 
 		private void ProcessSFVFile(string sfvFilePath)
 		{
+			SFVFile sfvFile = null;
 			try
 			{
 				WriteLogEntry("Validating SFV file references, sfvfile=" + sfvFilePath);
 				RaiseSubProgressEvent("Validating SFV file references...", 0);
-				SFVFile sfvFile = new SFVFile(sfvFilePath);
+				sfvFile = new SFVFile(sfvFilePath);
+				sfvFile.Progress += sfvFile_Progress;
 				string rarFilePath = sfvFile.ContainedFilePaths.OrderBy(filePath => filePath)
 					.FirstOrDefault(filePath => filePath.EndsWith(".rar", StringComparison.CurrentCultureIgnoreCase));
 				Record record = new Record(Path.GetDirectoryName(sfvFile.SFVFilePath), Path.GetFileName(sfvFile.SFVFilePath),
 					Path.GetFileName(rarFilePath), sfvFile.ContainedFilePaths.Count, FileHandler.GetTotalFileSize(sfvFile.ContainedFilePaths));
+				AddRecord(record);
 				if (!string.IsNullOrEmpty(rarFilePath))
 				{
 					if (sfvFile.Validate())
 					{
 						WriteLogEntry("Validation OK, proceeding with extraction...");
-						AddRecord(record);
+						AddRecord(record.Succeed());
 						if (ExtractRARContent(rarFilePath, record))
 						{
 							//DeleteFiles(sfvFile);
@@ -321,7 +341,21 @@ namespace UnpakkDaemon
 				WriteLogEntry("An exception occurred while processing SFV file, path=" + sfvFilePath, ex);
 				AddRecord(new Record(RecordStatus.Failure, Path.GetDirectoryName(sfvFilePath), Path.GetFileName(sfvFilePath), string.Empty, 0, 0));
 			}
+			finally
+			{
+				if (sfvFile != null)
+					sfvFile.Progress -= sfvFile_Progress;
+			}
 		}
+
+		#region SFVFile event handlers
+
+		private void sfvFile_Progress(object sender, ProgressEventArgs e)
+		{
+			RaiseSubProgressEvent("Validating SFV file references...", e.Percent, e.Current, e.Max);
+		}
+
+		#endregion
 
 		private bool ExtractRARContent(string rarFilePath, Record record)
 		{
@@ -336,17 +370,18 @@ namespace UnpakkDaemon
 			try
 			{
 				unrar.Open(Unrar.OpenMode.Extract);
-				//int a = 0;
+				int a = 0;
 				while (success && unrar.ReadHeader())
 				{
 					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName + ", size=" + unrar.CurrentFile.UnpackedSize);
 					subRecord = new SubRecord(unrar.DestinationPath, unrar.CurrentFile.FileName, unrar.CurrentFile.UnpackedSize);
+					AddSubRecord(record.ID, subRecord);
 					unrar.Extract();
 					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName), 
-						unrar.CurrentFile.UnpackedSize, GetRARFileCRC(_lastRARVolume, unrar.CurrentFile.FileName/* + (a++ > 0 ? "x" : "")*/));
-					AddSubRecord(record.ID, (success ? subRecord : subRecord.Fail()));
+						unrar.CurrentFile.UnpackedSize, GetRARFileCRC(_lastRARVolume, unrar.CurrentFile.FileName + (a++ > 0 ? "x" : "")));
 					if (!success)
 						WriteLogEntry(LogType.Warning, "Validation FAILED, aborting extraction");
+					AddSubRecord(record.ID, (success ? subRecord.Succeed() : subRecord.Fail()));
 				}
 			}
 			catch (Exception ex)
@@ -419,7 +454,7 @@ namespace UnpakkDaemon
 		private bool ValidateExtractedFile(string filePath, long fileSize, string referenceChecksum)
 		{
 			WriteLogEntry("Validating extracted file...");
-			RaiseSubProgressEvent("Validating extracted file: " + Path.GetFileName(filePath), 100);
+			RaiseSubProgressEvent("Validating extracted file: " + Path.GetFileName(filePath), 0);
 
 			if (!FileHandler.FileExists(filePath))
 			{
@@ -434,21 +469,37 @@ namespace UnpakkDaemon
 				return false;
 			}
 
-			CRC32 crc32 = new CRC32();
-			using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+			CRC32 crc32 = new CRC32(Path.GetFileName(filePath), actualFileSize);
+			crc32.Progress += crc32_Progress;
+			try
 			{
-				crc32.ComputeHash(fileStream);
-				if (!crc32.HashValueStr.Equals(referenceChecksum, StringComparison.CurrentCultureIgnoreCase))
+				using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
 				{
-					WriteLogEntry(LogType.Warning, "CRC checksum mismatch, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
-					return false;
+					crc32.ComputeHash(fileStream);
+					if (!crc32.HashValueStr.Equals(referenceChecksum, StringComparison.CurrentCultureIgnoreCase))
+					{
+						WriteLogEntry(LogType.Warning, "CRC checksum mismatch, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
+						return false;
+					}
+					WriteLogEntry(LogType.Debug, "CRC checksum match, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
 				}
-				WriteLogEntry(LogType.Debug, "CRC checksum match, reference=" + referenceChecksum + ", actual=" + crc32.HashValueStr.ToLower());
 			}
-
+			finally
+			{
+				crc32.Progress -= crc32_Progress;
+			}
 			WriteLogEntry("Validation OK");
 			return true;
 		}
+
+		#region CRC32 event handlers
+
+		private void crc32_Progress(object sender, ProgressEventArgs e)
+		{
+			RaiseSubProgressEvent("Validating extracted file: " + e.Message, e.Percent, e.Current, e.Max);
+		}
+
+		#endregion
 
 		private void DeleteFiles(SFVFile sfvFile)
 		{

@@ -9,6 +9,7 @@ namespace UnpakkDaemon.SimpleFileVerification
 	public class SFVFile
 	{
 		public static event EventHandler<LogEntryEventArgs> LogEntry;
+		public event EventHandler<ProgressEventArgs> Progress;
 
 		#region Event raisers
 
@@ -25,6 +26,14 @@ namespace UnpakkDaemon.SimpleFileVerification
 			if (LogEntry != null)
 			{
 				LogEntry(null, new LogEntryEventArgs(logType, logText));
+			}
+		}
+
+		private void RaiseProgressEvent(double percent, long current, long max)
+		{
+			if (Progress != null)
+			{
+				Progress(null, new ProgressEventArgs(percent, current, max));
 			}
 		}
 
@@ -67,6 +76,7 @@ namespace UnpakkDaemon.SimpleFileVerification
 
 		public bool Validate()
 		{
+			int current = 0;
 			foreach (string fileName in _crcFiles.Keys)
 			{
 				CRC32 crc32 = new CRC32();
@@ -88,6 +98,9 @@ namespace UnpakkDaemon.SimpleFileVerification
 					}
 					RaiseLogEntryEvent(LogType.Debug, "CRC checksum match, file=" + fileName + ", reference=" + _crcFiles[fileName].ToLower() + ", actual=" + crc32.HashValueStr);
 				}
+
+				if (++current % 2 == 0)
+					RaiseProgressEvent(100 * (double) current / _crcFiles.Count, current, _crcFiles.Count);
 			}
 			return true;
 		}

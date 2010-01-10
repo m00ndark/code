@@ -2,6 +2,7 @@
 {
 	public enum RecordStatus
 	{
+		InProgress,
 		Success,
 		Failure
 	}

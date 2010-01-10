@@ -15,7 +15,7 @@ namespace UnpakkDaemon.DataObjects
 		}
 
 		public Record(string folder, string sfvName, string rarName, int rarCount, long rarSize)
-			: this(RecordStatus.Success, folder, sfvName, rarName, rarCount, rarSize) { }
+			: this(RecordStatus.InProgress, folder, sfvName, rarName, rarCount, rarSize) { }
 
 		public Record(RecordStatus status, string folder, string sfvName, string rarName, int rarCount, long rarSize)
 			: this(Guid.NewGuid(), DateTime.Now, status, folder, sfvName, rarName, rarCount, rarSize) { }
@@ -53,9 +53,17 @@ namespace UnpakkDaemon.DataObjects
 			RARSize = record.RARSize;
 		}
 
+		public Record Succeed()
+		{
+			Status = RecordStatus.Success;
+			Time = DateTime.Now;
+			return this;
+		}
+
 		public Record Fail()
 		{
 			Status = RecordStatus.Failure;
+			Time = DateTime.Now;
 			return this;
 		}
 
@@ -76,7 +84,8 @@ namespace UnpakkDaemon.DataObjects
 			get
 			{
 				return (SubRecords.Count > 0
-					? SubRecords.Select(sr => sr.Status).Aggregate((x, y) => (x == RecordStatus.Failure || y == RecordStatus.Failure ? RecordStatus.Failure : RecordStatus.Success))
+					? SubRecords.Select(sr => sr.Status).Aggregate((x, y) => (x == RecordStatus.Failure || y == RecordStatus.Failure ? RecordStatus.Failure
+						: (x == RecordStatus.InProgress || y == RecordStatus.InProgress ? RecordStatus.InProgress : RecordStatus.Success)))
 					: RecordStatus.Success);
 			}
 		}

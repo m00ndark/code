@@ -123,6 +123,11 @@ namespace UnpakkDaemonTray.Forms
 			ShowRecordDetails(e.Node.Tag);
 		}
 
+		private void linkLabelRecordStatus_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			SelectLogEntry((DateTime) linkLabelRecordStatus.Tag);
+		}
+
 		private void linkLabelRecordOpenFolder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			Record record = (Record) ((LinkLabel) sender).Tag;
@@ -131,6 +136,11 @@ namespace UnpakkDaemonTray.Forms
 				FileName = record.Folder,
 				Verb = "open"
 			});
+		}
+
+		private void linkLabelSubRecordStatus_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			SelectLogEntry((DateTime) linkLabelSubRecordStatus.Tag);
 		}
 
 		private void linkLabelSubRecordOpenFile_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -211,6 +221,7 @@ namespace UnpakkDaemonTray.Forms
 				progressBarSubProgress.Value = (int) e.Percent;
 				labelSubMessage.Text = e.Message;
 				labelSubProgress.Text = (e.Current < 0 ? string.Empty : (int) e.Percent + "%");
+				Console.WriteLine(e.Message + "\t" + e.Percent + "\t" + e.Current + "\t" + e.Max);
 			}
 		}
 
@@ -249,7 +260,8 @@ namespace UnpakkDaemonTray.Forms
 				ListViewItem item = listViewLog.Items.Add(e.LogTime.ToString("yyyy-MM-dd HH:mm:ss"));
 				item.SubItems.Add(e.LogType.ToString());
 				item.SubItems.Add(e.LogText);
-				listViewLog.EnsureVisible(item.Index);
+				item.Tag = e.LogTime;
+				item.EnsureVisible();
 			}
 		}
 
@@ -354,7 +366,7 @@ namespace UnpakkDaemonTray.Forms
 		private void AddRecord(Record record, bool update)
 		{
 			TreeNode node = treeViewRecords.Nodes.Find(record.ID.ToString(), false).FirstOrDefault();
-			int imageIndex = (record.Status == RecordStatus.Success && record.SubRecordStatus == RecordStatus.Success ? 0 : 1);
+			int imageIndex = (record.Status == RecordStatus.Failure || record.SubRecordStatus == RecordStatus.Failure ? 1 : 0);
 
 			if (node == null)
 				node = treeViewRecords.Nodes.Add(record.ID.ToString(), Path.GetFileNameWithoutExtension(record.SFVName), imageIndex, imageIndex);
@@ -375,7 +387,7 @@ namespace UnpakkDaemonTray.Forms
 			if (parentNode != null)
 			{
 				TreeNode node = parentNode.Nodes.Find(subRecord.Name, false).FirstOrDefault();
-				int imageIndex = (subRecord.Status == RecordStatus.Success ? 2 : 3);
+				int imageIndex = (subRecord.Status == RecordStatus.Failure ? 3 : 2);
 
 				if (node == null)
 					node = parentNode.Nodes.Add(subRecord.Name, subRecord.Name, imageIndex, imageIndex);
@@ -404,7 +416,9 @@ namespace UnpakkDaemonTray.Forms
 			if (obj is Record)
 			{
 				Record record = (Record) obj;
-				bool success = (record.Status == RecordStatus.Success && record.SubRecordStatus == RecordStatus.Success);
+				RecordStatus subRecordStatus = record.SubRecordStatus;
+				bool success = (record.Status == RecordStatus.Success && subRecordStatus == RecordStatus.Success);
+				bool failure = (record.Status == RecordStatus.Failure || subRecordStatus == RecordStatus.Failure);
 				groupBoxRecordDetails.Visible = true;
 				groupBoxSubRecordDetails.Visible = false;
 				textBoxRecordPath.Text = record.Folder;
@@ -413,9 +427,11 @@ namespace UnpakkDaemonTray.Forms
 				labelRecordRARPartsValue.Text = record.RARCount.ToString();
 				labelRecordRARSizeValue.Text = MakeFileSize(record.RARSize);
 				labelRecordTimeValue.Text = record.Time.ToString("yyyy-MM-dd HH:mm:ss");
-				labelRecordStatusValue.Text = (success ? RecordStatus.Success.ToString() : RecordStatus.Failure.ToString())
-					+ (!success && record.Status == RecordStatus.Success ? " (sub record failed)" : string.Empty);
-				pictureBoxRecord.Image = (success ? _record : _recordRed);
+				linkLabelRecordStatus.Text = MakeStatus(success ? RecordStatus.Success : (failure ? RecordStatus.Failure : RecordStatus.InProgress))
+					+ (subRecordStatus == RecordStatus.Failure ? " (sub record failed)" : string.Empty);
+				linkLabelRecordStatus.LinkArea = new LinkArea(0, record.Status == RecordStatus.Failure ? linkLabelRecordStatus.Text.Length : 0);
+				linkLabelRecordStatus.Tag = record.Time;
+				pictureBoxRecord.Image = (failure ? _recordRed : _record);
 				linkLabelRecordOpenFolder.Tag = record;
 				toolTip.SetToolTip(linkLabelRecordOpenFolder, record.Folder);
 			}
@@ -428,8 +444,10 @@ namespace UnpakkDaemonTray.Forms
 				textBoxSubRecordFile.Text = subRecord.Name;
 				labelSubRecordFileSizeValue.Text = MakeFileSize(subRecord.Size);
 				labelSubRecordTimeValue.Text = subRecord.Time.ToString("yyyy-MM-dd HH:mm:ss");
-				labelSubRecordStatusValue.Text = subRecord.Status.ToString();
-				pictureBoxSubRecord.Image = (subRecord.Status == RecordStatus.Success ? _subRecord : _subRecordRed);
+				linkLabelSubRecordStatus.Text = MakeStatus(subRecord.Status);
+				linkLabelSubRecordStatus.LinkArea = new LinkArea(0, subRecord.Status == RecordStatus.Failure ? linkLabelSubRecordStatus.Text.Length : 0);
+				linkLabelSubRecordStatus.Tag = subRecord.Time;
+				pictureBoxSubRecord.Image = (subRecord.Status == RecordStatus.Failure ? _subRecordRed : _subRecord);
 				linkLabelSubRecordOpenFile.Tag = subRecord;
 				linkLabelSubRecordOpenFolder.Tag = subRecord;
 				toolTip.SetToolTip(linkLabelSubRecordOpenFolder, subRecord.Folder);
@@ -438,6 +456,19 @@ namespace UnpakkDaemonTray.Forms
 			{
 				groupBoxRecordDetails.Visible = false;
 				groupBoxSubRecordDetails.Visible = false;
+			}
+		}
+
+		private void SelectLogEntry(DateTime dateTime)
+		{
+			tabControl.SelectedIndex = 1;
+			if (listViewLog.Items.Count > 0)
+			{
+				listViewLog.SelectedItems.Clear();
+				ListViewItem itemAfter = listViewLog.Items.Cast<ListViewItem>().FirstOrDefault(x => ((DateTime) x.Tag > dateTime));
+				ListViewItem item = listViewLog.Items[Math.Max(0, itemAfter.Index - 1)];
+				item.Selected = true;
+				item.EnsureVisible();
 			}
 		}
 
@@ -466,6 +497,11 @@ namespace UnpakkDaemonTray.Forms
 			}
 			string[] units = new string[] { "bytes", "kB", "MB", "GB", "TB" };
 			return value.ToString("0.0") + " " + units[i];
+		}
+
+		private static string MakeStatus(RecordStatus status)
+		{
+			return status.ToString().Aggregate(string.Empty, (x, y) => (x + (y >= 65 && y <= 90 ? " " + y.ToString() : y.ToString()))).Trim();
 		}
 
 		#endregion

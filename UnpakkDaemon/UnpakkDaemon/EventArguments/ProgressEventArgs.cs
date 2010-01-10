@@ -4,6 +4,15 @@ namespace UnpakkDaemon.EventArguments
 {
 	public class ProgressEventArgs : EventArgs
 	{
+		public ProgressEventArgs(double percent)
+			: this(string.Empty, percent) { }
+
+		public ProgressEventArgs(double percent, long current)
+			: this(string.Empty, percent, current) { }
+
+		public ProgressEventArgs(double percent, long current, long max)
+			: this(string.Empty, percent, current, max) { }
+
 		public ProgressEventArgs(string message, double percent)
 			: this(message, percent, -1, -1) { }
 
@@ -22,5 +31,10 @@ namespace UnpakkDaemon.EventArguments
 		public double Percent { get; private set; }
 		public long Current { get; private set; }
 		public long Max { get; private set; }
+
+		public bool IsSame(ProgressEventArgs progressEventArgs)
+		{
+			return (Message == progressEventArgs.Message && (int) Percent == (int) progressEventArgs.Percent);
+		}
 	}
 }

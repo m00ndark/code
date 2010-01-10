@@ -10,7 +10,7 @@ namespace UnpakkDaemon.DataObjects
 		public SubRecord() {}
 
 		public SubRecord(string folder, string name, long size)
-			: this(RecordStatus.Success, folder, name, size) {}
+			: this(RecordStatus.InProgress, folder, name, size) {}
 
 		public SubRecord(RecordStatus status, string folder, string name, long size)
 			: this(DateTime.Now, status, folder, name, size) { }
@@ -38,9 +38,17 @@ namespace UnpakkDaemon.DataObjects
 			Size = subRecord.Size;
 		}
 
+		public SubRecord Succeed()
+		{
+			Status = RecordStatus.Success;
+			Time = DateTime.Now;
+			return this;
+		}
+
 		public SubRecord Fail()
 		{
 			Status = RecordStatus.Failure;
+			Time = DateTime.Now;
 			return this;
 		}
 

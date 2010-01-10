@@ -40,17 +40,11 @@
 			this.labelMainMessage = new System.Windows.Forms.Label();
 			this.progressBarMainProgress = new System.Windows.Forms.ProgressBar();
 			this.progressBarSubProgress = new System.Windows.Forms.ProgressBar();
-			this.groupBoxSubRecordDetails = new System.Windows.Forms.GroupBox();
-			this.pictureBoxSubRecord = new System.Windows.Forms.PictureBox();
-			this.labelSubRecordFileSizeValue = new System.Windows.Forms.Label();
-			this.linkLabelSubRecordOpenFile = new System.Windows.Forms.LinkLabel();
-			this.linkLabelSubRecordOpenFolder = new System.Windows.Forms.LinkLabel();
-			this.labelSubRecordFileSize = new System.Windows.Forms.Label();
-			this.textBoxSubRecordPath = new System.Windows.Forms.TextBox();
-			this.textBoxSubRecordFile = new System.Windows.Forms.TextBox();
-			this.labelSubRecordFile = new System.Windows.Forms.Label();
-			this.labelSubRecordPath = new System.Windows.Forms.Label();
 			this.groupBoxRecordDetails = new System.Windows.Forms.GroupBox();
+			this.linkLabelRecordStatus = new System.Windows.Forms.LinkLabel();
+			this.labelRecordTimeValue = new System.Windows.Forms.Label();
+			this.labelRecordTime = new System.Windows.Forms.Label();
+			this.labelRecordStatus = new System.Windows.Forms.Label();
 			this.pictureBoxRecord = new System.Windows.Forms.PictureBox();
 			this.labelRecordRARSizeValue = new System.Windows.Forms.Label();
 			this.labelRecordRARPartsValue = new System.Windows.Forms.Label();
@@ -63,6 +57,19 @@
 			this.textBoxRecordSFVFile = new System.Windows.Forms.TextBox();
 			this.labelRecordSFVFile = new System.Windows.Forms.Label();
 			this.labelRecordPath = new System.Windows.Forms.Label();
+			this.groupBoxSubRecordDetails = new System.Windows.Forms.GroupBox();
+			this.labelSubRecordTimeValue = new System.Windows.Forms.Label();
+			this.labelSubRecordTime = new System.Windows.Forms.Label();
+			this.labelSubRecordStatus = new System.Windows.Forms.Label();
+			this.pictureBoxSubRecord = new System.Windows.Forms.PictureBox();
+			this.labelSubRecordFileSizeValue = new System.Windows.Forms.Label();
+			this.linkLabelSubRecordOpenFile = new System.Windows.Forms.LinkLabel();
+			this.linkLabelSubRecordOpenFolder = new System.Windows.Forms.LinkLabel();
+			this.labelSubRecordFileSize = new System.Windows.Forms.Label();
+			this.textBoxSubRecordPath = new System.Windows.Forms.TextBox();
+			this.textBoxSubRecordFile = new System.Windows.Forms.TextBox();
+			this.labelSubRecordFile = new System.Windows.Forms.Label();
+			this.labelSubRecordPath = new System.Windows.Forms.Label();
 			this.tabPageLog = new System.Windows.Forms.TabPage();
 			this.listViewLog = new System.Windows.Forms.ListView();
 			this.columnHeaderTime = new System.Windows.Forms.ColumnHeader();
@@ -86,20 +93,13 @@
 			this.toolStripMenuItemRestore = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.labelRecordStatus = new System.Windows.Forms.Label();
-			this.labelRecordStatusValue = new System.Windows.Forms.Label();
-			this.labelSubRecordStatusValue = new System.Windows.Forms.Label();
-			this.labelSubRecordStatus = new System.Windows.Forms.Label();
-			this.labelRecordTimeValue = new System.Windows.Forms.Label();
-			this.labelRecordTime = new System.Windows.Forms.Label();
-			this.labelSubRecordTimeValue = new System.Windows.Forms.Label();
-			this.labelSubRecordTime = new System.Windows.Forms.Label();
+			this.linkLabelSubRecordStatus = new System.Windows.Forms.LinkLabel();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
-			this.groupBoxSubRecordDetails.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize) (this.pictureBoxSubRecord)).BeginInit();
 			this.groupBoxRecordDetails.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize) (this.pictureBoxRecord)).BeginInit();
+			this.groupBoxSubRecordDetails.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize) (this.pictureBoxSubRecord)).BeginInit();
 			this.tabPageLog.SuspendLayout();
 			this.tabPageSettings.SuspendLayout();
 			this.groupBoxScanSettings.SuspendLayout();
@@ -133,8 +133,8 @@
 			this.tabPageProgress.Controls.Add(this.labelMainMessage);
 			this.tabPageProgress.Controls.Add(this.progressBarMainProgress);
 			this.tabPageProgress.Controls.Add(this.progressBarSubProgress);
-			this.tabPageProgress.Controls.Add(this.groupBoxRecordDetails);
 			this.tabPageProgress.Controls.Add(this.groupBoxSubRecordDetails);
+			this.tabPageProgress.Controls.Add(this.groupBoxRecordDetails);
 			this.tabPageProgress.Location = new System.Drawing.Point(4, 22);
 			this.tabPageProgress.Name = "tabPageProgress";
 			this.tabPageProgress.Padding = new System.Windows.Forms.Padding(3);
@@ -212,11 +212,183 @@
 			this.progressBarSubProgress.Size = new System.Drawing.Size(779, 15);
 			this.progressBarSubProgress.TabIndex = 1;
 			// 
+			// groupBoxRecordDetails
+			// 
+			this.groupBoxRecordDetails.Controls.Add(this.linkLabelRecordStatus);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTimeValue);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTime);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordStatus);
+			this.groupBoxRecordDetails.Controls.Add(this.pictureBoxRecord);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARSizeValue);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARPartsValue);
+			this.groupBoxRecordDetails.Controls.Add(this.linkLabelRecordOpenFolder);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARSize);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARParts);
+			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordRARFile);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARFile);
+			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordPath);
+			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordSFVFile);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordSFVFile);
+			this.groupBoxRecordDetails.Controls.Add(this.labelRecordPath);
+			this.groupBoxRecordDetails.Location = new System.Drawing.Point(348, 81);
+			this.groupBoxRecordDetails.Name = "groupBoxRecordDetails";
+			this.groupBoxRecordDetails.Size = new System.Drawing.Size(437, 284);
+			this.groupBoxRecordDetails.TabIndex = 11;
+			this.groupBoxRecordDetails.TabStop = false;
+			this.groupBoxRecordDetails.Text = "Details";
+			this.groupBoxRecordDetails.Visible = false;
+			// 
+			// linkLabelRecordStatus
+			// 
+			this.linkLabelRecordStatus.AutoSize = true;
+			this.linkLabelRecordStatus.Location = new System.Drawing.Point(71, 178);
+			this.linkLabelRecordStatus.Name = "linkLabelRecordStatus";
+			this.linkLabelRecordStatus.Size = new System.Drawing.Size(0, 13);
+			this.linkLabelRecordStatus.TabIndex = 25;
+			this.linkLabelRecordStatus.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelRecordStatus_LinkClicked);
+			// 
+			// labelRecordTimeValue
+			// 
+			this.labelRecordTimeValue.AutoSize = true;
+			this.labelRecordTimeValue.Location = new System.Drawing.Point(71, 152);
+			this.labelRecordTimeValue.Name = "labelRecordTimeValue";
+			this.labelRecordTimeValue.Size = new System.Drawing.Size(0, 13);
+			this.labelRecordTimeValue.TabIndex = 24;
+			// 
+			// labelRecordTime
+			// 
+			this.labelRecordTime.AutoSize = true;
+			this.labelRecordTime.Location = new System.Drawing.Point(6, 152);
+			this.labelRecordTime.Name = "labelRecordTime";
+			this.labelRecordTime.Size = new System.Drawing.Size(33, 13);
+			this.labelRecordTime.TabIndex = 23;
+			this.labelRecordTime.Text = "Time:";
+			// 
+			// labelRecordStatus
+			// 
+			this.labelRecordStatus.AutoSize = true;
+			this.labelRecordStatus.Location = new System.Drawing.Point(6, 178);
+			this.labelRecordStatus.Name = "labelRecordStatus";
+			this.labelRecordStatus.Size = new System.Drawing.Size(40, 13);
+			this.labelRecordStatus.TabIndex = 21;
+			this.labelRecordStatus.Text = "Status:";
+			// 
+			// pictureBoxRecord
+			// 
+			this.pictureBoxRecord.Location = new System.Drawing.Point(9, 225);
+			this.pictureBoxRecord.Name = "pictureBoxRecord";
+			this.pictureBoxRecord.Size = new System.Drawing.Size(48, 48);
+			this.pictureBoxRecord.TabIndex = 20;
+			this.pictureBoxRecord.TabStop = false;
+			// 
+			// labelRecordRARSizeValue
+			// 
+			this.labelRecordRARSizeValue.AutoSize = true;
+			this.labelRecordRARSizeValue.Location = new System.Drawing.Point(71, 126);
+			this.labelRecordRARSizeValue.Name = "labelRecordRARSizeValue";
+			this.labelRecordRARSizeValue.Size = new System.Drawing.Size(0, 13);
+			this.labelRecordRARSizeValue.TabIndex = 19;
+			// 
+			// labelRecordRARPartsValue
+			// 
+			this.labelRecordRARPartsValue.AutoSize = true;
+			this.labelRecordRARPartsValue.Location = new System.Drawing.Point(71, 100);
+			this.labelRecordRARPartsValue.Name = "labelRecordRARPartsValue";
+			this.labelRecordRARPartsValue.Size = new System.Drawing.Size(0, 13);
+			this.labelRecordRARPartsValue.TabIndex = 18;
+			// 
+			// linkLabelRecordOpenFolder
+			// 
+			this.linkLabelRecordOpenFolder.AutoSize = true;
+			this.linkLabelRecordOpenFolder.LinkArea = new System.Windows.Forms.LinkArea(0, 11);
+			this.linkLabelRecordOpenFolder.Location = new System.Drawing.Point(366, 260);
+			this.linkLabelRecordOpenFolder.Name = "linkLabelRecordOpenFolder";
+			this.linkLabelRecordOpenFolder.Size = new System.Drawing.Size(65, 13);
+			this.linkLabelRecordOpenFolder.TabIndex = 17;
+			this.linkLabelRecordOpenFolder.TabStop = true;
+			this.linkLabelRecordOpenFolder.Text = "Open Folder";
+			this.linkLabelRecordOpenFolder.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelRecordOpenFolder_LinkClicked);
+			// 
+			// labelRecordRARSize
+			// 
+			this.labelRecordRARSize.AutoSize = true;
+			this.labelRecordRARSize.Location = new System.Drawing.Point(6, 126);
+			this.labelRecordRARSize.Name = "labelRecordRARSize";
+			this.labelRecordRARSize.Size = new System.Drawing.Size(54, 13);
+			this.labelRecordRARSize.TabIndex = 15;
+			this.labelRecordRARSize.Text = "RAR size:";
+			// 
+			// labelRecordRARParts
+			// 
+			this.labelRecordRARParts.AutoSize = true;
+			this.labelRecordRARParts.Location = new System.Drawing.Point(6, 100);
+			this.labelRecordRARParts.Name = "labelRecordRARParts";
+			this.labelRecordRARParts.Size = new System.Drawing.Size(59, 13);
+			this.labelRecordRARParts.TabIndex = 13;
+			this.labelRecordRARParts.Text = "RAR parts:";
+			// 
+			// textBoxRecordRARFile
+			// 
+			this.textBoxRecordRARFile.BackColor = System.Drawing.Color.White;
+			this.textBoxRecordRARFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.textBoxRecordRARFile.Location = new System.Drawing.Point(74, 74);
+			this.textBoxRecordRARFile.Name = "textBoxRecordRARFile";
+			this.textBoxRecordRARFile.ReadOnly = true;
+			this.textBoxRecordRARFile.Size = new System.Drawing.Size(354, 13);
+			this.textBoxRecordRARFile.TabIndex = 12;
+			// 
+			// labelRecordRARFile
+			// 
+			this.labelRecordRARFile.AutoSize = true;
+			this.labelRecordRARFile.Location = new System.Drawing.Point(6, 74);
+			this.labelRecordRARFile.Name = "labelRecordRARFile";
+			this.labelRecordRARFile.Size = new System.Drawing.Size(49, 13);
+			this.labelRecordRARFile.TabIndex = 11;
+			this.labelRecordRARFile.Text = "RAR file:";
+			// 
+			// textBoxRecordPath
+			// 
+			this.textBoxRecordPath.BackColor = System.Drawing.Color.White;
+			this.textBoxRecordPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.textBoxRecordPath.Location = new System.Drawing.Point(74, 22);
+			this.textBoxRecordPath.Name = "textBoxRecordPath";
+			this.textBoxRecordPath.ReadOnly = true;
+			this.textBoxRecordPath.Size = new System.Drawing.Size(354, 13);
+			this.textBoxRecordPath.TabIndex = 8;
+			// 
+			// textBoxRecordSFVFile
+			// 
+			this.textBoxRecordSFVFile.BackColor = System.Drawing.Color.White;
+			this.textBoxRecordSFVFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.textBoxRecordSFVFile.Location = new System.Drawing.Point(74, 48);
+			this.textBoxRecordSFVFile.Name = "textBoxRecordSFVFile";
+			this.textBoxRecordSFVFile.ReadOnly = true;
+			this.textBoxRecordSFVFile.Size = new System.Drawing.Size(354, 13);
+			this.textBoxRecordSFVFile.TabIndex = 10;
+			// 
+			// labelRecordSFVFile
+			// 
+			this.labelRecordSFVFile.AutoSize = true;
+			this.labelRecordSFVFile.Location = new System.Drawing.Point(6, 48);
+			this.labelRecordSFVFile.Name = "labelRecordSFVFile";
+			this.labelRecordSFVFile.Size = new System.Drawing.Size(46, 13);
+			this.labelRecordSFVFile.TabIndex = 7;
+			this.labelRecordSFVFile.Text = "SFV file:";
+			// 
+			// labelRecordPath
+			// 
+			this.labelRecordPath.AutoSize = true;
+			this.labelRecordPath.Location = new System.Drawing.Point(6, 22);
+			this.labelRecordPath.Name = "labelRecordPath";
+			this.labelRecordPath.Size = new System.Drawing.Size(32, 13);
+			this.labelRecordPath.TabIndex = 9;
+			this.labelRecordPath.Text = "Path:";
+			// 
 			// groupBoxSubRecordDetails
 			// 
+			this.groupBoxSubRecordDetails.Controls.Add(this.linkLabelSubRecordStatus);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordTimeValue);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordTime);
-			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordStatusValue);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordStatus);
 			this.groupBoxSubRecordDetails.Controls.Add(this.pictureBoxSubRecord);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordFileSizeValue);
@@ -234,6 +406,32 @@
 			this.groupBoxSubRecordDetails.TabStop = false;
 			this.groupBoxSubRecordDetails.Text = "Details";
 			this.groupBoxSubRecordDetails.Visible = false;
+			// 
+			// labelSubRecordTimeValue
+			// 
+			this.labelSubRecordTimeValue.AutoSize = true;
+			this.labelSubRecordTimeValue.Location = new System.Drawing.Point(71, 100);
+			this.labelSubRecordTimeValue.Name = "labelSubRecordTimeValue";
+			this.labelSubRecordTimeValue.Size = new System.Drawing.Size(0, 13);
+			this.labelSubRecordTimeValue.TabIndex = 26;
+			// 
+			// labelSubRecordTime
+			// 
+			this.labelSubRecordTime.AutoSize = true;
+			this.labelSubRecordTime.Location = new System.Drawing.Point(6, 100);
+			this.labelSubRecordTime.Name = "labelSubRecordTime";
+			this.labelSubRecordTime.Size = new System.Drawing.Size(33, 13);
+			this.labelSubRecordTime.TabIndex = 25;
+			this.labelSubRecordTime.Text = "Time:";
+			// 
+			// labelSubRecordStatus
+			// 
+			this.labelSubRecordStatus.AutoSize = true;
+			this.labelSubRecordStatus.Location = new System.Drawing.Point(6, 126);
+			this.labelSubRecordStatus.Name = "labelSubRecordStatus";
+			this.labelSubRecordStatus.Size = new System.Drawing.Size(40, 13);
+			this.labelSubRecordStatus.TabIndex = 23;
+			this.labelSubRecordStatus.Text = "Status:";
 			// 
 			// pictureBoxSubRecord
 			// 
@@ -319,142 +517,6 @@
 			this.labelSubRecordPath.Size = new System.Drawing.Size(32, 13);
 			this.labelSubRecordPath.TabIndex = 9;
 			this.labelSubRecordPath.Text = "Path:";
-			// 
-			// groupBoxRecordDetails
-			// 
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTimeValue);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTime);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordStatusValue);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordStatus);
-			this.groupBoxRecordDetails.Controls.Add(this.pictureBoxRecord);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARSizeValue);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARPartsValue);
-			this.groupBoxRecordDetails.Controls.Add(this.linkLabelRecordOpenFolder);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARSize);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARParts);
-			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordRARFile);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordRARFile);
-			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordPath);
-			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordSFVFile);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordSFVFile);
-			this.groupBoxRecordDetails.Controls.Add(this.labelRecordPath);
-			this.groupBoxRecordDetails.Location = new System.Drawing.Point(348, 81);
-			this.groupBoxRecordDetails.Name = "groupBoxRecordDetails";
-			this.groupBoxRecordDetails.Size = new System.Drawing.Size(437, 284);
-			this.groupBoxRecordDetails.TabIndex = 11;
-			this.groupBoxRecordDetails.TabStop = false;
-			this.groupBoxRecordDetails.Text = "Details";
-			this.groupBoxRecordDetails.Visible = false;
-			// 
-			// pictureBoxRecord
-			// 
-			this.pictureBoxRecord.Location = new System.Drawing.Point(9, 225);
-			this.pictureBoxRecord.Name = "pictureBoxRecord";
-			this.pictureBoxRecord.Size = new System.Drawing.Size(48, 48);
-			this.pictureBoxRecord.TabIndex = 20;
-			this.pictureBoxRecord.TabStop = false;
-			// 
-			// labelRecordRARSizeValue
-			// 
-			this.labelRecordRARSizeValue.AutoSize = true;
-			this.labelRecordRARSizeValue.Location = new System.Drawing.Point(71, 126);
-			this.labelRecordRARSizeValue.Name = "labelRecordRARSizeValue";
-			this.labelRecordRARSizeValue.Size = new System.Drawing.Size(0, 13);
-			this.labelRecordRARSizeValue.TabIndex = 19;
-			// 
-			// labelRecordRARPartsValue
-			// 
-			this.labelRecordRARPartsValue.AutoSize = true;
-			this.labelRecordRARPartsValue.Location = new System.Drawing.Point(71, 100);
-			this.labelRecordRARPartsValue.Name = "labelRecordRARPartsValue";
-			this.labelRecordRARPartsValue.Size = new System.Drawing.Size(0, 13);
-			this.labelRecordRARPartsValue.TabIndex = 18;
-			// 
-			// linkLabelRecordOpenFolder
-			// 
-			this.linkLabelRecordOpenFolder.AutoSize = true;
-			this.linkLabelRecordOpenFolder.Location = new System.Drawing.Point(366, 260);
-			this.linkLabelRecordOpenFolder.Name = "linkLabelRecordOpenFolder";
-			this.linkLabelRecordOpenFolder.Size = new System.Drawing.Size(65, 13);
-			this.linkLabelRecordOpenFolder.TabIndex = 17;
-			this.linkLabelRecordOpenFolder.TabStop = true;
-			this.linkLabelRecordOpenFolder.Text = "Open Folder";
-			this.linkLabelRecordOpenFolder.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelRecordOpenFolder_LinkClicked);
-			// 
-			// labelRecordRARSize
-			// 
-			this.labelRecordRARSize.AutoSize = true;
-			this.labelRecordRARSize.Location = new System.Drawing.Point(6, 126);
-			this.labelRecordRARSize.Name = "labelRecordRARSize";
-			this.labelRecordRARSize.Size = new System.Drawing.Size(54, 13);
-			this.labelRecordRARSize.TabIndex = 15;
-			this.labelRecordRARSize.Text = "RAR size:";
-			// 
-			// labelRecordRARParts
-			// 
-			this.labelRecordRARParts.AutoSize = true;
-			this.labelRecordRARParts.Location = new System.Drawing.Point(6, 100);
-			this.labelRecordRARParts.Name = "labelRecordRARParts";
-			this.labelRecordRARParts.Size = new System.Drawing.Size(59, 13);
-			this.labelRecordRARParts.TabIndex = 13;
-			this.labelRecordRARParts.Text = "RAR parts:";
-			// 
-			// textBoxRecordRARFile
-			// 
-			this.textBoxRecordRARFile.BackColor = System.Drawing.Color.White;
-			this.textBoxRecordRARFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.textBoxRecordRARFile.Location = new System.Drawing.Point(74, 74);
-			this.textBoxRecordRARFile.Name = "textBoxRecordRARFile";
-			this.textBoxRecordRARFile.ReadOnly = true;
-			this.textBoxRecordRARFile.Size = new System.Drawing.Size(354, 13);
-			this.textBoxRecordRARFile.TabIndex = 12;
-			// 
-			// labelRecordRARFile
-			// 
-			this.labelRecordRARFile.AutoSize = true;
-			this.labelRecordRARFile.Location = new System.Drawing.Point(6, 74);
-			this.labelRecordRARFile.Name = "labelRecordRARFile";
-			this.labelRecordRARFile.Size = new System.Drawing.Size(49, 13);
-			this.labelRecordRARFile.TabIndex = 11;
-			this.labelRecordRARFile.Text = "RAR file:";
-			// 
-			// textBoxRecordPath
-			// 
-			this.textBoxRecordPath.BackColor = System.Drawing.Color.White;
-			this.textBoxRecordPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.textBoxRecordPath.Location = new System.Drawing.Point(74, 22);
-			this.textBoxRecordPath.Name = "textBoxRecordPath";
-			this.textBoxRecordPath.ReadOnly = true;
-			this.textBoxRecordPath.Size = new System.Drawing.Size(354, 13);
-			this.textBoxRecordPath.TabIndex = 8;
-			// 
-			// textBoxRecordSFVFile
-			// 
-			this.textBoxRecordSFVFile.BackColor = System.Drawing.Color.White;
-			this.textBoxRecordSFVFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.textBoxRecordSFVFile.Location = new System.Drawing.Point(74, 48);
-			this.textBoxRecordSFVFile.Name = "textBoxRecordSFVFile";
-			this.textBoxRecordSFVFile.ReadOnly = true;
-			this.textBoxRecordSFVFile.Size = new System.Drawing.Size(354, 13);
-			this.textBoxRecordSFVFile.TabIndex = 10;
-			// 
-			// labelRecordSFVFile
-			// 
-			this.labelRecordSFVFile.AutoSize = true;
-			this.labelRecordSFVFile.Location = new System.Drawing.Point(6, 48);
-			this.labelRecordSFVFile.Name = "labelRecordSFVFile";
-			this.labelRecordSFVFile.Size = new System.Drawing.Size(46, 13);
-			this.labelRecordSFVFile.TabIndex = 7;
-			this.labelRecordSFVFile.Text = "SFV file:";
-			// 
-			// labelRecordPath
-			// 
-			this.labelRecordPath.AutoSize = true;
-			this.labelRecordPath.Location = new System.Drawing.Point(6, 22);
-			this.labelRecordPath.Name = "labelRecordPath";
-			this.labelRecordPath.Size = new System.Drawing.Size(32, 13);
-			this.labelRecordPath.TabIndex = 9;
-			this.labelRecordPath.Text = "Path:";
 			// 
 			// tabPageLog
 			// 
@@ -679,73 +741,14 @@
 			this.toolTip.InitialDelay = 100;
 			this.toolTip.ReshowDelay = 20;
 			// 
-			// labelRecordStatus
+			// linkLabelSubRecordStatus
 			// 
-			this.labelRecordStatus.AutoSize = true;
-			this.labelRecordStatus.Location = new System.Drawing.Point(6, 178);
-			this.labelRecordStatus.Name = "labelRecordStatus";
-			this.labelRecordStatus.Size = new System.Drawing.Size(40, 13);
-			this.labelRecordStatus.TabIndex = 21;
-			this.labelRecordStatus.Text = "Status:";
-			// 
-			// labelRecordStatusValue
-			// 
-			this.labelRecordStatusValue.AutoSize = true;
-			this.labelRecordStatusValue.Location = new System.Drawing.Point(71, 178);
-			this.labelRecordStatusValue.Name = "labelRecordStatusValue";
-			this.labelRecordStatusValue.Size = new System.Drawing.Size(0, 13);
-			this.labelRecordStatusValue.TabIndex = 22;
-			// 
-			// labelSubRecordStatusValue
-			// 
-			this.labelSubRecordStatusValue.AutoSize = true;
-			this.labelSubRecordStatusValue.Location = new System.Drawing.Point(71, 126);
-			this.labelSubRecordStatusValue.Name = "labelSubRecordStatusValue";
-			this.labelSubRecordStatusValue.Size = new System.Drawing.Size(0, 13);
-			this.labelSubRecordStatusValue.TabIndex = 24;
-			// 
-			// labelSubRecordStatus
-			// 
-			this.labelSubRecordStatus.AutoSize = true;
-			this.labelSubRecordStatus.Location = new System.Drawing.Point(6, 126);
-			this.labelSubRecordStatus.Name = "labelSubRecordStatus";
-			this.labelSubRecordStatus.Size = new System.Drawing.Size(40, 13);
-			this.labelSubRecordStatus.TabIndex = 23;
-			this.labelSubRecordStatus.Text = "Status:";
-			// 
-			// labelRecordTimeValue
-			// 
-			this.labelRecordTimeValue.AutoSize = true;
-			this.labelRecordTimeValue.Location = new System.Drawing.Point(71, 152);
-			this.labelRecordTimeValue.Name = "labelRecordTimeValue";
-			this.labelRecordTimeValue.Size = new System.Drawing.Size(0, 13);
-			this.labelRecordTimeValue.TabIndex = 24;
-			// 
-			// labelRecordTime
-			// 
-			this.labelRecordTime.AutoSize = true;
-			this.labelRecordTime.Location = new System.Drawing.Point(6, 152);
-			this.labelRecordTime.Name = "labelRecordTime";
-			this.labelRecordTime.Size = new System.Drawing.Size(33, 13);
-			this.labelRecordTime.TabIndex = 23;
-			this.labelRecordTime.Text = "Time:";
-			// 
-			// labelSubRecordTimeValue
-			// 
-			this.labelSubRecordTimeValue.AutoSize = true;
-			this.labelSubRecordTimeValue.Location = new System.Drawing.Point(71, 100);
-			this.labelSubRecordTimeValue.Name = "labelSubRecordTimeValue";
-			this.labelSubRecordTimeValue.Size = new System.Drawing.Size(0, 13);
-			this.labelSubRecordTimeValue.TabIndex = 26;
-			// 
-			// labelSubRecordTime
-			// 
-			this.labelSubRecordTime.AutoSize = true;
-			this.labelSubRecordTime.Location = new System.Drawing.Point(6, 100);
-			this.labelSubRecordTime.Name = "labelSubRecordTime";
-			this.labelSubRecordTime.Size = new System.Drawing.Size(33, 13);
-			this.labelSubRecordTime.TabIndex = 25;
-			this.labelSubRecordTime.Text = "Time:";
+			this.linkLabelSubRecordStatus.AutoSize = true;
+			this.linkLabelSubRecordStatus.Location = new System.Drawing.Point(71, 126);
+			this.linkLabelSubRecordStatus.Name = "linkLabelSubRecordStatus";
+			this.linkLabelSubRecordStatus.Size = new System.Drawing.Size(0, 13);
+			this.linkLabelSubRecordStatus.TabIndex = 27;
+			this.linkLabelSubRecordStatus.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelSubRecordStatus_LinkClicked);
 			// 
 			// MainForm
 			// 
@@ -765,12 +768,12 @@
 			this.tabControl.ResumeLayout(false);
 			this.tabPageProgress.ResumeLayout(false);
 			this.tabPageProgress.PerformLayout();
-			this.groupBoxSubRecordDetails.ResumeLayout(false);
-			this.groupBoxSubRecordDetails.PerformLayout();
-			((System.ComponentModel.ISupportInitialize) (this.pictureBoxSubRecord)).EndInit();
 			this.groupBoxRecordDetails.ResumeLayout(false);
 			this.groupBoxRecordDetails.PerformLayout();
 			((System.ComponentModel.ISupportInitialize) (this.pictureBoxRecord)).EndInit();
+			this.groupBoxSubRecordDetails.ResumeLayout(false);
+			this.groupBoxSubRecordDetails.PerformLayout();
+			((System.ComponentModel.ISupportInitialize) (this.pictureBoxSubRecord)).EndInit();
 			this.tabPageLog.ResumeLayout(false);
 			this.tabPageSettings.ResumeLayout(false);
 			this.groupBoxScanSettings.ResumeLayout(false);
@@ -839,13 +842,13 @@
 		private System.Windows.Forms.PictureBox pictureBoxSubRecord;
 		private System.Windows.Forms.PictureBox pictureBoxRecord;
 		private System.Windows.Forms.ToolTip toolTip;
-		private System.Windows.Forms.Label labelSubRecordStatusValue;
 		private System.Windows.Forms.Label labelSubRecordStatus;
-		private System.Windows.Forms.Label labelRecordStatusValue;
 		private System.Windows.Forms.Label labelRecordStatus;
 		private System.Windows.Forms.Label labelRecordTimeValue;
 		private System.Windows.Forms.Label labelRecordTime;
 		private System.Windows.Forms.Label labelSubRecordTimeValue;
 		private System.Windows.Forms.Label labelSubRecordTime;
+		private System.Windows.Forms.LinkLabel linkLabelRecordStatus;
+		private System.Windows.Forms.LinkLabel linkLabelSubRecordStatus;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
+using UnpakkDaemon.EventArguments;
 
 namespace UnpakkDaemon.SimpleFileVerification
 {
@@ -12,11 +13,21 @@ namespace UnpakkDaemon.SimpleFileVerification
 		private readonly UInt32 _seed;
 		private readonly UInt32[] _table;
 		private static UInt32[] _defaultTable;
+		private readonly string _fileName;
+		private readonly long _totalBytes;
+		private long _processedBytes;
 
-		public CRC32()
+		public event EventHandler<ProgressEventArgs> Progress;
+
+		public CRC32() : this(null, 0) {}
+
+		public CRC32(string fileName, long totalBytes)
 		{
 			_table = InitializeTable(DEFAULT_POLYNOMIAL);
 			_seed = DEFAULT_SEED;
+			_fileName = fileName;
+			_totalBytes = totalBytes;
+			_processedBytes = 0;
 			Initialize();
 		}
 
@@ -24,6 +35,9 @@ namespace UnpakkDaemon.SimpleFileVerification
 		{
 			_table = InitializeTable(polynomial);
 			_seed = seed;
+			_fileName = null;
+			_totalBytes = 0;
+			_processedBytes = 0;
 			Initialize();
 		}
 
@@ -37,6 +51,12 @@ namespace UnpakkDaemon.SimpleFileVerification
 		protected override void HashCore(byte[] buffer, int start, int length)
 		{
 			_hash = CalculateHash(_table, _hash, buffer, start, length);
+			if (_totalBytes > 0) // progress desired?
+			{
+				_processedBytes += (length - start);
+				if (_processedBytes % 10485760 == 0) // raise event once per 10 MB
+					RaiseProgressEvent(100 * (double) _processedBytes / _totalBytes, _processedBytes, _totalBytes);
+			}
 		}
 
 		protected override byte[] HashFinal()
@@ -45,6 +65,18 @@ namespace UnpakkDaemon.SimpleFileVerification
 			HashValue = hashBuffer;
 			HashValueStr = ToString(~_hash);
 			return hashBuffer;
+		}
+
+		#endregion
+
+		#region Event raisers
+
+		private void RaiseProgressEvent(double percent, long current, long max)
+		{
+			if (Progress != null)
+			{
+				Progress(null, new ProgressEventArgs(_fileName, percent, current, max));
+			}
 		}
 
 		#endregion
