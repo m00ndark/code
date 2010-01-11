@@ -44,6 +44,7 @@ namespace UnpakkDaemonTray.Forms
 // ReSharper restore AssignNullToNotNullAttribute
 			pictureBoxRecord.Image = _record;
 			pictureBoxSubRecord.Image = _subRecord;
+			FileLogger.LogEntryRead += FileLogger_LogEntryRead;
 			StatusChangedHandler statusChangedHandler = new StatusChangedHandler();
 			statusChangedHandler.ProgressChanged += StatusChangedHandler_ProgressChanged;
 			statusChangedHandler.SubProgressChanged += StatusChangedHandler_SubProgressChanged;
@@ -52,7 +53,12 @@ namespace UnpakkDaemonTray.Forms
 			statusChangedHandler.LogEntryAdded += StatusChangedHandler_LogEntryAdded;
 			ObjectPool.StatusServiceHandler = new StatusServiceHandler(statusChangedHandler);
 			ObjectPool.StatusServiceHandler.Start();
+			ObjectPool.LogFilterDaysBack = 0;
+			ObjectPool.LogFilterLeastLogType = LogType.Flow;
+			SetupLogFilter();
+			EngineSettings.Load();
 			LoadRecords();
+			LoadLog();
 		}
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -165,6 +171,28 @@ namespace UnpakkDaemonTray.Forms
 
 		#endregion
 
+		#region Log tab
+
+		private void comboBoxLogFilterDaysBack_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (comboBoxLogFilterDaysBack.SelectedIndex > -1)
+			{
+				ObjectPool.LogFilterDaysBack = comboBoxLogFilterDaysBack.SelectedIndex;
+				LoadLog();
+			}
+		}
+
+		private void comboBoxLogFilterLeastLogType_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (comboBoxLogFilterLeastLogType.SelectedIndex > -1)
+			{
+				ObjectPool.LogFilterLeastLogType = (LogType) Enum.Parse(typeof(LogType), (string) comboBoxLogFilterLeastLogType.SelectedItem);
+				LoadLog();
+			}
+		}
+
+		#endregion
+
 		#region Settings tab
 
 		private void buttonBrowseApplicationDataFolder_Click(object sender, EventArgs e)
@@ -256,11 +284,19 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
-				ListViewItem item = listViewLog.Items.Add(e.LogTime.ToString("yyyy-MM-dd HH:mm:ss"));
-				item.SubItems.Add(e.LogType.ToString());
-				item.SubItems.Add(e.LogText);
-				item.Tag = e.LogTime;
-				item.EnsureVisible();
+				AddLogEntry(e.LogTime, e.LogType, e.LogText);
+			}
+		}
+
+		private void FileLogger_LogEntryRead(object sender, LogEntryEventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new EventHandler<LogEntryEventArgs>(FileLogger_LogEntryRead), new object[] { sender, e });
+			}
+			else
+			{
+				AddLogEntry(e.LogTime, e.LogType, e.LogText);
 			}
 		}
 
@@ -348,9 +384,30 @@ namespace UnpakkDaemonTray.Forms
 			buttonRemoveRootPath.Enabled = (enable && listViewRootPath.SelectedItems.Count > 0);
 		}
 
+		private void SetupLogFilter()
+		{
+			comboBoxLogFilterLeastLogType.Items.Clear();
+			foreach (string logType in Enum.GetNames(typeof(LogType)))
+			{
+				int index = comboBoxLogFilterLeastLogType.Items.Add(logType);
+				if (logType == ObjectPool.LogFilterLeastLogType.ToString())
+					comboBoxLogFilterLeastLogType.SelectedIndex = index;
+			}
+			comboBoxLogFilterDaysBack.Items.Clear();
+			for (int i = 0; i <= 7; i++)
+			{
+				int index;
+				if (i == 0)
+					index = comboBoxLogFilterDaysBack.Items.Add("Today");
+				else
+					index = comboBoxLogFilterDaysBack.Items.Add(i + " day" + (i > 1 ? "s" : string.Empty) + " back");
+				if (index == ObjectPool.LogFilterDaysBack)
+					comboBoxLogFilterDaysBack.SelectedIndex = index;
+			}
+		}
+
 		private void LoadRecords()
 		{
-			EngineSettings.Load();
 			FileRecorder fileRecorder = new FileRecorder();
 			foreach (Record record in fileRecorder.RecordList)
 			{
@@ -360,6 +417,12 @@ namespace UnpakkDaemonTray.Forms
 					AddSubRecord(record.ID, subRecord, false);
 				}
 			}
+		}
+
+		private void LoadLog()
+		{
+			listViewLog.Items.Clear();
+			new FileLogger().Load(ObjectPool.LogFilterDaysBack, ObjectPool.LogFilterLeastLogType);
 		}
 
 		private void AddRecord(Record record, bool update)
@@ -458,16 +521,28 @@ namespace UnpakkDaemonTray.Forms
 			}
 		}
 
+		private void AddLogEntry(DateTime logTime, LogType logType, string logText)
+		{
+			ListViewItem item = listViewLog.Items.Add(logTime.ToString("yyyy-MM-dd HH:mm:ss"));
+			item.SubItems.Add(logType.ToString());
+			item.SubItems.Add(logText);
+			item.Tag = logTime;
+			item.EnsureVisible();
+		}
+
 		private void SelectLogEntry(DateTime dateTime)
 		{
 			tabControl.SelectedIndex = 1;
 			if (listViewLog.Items.Count > 0)
 			{
 				listViewLog.SelectedItems.Clear();
-				ListViewItem itemAfter = listViewLog.Items.Cast<ListViewItem>().FirstOrDefault(x => ((DateTime) x.Tag > dateTime));
-				ListViewItem item = listViewLog.Items[Math.Max(0, itemAfter.Index - 1)];
-				item.Selected = true;
-				item.EnsureVisible();
+				ListViewItem itemAfter = listViewLog.Items.Cast<ListViewItem>().FirstOrDefault(x => ((DateTime) x.Tag > dateTime && (DateTime) x.Tag < dateTime.AddSeconds(10)));
+				if (itemAfter != null)
+				{
+					ListViewItem item = listViewLog.Items[Math.Max(0, itemAfter.Index - 1)];
+					item.Selected = true;
+					item.EnsureVisible();
+				}
 			}
 		}
 

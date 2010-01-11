@@ -110,7 +110,7 @@ namespace UnpakkDaemon.DataObjects
 		public void WriteXml(XmlWriter writer)
 		{
 			writer.WriteStartElement("SubRecord");
-			writer.WriteAttributeString("Time", Time.ToString());
+			writer.WriteAttributeString("Time", Time.ToString("yyyy-MM-dd HH:mm:ss.fff"));
 			writer.WriteAttributeString("Status", Status.ToString());
 			writer.WriteAttributeString("Folder", Folder);
 			writer.WriteAttributeString("Name", Name);

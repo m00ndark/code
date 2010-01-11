@@ -1,4 +1,5 @@
-﻿using UnpakkDaemon.Service.Client;
+﻿using UnpakkDaemon;
+using UnpakkDaemon.Service.Client;
 
 namespace UnpakkDaemonTray
 {
@@ -10,5 +11,9 @@ namespace UnpakkDaemonTray
 		}
 
 		public static StatusServiceHandler StatusServiceHandler { get; set; }
+
+		public static int LogFilterDaysBack { get; set; }
+
+		public static LogType LogFilterLeastLogType { get; set; }
 	}
 }

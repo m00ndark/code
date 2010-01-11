@@ -33,6 +33,11 @@ namespace UnpakkDaemon.DataAccess
 			return filePaths.Sum(filePath => new FileInfo(filePath).Length);
 		}
 
+		public static string[] FileReadLines(string filePath)
+		{
+			return File.ReadAllLines(filePath);
+		}
+
 		public static void FileWriteLine(string filePath, string text)
 		{
 			using (StreamWriter writer = new StreamWriter(filePath, true))

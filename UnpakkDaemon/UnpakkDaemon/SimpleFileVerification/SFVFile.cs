@@ -33,7 +33,7 @@ namespace UnpakkDaemon.SimpleFileVerification
 		{
 			if (Progress != null)
 			{
-				Progress(null, new ProgressEventArgs(percent, current, max));
+				Progress(this, new ProgressEventArgs(percent, current, max));
 			}
 		}
 

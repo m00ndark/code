@@ -370,7 +370,6 @@ namespace UnpakkDaemon
 			try
 			{
 				unrar.Open(Unrar.OpenMode.Extract);
-				int a = 0;
 				while (success && unrar.ReadHeader())
 				{
 					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName + ", size=" + unrar.CurrentFile.UnpackedSize);
@@ -378,7 +377,7 @@ namespace UnpakkDaemon
 					AddSubRecord(record.ID, subRecord);
 					unrar.Extract();
 					success = ValidateExtractedFile(Path.Combine(unrar.DestinationPath, unrar.CurrentFile.FileName), 
-						unrar.CurrentFile.UnpackedSize, GetRARFileCRC(_lastRARVolume, unrar.CurrentFile.FileName + (a++ > 0 ? "x" : "")));
+						unrar.CurrentFile.UnpackedSize, GetRARFileCRC(_lastRARVolume, unrar.CurrentFile.FileName));
 					if (!success)
 						WriteLogEntry(LogType.Warning, "Validation FAILED, aborting extraction");
 					AddSubRecord(record.ID, (success ? subRecord.Succeed() : subRecord.Fail()));

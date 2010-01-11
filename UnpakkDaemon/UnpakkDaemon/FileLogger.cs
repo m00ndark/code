@@ -8,10 +8,10 @@ namespace UnpakkDaemon
 {
 	public enum LogType
 	{
-		Debug,
-		Flow,
-		Warning,
-		Error
+		Debug = 0,
+		Flow = 1,
+		Warning = 2,
+		Error = 3
 	}
 
 	public class FileLogger
@@ -19,15 +19,20 @@ namespace UnpakkDaemon
 		private const string DEFAULT_LOG_FOLDER = "Logs";
 		private const string DEFAULT_LOG_NAME = "unpakkdaemon_%date%.log";
 
-		private int _logTypeIndentationDepth;
+		private static int _logTypeIndentationDepth;
 
 		public event EventHandler<LogEntryEventArgs> LogEntryWritten;
+		public static event EventHandler<LogEntryEventArgs> LogEntryRead;
+
+		static FileLogger()
+		{
+			SetupLogTypeIndentationDepth();
+		}
 
 		public FileLogger()
 		{
 			LogFolder = DEFAULT_LOG_FOLDER;
 			LogName = DEFAULT_LOG_NAME;
-			SetupLogTypeIndentationDepth();
 		}
 
 		#region Properties
@@ -55,12 +60,51 @@ namespace UnpakkDaemon
 				LogEntryWritten(this, new LogEntryEventArgs(logTime, logType, logText));
 		}
 
+		private static void RaiseLogEntryReadEvent(DateTime logTime, LogType logType, string logText)
+		{
+			if (LogEntryRead != null)
+				LogEntryRead(null, new LogEntryEventArgs(logTime, logType, logText));
+		}
+
 		#endregion
 
-		private void SetupLogTypeIndentationDepth()
+		private static void SetupLogTypeIndentationDepth()
 		{
 			string[] logTypeNames = Enum.GetNames(typeof(LogType));
 			_logTypeIndentationDepth = logTypeNames.Max(logTypeName => logTypeName.Length);
+		}
+
+		public void Load(int daysBack, LogType leastLogType)
+		{
+			try
+			{
+				for (int i = daysBack; i >= 0; i--)
+				{
+					string logPathName = Path.Combine(LogPath, LogName.Replace("%date%", DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd")));
+					if (FileHandler.FileExists(logPathName))
+					{
+						string[] logLines = FileHandler.FileReadLines(logPathName);
+						foreach (string logLine in logLines)
+						{
+							try
+							{
+								string[] split = logLine.Split(">".ToCharArray(), 2);
+								DateTime logTime = DateTime.Parse(split[0].Trim());
+								split = split[1].Trim().Split(" ".ToCharArray(), 2);
+								LogType logType = (LogType) Enum.Parse(typeof(LogType), split[0].Trim());
+								string logText = split[1].Trim();
+								if (logType >= leastLogType)
+									RaiseLogEntryReadEvent(logTime, logType, logText);
+							}
+							catch { /* ignore.. could be e.g. exception stack trace line */ }
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				RaiseLogEntryReadEvent(DateTime.Now, LogType.Error, "Failed to read log: " + ex.Message);
+			}
 		}
 
 		public void WriteLogLine(string logText, Exception exception)
