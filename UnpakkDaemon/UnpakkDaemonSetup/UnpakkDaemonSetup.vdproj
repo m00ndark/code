@@ -33,6 +33,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_E0EB61D0B22D840CD82D3BFB0DDB50BC"
+        "OwnerKey" = "8:_82D33646395D4AEB8C84B708CF04E71E"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_82D33646395D4AEB8C84B708CF04E71E"
         "MsmSig" = "8:_UNDEFINED"
@@ -67,6 +73,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -83,65 +97,73 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
     {
         "CustomAction"
         {
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_27AF747A6DCA432686C3EC117147AFE4"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_2E32FE0D58CB4424ADCBD79C847D6318"
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:"
+            "Object" = "8:_5AA94BAD267A487DA96668912A8133DC"
             "FileType" = "3:2"
             "InstallAction" = "3:2"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_0EE9F6CB_47C2_4DB6_B881_FF2522061224"
+            "Identifier" = "8:_0E584ACE_92E9_445F_B65B_13006B754DE9"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_749E7F9F880048DF86AD3C5104EE5521"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_5B642D89F49F4313B196092AB43924F3"
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:"
+            "Object" = "8:_5AA94BAD267A487DA96668912A8133DC"
             "FileType" = "3:2"
             "InstallAction" = "3:3"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_852F7644_C020_4EA2_A19E_BBF09BC5BBCD"
+            "Identifier" = "8:_8245D1D7_1327_4E11_A12C_99F406E40226"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_EBC1C9DE6065483B93977675E99562E2"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_78DB01BB317E447A946AFD476858B9D3"
             {
             "Name" = "8:Primary output from UnpakkDaemonService (Active)"
             "Condition" = "8:"
-            "Object" = "8:"
-            "FileType" = "3:2"
-            "InstallAction" = "3:4"
-            "Arguments" = "8:"
-            "EntryPoint" = "8:"
-            "Sequence" = "3:1"
-            "Identifier" = "8:_5433C96E_11CB_40BF_87FA_C114E7A9096C"
-            "InstallerClass" = "11:TRUE"
-            "CustomActionData" = "8:"
-            }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_FFA6BF542B07443CA1F511A90F3885F2"
-            {
-            "Name" = "8:Primary output from UnpakkDaemonService (Active)"
-            "Condition" = "8:"
-            "Object" = "8:"
+            "Object" = "8:_5AA94BAD267A487DA96668912A8133DC"
             "FileType" = "3:2"
             "InstallAction" = "3:1"
             "Arguments" = "8:"
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
-            "Identifier" = "8:_6E4BD248_3C96_4FE0_B8B6_73E7BD089F3A"
+            "Identifier" = "8:_DB02D2D4_4273_4D55_84AE_6C0A0130BE31"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_B7AF79A8FEDE458199A9A43F217C7DFA"
+            {
+            "Name" = "8:Primary output from UnpakkDaemonService (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_5AA94BAD267A487DA96668912A8133DC"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_3F90BD29_9F3B_4B5F_AB0B_3B5882654552"
             "InstallerClass" = "11:TRUE"
             "CustomActionData" = "8:"
             }
@@ -172,7 +194,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:UnpakkDaemon, Version=1.0.3609.1, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:UnpakkDaemon, Version=1.0.3664.40443, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_E0EB61D0B22D840CD82D3BFB0DDB50BC"
