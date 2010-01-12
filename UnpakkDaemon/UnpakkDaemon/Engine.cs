@@ -321,7 +321,7 @@ namespace UnpakkDaemon
 						AddRecord(record.Succeed());
 						if (ExtractRARContent(rarFilePath, record))
 						{
-							//DeleteFiles(sfvFile);
+							DeleteFiles(sfvFile);
 						}
 					}
 					else
