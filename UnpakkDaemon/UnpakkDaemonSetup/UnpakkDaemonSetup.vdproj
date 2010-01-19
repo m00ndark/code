@@ -220,7 +220,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:UnpakkDaemon, Version=1.0.3672.207, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:UnpakkDaemon, Version=1.0.3672.658, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_E0EB61D0B22D840CD82D3BFB0DDB50BC"
@@ -304,7 +304,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Unpakk Daemon"
         "ProductCode" = "8:{779A9B8B-9E47-4E0C-A7EF-D7DA04754EE9}"
-        "PackageCode" = "8:{D2E4818C-8063-45AF-B3CB-E126A032845F}"
+        "PackageCode" = "8:{63AF10EB-F04C-4323-BDE4-3A61B87981FA}"
         "UpgradeCode" = "8:{B649ED8B-A979-481E-8590-DA772EA5032C}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -429,12 +429,12 @@
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
+            "IconIndex" = "3:32512"
             "Transitive" = "11:FALSE"
             "Target" = "8:_82D33646395D4AEB8C84B708CF04E71E"
             "Folder" = "8:_7A6157219B0047B9BDB2387D7D88CECA"
             "WorkingFolder" = "8:_581E9DA341F14F61A5A7C88467901A41"
-            "Icon" = "8:"
+            "Icon" = "8:_82D33646395D4AEB8C84B708CF04E71E"
             "Feature" = "8:"
             }
         }
