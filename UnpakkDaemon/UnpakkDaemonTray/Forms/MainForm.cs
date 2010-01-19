@@ -663,11 +663,6 @@ namespace UnpakkDaemonTray.Forms
 			toolStripMenuItemService.Image = (serviceIsStoppedOrNotRunning ? _statusStopped : (engineIsPaused ? _statusPaused : _statusRunning));
 			toolStripMenuItemServiceStart.Enabled = (serviceIsStopped || serviceIsRunning && engineIsPaused);
 			toolStripMenuItemServicePause.Enabled = (serviceIsRunning && !engineIsPaused);
-			//bool serviceIsRunning = ServiceHandler.ServiceIsRunning();
-			//bool engineIsPaused = (serviceIsRunning ? ObjectPool.StatusServiceHandler.EngineIsPaused() : true);
-			//toolStripMenuItemService.Image = (serviceIsRunning ? (engineIsPaused ? _statusPaused : _statusRunning) : _statusStopped);
-			//toolStripMenuItemServiceStart.Enabled = !serviceIsRunning || engineIsPaused;
-			//toolStripMenuItemServicePause.Enabled = serviceIsRunning && !engineIsPaused;
 		}
 
 		private static string MakeFileSize(long bytes)
