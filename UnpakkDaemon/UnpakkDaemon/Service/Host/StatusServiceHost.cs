@@ -37,6 +37,9 @@ namespace UnpakkDaemon.Service.Host
 				_serviceHost = null;
 				_engine.Progress -= _statusService.StatusProvider_Progress;
 				_engine.SubProgress -= _statusService.StatusProvider_SubProgress;
+				_engine.Record -= _statusService.StatusProvider_Record;
+				_engine.SubRecord -= _statusService.StatusProvider_SubRecord;
+				_engine.Log -= _statusService.StatusProvider_Log;
 				_statusService = null;
 			}
 		}
