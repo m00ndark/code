@@ -1,4 +1,6 @@
-﻿namespace UnpakkDaemonService
+﻿using UnpakkDaemon.DataAccess;
+
+namespace UnpakkDaemonService
 {
 	partial class UnpakkDaemonServiceInstaller
 	{
@@ -40,7 +42,7 @@
 			// serviceInstaller
 			// 
 			this.serviceInstaller.DisplayName = "Unpakk Daemon Service";
-			this.serviceInstaller.ServiceName = "UnpakkDaemonService";
+			this.serviceInstaller.ServiceName = ServiceHandler.APPLICATION_SERVICE_NAME;
 			this.serviceInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
 			// 
 			// UnpakkDaemonServiceInstaller

@@ -52,5 +52,22 @@ namespace UnpakkDaemon.Service.Client
 				Thread.Sleep(1000);
 			}
 		}
+
+		public bool EngineIsPaused()
+		{
+			return (_shutdownInitiated || _statusServiceClient.State != CommunicationState.Opened ? true : _statusServiceClient.IsPaused());
+		}
+
+		public void ResumeEngine()
+		{
+			if (!_shutdownInitiated && _statusServiceClient.State == CommunicationState.Opened)
+				_statusServiceClient.Resume();
+		}
+
+		public void PauseEngine()
+		{
+			if (!_shutdownInitiated && _statusServiceClient.State == CommunicationState.Opened)
+				_statusServiceClient.Pause();
+		}
 	}
 }

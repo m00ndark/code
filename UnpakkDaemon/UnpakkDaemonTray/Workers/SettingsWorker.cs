@@ -81,7 +81,7 @@ namespace UnpakkDaemonTray.Workers
 				if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
 				{
 					EngineSettings.SetApplicationDataFolder(folderBrowserDialog.SelectedPath);
-					RegistryHandler.SaveSettings(SettingsType.ApplicationDataFolder);
+					RegistryHandler.SaveEngineSettings(EngineSettingsType.ApplicationDataFolder);
 					RaiseApplicationDataFolderUpdatedEvent(EngineSettings.ApplicationDataFolder);
 				}
 			}
@@ -96,7 +96,7 @@ namespace UnpakkDaemonTray.Workers
 			try
 			{
 				EngineSettings.SleepTime = TimeSpan.FromMinutes(double.Parse(sleepTimeMinutes));
-				RegistryHandler.SaveSettings(SettingsType.SleepTime);
+				RegistryHandler.SaveEngineSettings(EngineSettingsType.SleepTime);
 				RaiseSleepTimeUpdatedEvent(EngineSettings.SleepTime);
 			}
 			catch (FormatException)
@@ -122,7 +122,7 @@ namespace UnpakkDaemonTray.Workers
 				if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
 				{
 					EngineSettings.AddRootPath(folderBrowserDialog.SelectedPath);
-					RegistryHandler.SaveSettings(SettingsType.RootPaths);
+					RegistryHandler.SaveEngineSettings(EngineSettingsType.RootPaths);
 					RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
 				}
 				_lastBrowsedRootPath = folderBrowserDialog.SelectedPath;
@@ -138,7 +138,7 @@ namespace UnpakkDaemonTray.Workers
 			try
 			{
 				EngineSettings.RemoveRootPath(rootPath);
-				RegistryHandler.SaveSettings(SettingsType.RootPaths);
+				RegistryHandler.SaveEngineSettings(EngineSettingsType.RootPaths);
 				RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
 			}
 			catch (Exception ex)

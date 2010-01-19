@@ -13,10 +13,24 @@ namespace UnpakkDaemon.Service.Host
 	internal class StatusService : IStatusService
 	{
 		private readonly List<IStatusChangedHandler> _subscribers;
+		private readonly EngineIsPaused _engineIsPaused;
+		private readonly ResumeEngine _resumeEngine;
+		private readonly PauseEngine _pauseEngine;
 
-		public StatusService()
+		#region Delegates
+
+		public delegate bool EngineIsPaused();
+		public delegate void ResumeEngine();
+		public delegate void PauseEngine();
+
+		#endregion
+
+		public StatusService(EngineIsPaused engineIsPaused, ResumeEngine resumeEngine, PauseEngine pauseEngine)
 		{
 			_subscribers = new List<IStatusChangedHandler>();
+			_engineIsPaused = engineIsPaused;
+			_resumeEngine = resumeEngine;
+			_pauseEngine = pauseEngine;
 		}
 
 		#region Implementation of IStatusService
@@ -30,6 +44,21 @@ namespace UnpakkDaemon.Service.Host
 		{
 			IStatusChangedHandler caller = OperationContext.Current.GetCallbackChannel<IStatusChangedHandler>();
 			_subscribers.RemoveAll(subscriber => (subscriber == caller));
+		}
+
+		public bool IsPaused()
+		{
+			return _engineIsPaused();
+		}
+
+		public void Resume()
+		{
+			_resumeEngine();
+		}
+
+		public void Pause()
+		{
+			_pauseEngine();
 		}
 
 		#endregion

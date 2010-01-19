@@ -21,6 +21,21 @@ namespace UnpakkDaemon.Service.Client
 			Channel.Unsubscribe();
 		}
 
+		public bool IsPaused()
+		{
+			return Channel.IsPaused();
+		}
+
+		public void Resume()
+		{
+			Channel.Resume();
+		}
+
+		public void Pause()
+		{
+			Channel.Pause();
+		}
+
 		#endregion
 	}
 }

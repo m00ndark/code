@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using UnpakkDaemon;
+using UnpakkDaemon.DataAccess;
 using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 using UnpakkDaemon.Service.Client;
@@ -17,7 +18,11 @@ namespace UnpakkDaemonTray.Forms
 	public partial class MainForm : Form
 	{
 		private bool _closing;
+		private bool _discardEvents;
 		private SettingsWorker _settingsWorker;
+		private Image _statusRunning;
+		private Image _statusPaused;
+		private Image _statusStopped;
 		private Image _record;
 		private Image _recordRed;
 		private Image _subRecord;
@@ -27,6 +32,7 @@ namespace UnpakkDaemonTray.Forms
 		{
 			InitializeComponent();
 			_closing = false;
+			_discardEvents = false;
 			_settingsWorker = null;
 			CommonWorker.ShowMessage += CommonWorker_ShowMessage;
 		}
@@ -35,8 +41,17 @@ namespace UnpakkDaemonTray.Forms
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
-			Restore();
+			TraySettings.Load();
+			if (TraySettings.WindowVisible)
+				Restore();
+			else
+				Minimize();
+			toolStripMenuItemOptionsStartWithWindows.Checked = TraySettings.StartWithWindows;
+			SetStartWithWindows(TraySettings.StartWithWindows);
 // ReSharper disable AssignNullToNotNullAttribute
+			_statusRunning = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Status-Running-16.png"));
+			_statusPaused = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Status-Paused-16.png"));
+			_statusStopped = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Status-Stopped-16.png"));
 			_record = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Record-48.png"));
 			_recordRed = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.Record-Red-48.png"));
 			_subRecord = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("UnpakkDaemonTray.Resources.SubRecord-48.png"));
@@ -80,14 +95,55 @@ namespace UnpakkDaemonTray.Forms
 				Minimize();
 		}
 
+		private void notifyIcon_MouseDown(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+				UpdateServiceStatus();
+		}
+
 		private void notifyIcon_DoubleClick(object sender, EventArgs e)
 		{
-			Restore();
+			if (TraySettings.WindowVisible)
+				Minimize();
+			else
+				Restore();
+		}
+
+		private void toolStripMenuItemServiceStart_Click(object sender, EventArgs e)
+		{
+			if (ServiceHandler.ServiceIsStopped())
+			{
+				if (!ServiceHandler.StartService())
+					FormUtilities.ShowError(this, "The Unpakk Daemon service failed to start.");
+			}
+			else if (ServiceHandler.ServiceIsRunning() && ObjectPool.StatusServiceHandler.EngineIsPaused())
+			{
+				ObjectPool.StatusServiceHandler.ResumeEngine();
+			}
+		}
+
+		private void toolStripMenuItemServicePause_Click(object sender, EventArgs e)
+		{
+			if (ServiceHandler.ServiceIsRunning() && !ObjectPool.StatusServiceHandler.EngineIsPaused())
+			{
+				ObjectPool.StatusServiceHandler.PauseEngine();
+			}
+		}
+
+		private void toolStripMenuItemOptionsStartWithWindows_Click(object sender, EventArgs e)
+		{
+			if (!_discardEvents)
+				ToggleStartTrayWithWindows();
 		}
 
 		private void toolStripMenuItemRestore_Click(object sender, EventArgs e)
 		{
 			Restore();
+		}
+
+		private void toolStripMenuItemMinimize_Click(object sender, EventArgs e)
+		{
+			Minimize();
 		}
 
 		private void toolStripMenuItemClose_Click(object sender, EventArgs e)
@@ -198,6 +254,12 @@ namespace UnpakkDaemonTray.Forms
 		private void buttonBrowseApplicationDataFolder_Click(object sender, EventArgs e)
 		{
 			_settingsWorker.SetApplicationDataFolder();
+		}
+
+		private void checkBoxStartTrayAppWithWindows_CheckedChanged(object sender, EventArgs e)
+		{
+			if (!_discardEvents)
+				ToggleStartTrayWithWindows();
 		}
 
 		private void listViewRootPath_SelectedIndexChanged(object sender, EventArgs e)
@@ -548,16 +610,64 @@ namespace UnpakkDaemonTray.Forms
 
 		private void Minimize()
 		{
+			TraySettings.WindowVisible = false;
+			TraySettings.Save(TraySettingsType.TrayWindowVisibility);
 			Hide();
-			toolStripMenuItemRestore.Visible = true;
+			Opacity = 0;
+			ShowInTaskbar = false;
+			AdjustTrayMenu();
 		}
 
 		private void Restore()
 		{
+			TraySettings.WindowVisible = true;
+			TraySettings.Save(TraySettingsType.TrayWindowVisibility);
+			Opacity = 1;
+			ShowInTaskbar = true;
 			Show();
 			WindowState = FormWindowState.Normal;
 			Refresh();
-			toolStripMenuItemRestore.Visible = false;
+			AdjustTrayMenu();
+		}
+
+		private void AdjustTrayMenu()
+		{
+			toolStripMenuItemRestore.Enabled = !TraySettings.WindowVisible;
+			toolStripMenuItemMinimize.Enabled = TraySettings.WindowVisible;
+			toolStripMenuItemRestore.Font = new Font(toolStripMenuItemClose.Font, (TraySettings.WindowVisible ? FontStyle.Regular : FontStyle.Bold));
+			toolStripMenuItemMinimize.Font = new Font(toolStripMenuItemClose.Font, (TraySettings.WindowVisible ? FontStyle.Bold : FontStyle.Regular));
+		}
+
+		private void ToggleStartTrayWithWindows()
+		{
+			TraySettings.StartWithWindows = !TraySettings.StartWithWindows;
+			TraySettings.Save(TraySettingsType.TrayStartupWithWindows);
+			SetStartWithWindows(TraySettings.StartWithWindows);
+		}
+
+		private void SetStartWithWindows(bool enable)
+		{
+			_discardEvents = true;
+			checkBoxStartTrayAppWithWindows.Checked = enable;
+			toolStripMenuItemOptionsStartWithWindows.Checked = enable;
+			_discardEvents = false;
+			RegistryHandler.SetTrayToStartWithWindows(enable ? Application.ExecutablePath : null);
+		}
+
+		private void UpdateServiceStatus()
+		{
+			bool serviceIsRunning = ServiceHandler.ServiceIsRunning();
+			bool serviceIsStopped = ServiceHandler.ServiceIsStopped();
+			bool serviceIsStoppedOrNotRunning = (serviceIsStopped || !serviceIsRunning);
+			bool engineIsPaused = (serviceIsStoppedOrNotRunning || ObjectPool.StatusServiceHandler.EngineIsPaused());
+			toolStripMenuItemService.Image = (serviceIsStoppedOrNotRunning ? _statusStopped : (engineIsPaused ? _statusPaused : _statusRunning));
+			toolStripMenuItemServiceStart.Enabled = (serviceIsStopped || serviceIsRunning && engineIsPaused);
+			toolStripMenuItemServicePause.Enabled = (serviceIsRunning && !engineIsPaused);
+			//bool serviceIsRunning = ServiceHandler.ServiceIsRunning();
+			//bool engineIsPaused = (serviceIsRunning ? ObjectPool.StatusServiceHandler.EngineIsPaused() : true);
+			//toolStripMenuItemService.Image = (serviceIsRunning ? (engineIsPaused ? _statusPaused : _statusRunning) : _statusStopped);
+			//toolStripMenuItemServiceStart.Enabled = !serviceIsRunning || engineIsPaused;
+			//toolStripMenuItemServicePause.Enabled = serviceIsRunning && !engineIsPaused;
 		}
 
 		private static string MakeFileSize(long bytes)

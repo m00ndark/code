@@ -12,7 +12,7 @@ using UnpakkDaemon.SimpleFileVerification;
 
 namespace UnpakkDaemon
 {
-	public class Engine : IStatusProvider
+	public class Engine : IEngine
 	{
 		private readonly string _startupPath;
 		private FileLogger _fileLogger;
@@ -32,6 +32,25 @@ namespace UnpakkDaemon
 
 		#endregion
 
+		#region Implementation of IEngine
+
+		public bool EngineIsPaused()
+		{
+			return IsPaused;
+		}
+
+		public void ResumeEngine()
+		{
+			IsPaused = false;
+		}
+
+		public void PauseEngine()
+		{
+			IsPaused = true;
+		}
+
+		#endregion
+
 		public Engine(string startupPath)
 		{
 			_startupPath = startupPath;
@@ -42,9 +61,12 @@ namespace UnpakkDaemon
 			_lastSentProgressEventArgs = null;
 			_lastSentSubProgressEventArgs = null;
 			IsRunning = false;
+			IsPaused = false;
 		}
 
 		public bool IsRunning { get; private set; }
+
+		private bool IsPaused { get; set; }
 
 		public void Start()
 		{
@@ -58,18 +80,17 @@ namespace UnpakkDaemon
 
 			StatusServiceHost.Open(this);
 
-			//Thread.Sleep(1000000);
-
-//#if !DEBUG
-			TrayHandler.LaunchTray(_startupPath);
-			Thread.Sleep(5000);
-//#endif
+			Thread.Sleep(2000);
 
 			EnterMainLoop();
 
 			StatusServiceHost.Close();
 
 			IsRunning = false;
+
+			WriteLogEntry("ABORTING -- Communication shut down, signing off");
+
+			Environment.Exit(0);
 		}
 
 		public void ShutDown()
@@ -254,6 +275,7 @@ namespace UnpakkDaemon
 			{
 				try
 				{
+					WaitIfPaused();
 					WriteLogEntry("======================================================");
 					WriteLogEntry("Waking up, reloading settings..");
 					EngineSettings.Load();
@@ -271,6 +293,7 @@ namespace UnpakkDaemon
 					sfvFilePaths.Sort();
 					for (int i = 0; i < sfvFilePaths.Count && !_shutDown; i++)
 					{
+						WaitIfPaused();
 						RaiseSubProgressEvent(string.Empty, 0);
 						RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[i]), 100 * (i / (double) sfvFilePaths.Count), i + 1, sfvFilePaths.Count);
 						ProcessSFVFile(sfvFilePaths[i]);
@@ -288,15 +311,27 @@ namespace UnpakkDaemon
 					WriteLogEntry("An exception occurred in main loop", ex);
 				}
 
+				DateTime sleepUntil = DateTime.Now + EngineSettings.SleepTime;
+				while (DateTime.Now < sleepUntil && !_shutDown)
+					Thread.Sleep(100);
+
 				if (_shutDown)
 				{
 					WriteLogEntry("ABORTING -- Shutdown initiated");
 					RaiseSubProgressEvent(string.Empty, 100);
 					RaiseProgressEvent("Unpakk Daemon Service is shutting down...", 100);
 				}
-				else
-					Thread.Sleep(EngineSettings.SleepTime);
 			}
+		}
+
+		private void WaitIfPaused()
+		{
+			if (IsPaused)
+			{
+				RaiseSubProgressEvent(string.Empty, 0);
+				RaiseProgressEvent("Paused, awaiting resume instruction...", 0);
+			}
+			while (IsPaused) Thread.Sleep(100);
 		}
 
 		private void ProcessSFVFile(string sfvFilePath)

@@ -58,6 +58,7 @@
 			this.labelRecordSFVFile = new System.Windows.Forms.Label();
 			this.labelRecordPath = new System.Windows.Forms.Label();
 			this.groupBoxSubRecordDetails = new System.Windows.Forms.GroupBox();
+			this.linkLabelSubRecordStatus = new System.Windows.Forms.LinkLabel();
 			this.labelSubRecordTimeValue = new System.Windows.Forms.Label();
 			this.labelSubRecordTime = new System.Windows.Forms.Label();
 			this.labelSubRecordStatus = new System.Windows.Forms.Label();
@@ -71,6 +72,13 @@
 			this.labelSubRecordFile = new System.Windows.Forms.Label();
 			this.labelSubRecordPath = new System.Windows.Forms.Label();
 			this.tabPageLog = new System.Windows.Forms.TabPage();
+			this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+			this.panelLogFilterLeastLogType = new System.Windows.Forms.Panel();
+			this.comboBoxLogFilterLeastLogType = new System.Windows.Forms.ComboBox();
+			this.labelLogFilterLeastLogType = new System.Windows.Forms.Label();
+			this.panelLogFilterDaysBack = new System.Windows.Forms.Panel();
+			this.comboBoxLogFilterDaysBack = new System.Windows.Forms.ComboBox();
+			this.labelLogFilterDaysBack = new System.Windows.Forms.Label();
 			this.listViewLog = new System.Windows.Forms.ListView();
 			this.columnHeaderTime = new System.Windows.Forms.ColumnHeader();
 			this.columnHeaderType = new System.Windows.Forms.ColumnHeader();
@@ -82,6 +90,8 @@
 			this.listViewRootPath = new System.Windows.Forms.ListView();
 			this.columnHeaderRootPath = new System.Windows.Forms.ColumnHeader();
 			this.groupBoxApplicationSettings = new System.Windows.Forms.GroupBox();
+			this.checkBoxStartTrayAppWithWindows = new System.Windows.Forms.CheckBox();
+			this.labelStartTrayAppWithWindows = new System.Windows.Forms.Label();
 			this.buttonBrowseApplicationDataFolder = new System.Windows.Forms.Button();
 			this.labelSleepTimeMinutes = new System.Windows.Forms.Label();
 			this.textBoxSleepTime = new System.Windows.Forms.TextBox();
@@ -90,17 +100,16 @@
 			this.labelApplicationDataFolder = new System.Windows.Forms.Label();
 			this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
 			this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.toolStripMenuItemService = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemServiceStart = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemServicePause = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemOptions = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemOptionsStartWithWindows = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripMenuItemRestore = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemMinimize = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.linkLabelSubRecordStatus = new System.Windows.Forms.LinkLabel();
-			this.comboBoxLogFilterDaysBack = new System.Windows.Forms.ComboBox();
-			this.labelLogFilterDaysBack = new System.Windows.Forms.Label();
-			this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-			this.panelLogFilterDaysBack = new System.Windows.Forms.Panel();
-			this.panelLogFilterLeastLogType = new System.Windows.Forms.Panel();
-			this.comboBoxLogFilterLeastLogType = new System.Windows.Forms.ComboBox();
-			this.labelLogFilterLeastLogType = new System.Windows.Forms.Label();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
 			this.groupBoxRecordDetails.SuspendLayout();
@@ -108,13 +117,13 @@
 			this.groupBoxSubRecordDetails.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize) (this.pictureBoxSubRecord)).BeginInit();
 			this.tabPageLog.SuspendLayout();
+			this.tableLayoutPanel.SuspendLayout();
+			this.panelLogFilterLeastLogType.SuspendLayout();
+			this.panelLogFilterDaysBack.SuspendLayout();
 			this.tabPageSettings.SuspendLayout();
 			this.groupBoxScanSettings.SuspendLayout();
 			this.groupBoxApplicationSettings.SuspendLayout();
 			this.contextMenuStrip.SuspendLayout();
-			this.tableLayoutPanel.SuspendLayout();
-			this.panelLogFilterDaysBack.SuspendLayout();
-			this.panelLogFilterLeastLogType.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl
@@ -143,8 +152,8 @@
 			this.tabPageProgress.Controls.Add(this.labelMainMessage);
 			this.tabPageProgress.Controls.Add(this.progressBarMainProgress);
 			this.tabPageProgress.Controls.Add(this.progressBarSubProgress);
-			this.tabPageProgress.Controls.Add(this.groupBoxSubRecordDetails);
 			this.tabPageProgress.Controls.Add(this.groupBoxRecordDetails);
+			this.tabPageProgress.Controls.Add(this.groupBoxSubRecordDetails);
 			this.tabPageProgress.Location = new System.Drawing.Point(4, 22);
 			this.tabPageProgress.Name = "tabPageProgress";
 			this.tabPageProgress.Padding = new System.Windows.Forms.Padding(3);
@@ -417,6 +426,15 @@
 			this.groupBoxSubRecordDetails.Text = "Details";
 			this.groupBoxSubRecordDetails.Visible = false;
 			// 
+			// linkLabelSubRecordStatus
+			// 
+			this.linkLabelSubRecordStatus.AutoSize = true;
+			this.linkLabelSubRecordStatus.Location = new System.Drawing.Point(71, 126);
+			this.linkLabelSubRecordStatus.Name = "linkLabelSubRecordStatus";
+			this.linkLabelSubRecordStatus.Size = new System.Drawing.Size(0, 13);
+			this.linkLabelSubRecordStatus.TabIndex = 27;
+			this.linkLabelSubRecordStatus.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelSubRecordStatus_LinkClicked);
+			// 
 			// labelSubRecordTimeValue
 			// 
 			this.labelSubRecordTimeValue.AutoSize = true;
@@ -540,6 +558,85 @@
 			this.tabPageLog.Text = "Log";
 			this.tabPageLog.UseVisualStyleBackColor = true;
 			// 
+			// tableLayoutPanel
+			// 
+			this.tableLayoutPanel.ColumnCount = 3;
+			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel.Controls.Add(this.panelLogFilterLeastLogType, 2, 0);
+			this.tableLayoutPanel.Controls.Add(this.panelLogFilterDaysBack, 0, 0);
+			this.tableLayoutPanel.Location = new System.Drawing.Point(6, 6);
+			this.tableLayoutPanel.Name = "tableLayoutPanel";
+			this.tableLayoutPanel.RowCount = 1;
+			this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+			this.tableLayoutPanel.Size = new System.Drawing.Size(779, 21);
+			this.tableLayoutPanel.TabIndex = 3;
+			// 
+			// panelLogFilterLeastLogType
+			// 
+			this.panelLogFilterLeastLogType.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.panelLogFilterLeastLogType.Controls.Add(this.comboBoxLogFilterLeastLogType);
+			this.panelLogFilterLeastLogType.Controls.Add(this.labelLogFilterLeastLogType);
+			this.panelLogFilterLeastLogType.Location = new System.Drawing.Point(399, 0);
+			this.panelLogFilterLeastLogType.Margin = new System.Windows.Forms.Padding(0);
+			this.panelLogFilterLeastLogType.Name = "panelLogFilterLeastLogType";
+			this.panelLogFilterLeastLogType.Size = new System.Drawing.Size(380, 21);
+			this.panelLogFilterLeastLogType.TabIndex = 1;
+			// 
+			// comboBoxLogFilterLeastLogType
+			// 
+			this.comboBoxLogFilterLeastLogType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxLogFilterLeastLogType.FormattingEnabled = true;
+			this.comboBoxLogFilterLeastLogType.Location = new System.Drawing.Point(122, 0);
+			this.comboBoxLogFilterLeastLogType.Name = "comboBoxLogFilterLeastLogType";
+			this.comboBoxLogFilterLeastLogType.Size = new System.Drawing.Size(258, 21);
+			this.comboBoxLogFilterLeastLogType.TabIndex = 3;
+			this.comboBoxLogFilterLeastLogType.SelectedIndexChanged += new System.EventHandler(this.comboBoxLogFilterLeastLogType_SelectedIndexChanged);
+			// 
+			// labelLogFilterLeastLogType
+			// 
+			this.labelLogFilterLeastLogType.AutoSize = true;
+			this.labelLogFilterLeastLogType.Location = new System.Drawing.Point(1, 3);
+			this.labelLogFilterLeastLogType.Name = "labelLogFilterLeastLogType";
+			this.labelLogFilterLeastLogType.Size = new System.Drawing.Size(115, 13);
+			this.labelLogFilterLeastLogType.TabIndex = 4;
+			this.labelLogFilterLeastLogType.Text = "Least log type severity:";
+			// 
+			// panelLogFilterDaysBack
+			// 
+			this.panelLogFilterDaysBack.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.panelLogFilterDaysBack.Controls.Add(this.comboBoxLogFilterDaysBack);
+			this.panelLogFilterDaysBack.Controls.Add(this.labelLogFilterDaysBack);
+			this.panelLogFilterDaysBack.Location = new System.Drawing.Point(0, 0);
+			this.panelLogFilterDaysBack.Margin = new System.Windows.Forms.Padding(0);
+			this.panelLogFilterDaysBack.Name = "panelLogFilterDaysBack";
+			this.panelLogFilterDaysBack.Size = new System.Drawing.Size(379, 21);
+			this.panelLogFilterDaysBack.TabIndex = 0;
+			// 
+			// comboBoxLogFilterDaysBack
+			// 
+			this.comboBoxLogFilterDaysBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxLogFilterDaysBack.FormattingEnabled = true;
+			this.comboBoxLogFilterDaysBack.Location = new System.Drawing.Point(94, 0);
+			this.comboBoxLogFilterDaysBack.Name = "comboBoxLogFilterDaysBack";
+			this.comboBoxLogFilterDaysBack.Size = new System.Drawing.Size(258, 21);
+			this.comboBoxLogFilterDaysBack.TabIndex = 1;
+			this.comboBoxLogFilterDaysBack.SelectedIndexChanged += new System.EventHandler(this.comboBoxLogFilterDaysBack_SelectedIndexChanged);
+			// 
+			// labelLogFilterDaysBack
+			// 
+			this.labelLogFilterDaysBack.AutoSize = true;
+			this.labelLogFilterDaysBack.Location = new System.Drawing.Point(0, 3);
+			this.labelLogFilterDaysBack.Name = "labelLogFilterDaysBack";
+			this.labelLogFilterDaysBack.Size = new System.Drawing.Size(88, 13);
+			this.labelLogFilterDaysBack.TabIndex = 2;
+			this.labelLogFilterDaysBack.Text = "Show log entries:";
+			// 
 			// listViewLog
 			// 
 			this.listViewLog.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -593,7 +690,7 @@
 			this.groupBoxScanSettings.Controls.Add(this.listViewRootPath);
 			this.groupBoxScanSettings.Location = new System.Drawing.Point(3, 143);
 			this.groupBoxScanSettings.Name = "groupBoxScanSettings";
-			this.groupBoxScanSettings.Size = new System.Drawing.Size(782, 221);
+			this.groupBoxScanSettings.Size = new System.Drawing.Size(782, 224);
 			this.groupBoxScanSettings.TabIndex = 3;
 			this.groupBoxScanSettings.TabStop = false;
 			this.groupBoxScanSettings.Text = "Scan Settings";
@@ -631,7 +728,7 @@
 			this.listViewRootPath.HideSelection = false;
 			this.listViewRootPath.Location = new System.Drawing.Point(6, 19);
 			this.listViewRootPath.Name = "listViewRootPath";
-			this.listViewRootPath.Size = new System.Drawing.Size(689, 196);
+			this.listViewRootPath.Size = new System.Drawing.Size(689, 199);
 			this.listViewRootPath.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewRootPath.TabIndex = 0;
 			this.listViewRootPath.UseCompatibleStateImageBehavior = false;
@@ -647,23 +744,44 @@
 			// 
 			this.groupBoxApplicationSettings.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 							| System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBoxApplicationSettings.Controls.Add(this.checkBoxStartTrayAppWithWindows);
+			this.groupBoxApplicationSettings.Controls.Add(this.labelStartTrayAppWithWindows);
 			this.groupBoxApplicationSettings.Controls.Add(this.buttonBrowseApplicationDataFolder);
 			this.groupBoxApplicationSettings.Controls.Add(this.labelSleepTimeMinutes);
 			this.groupBoxApplicationSettings.Controls.Add(this.textBoxSleepTime);
 			this.groupBoxApplicationSettings.Controls.Add(this.labelSleepTime);
 			this.groupBoxApplicationSettings.Controls.Add(this.textBoxApplicationDataFolder);
 			this.groupBoxApplicationSettings.Controls.Add(this.labelApplicationDataFolder);
-			this.groupBoxApplicationSettings.Location = new System.Drawing.Point(6, 6);
+			this.groupBoxApplicationSettings.Location = new System.Drawing.Point(3, 6);
 			this.groupBoxApplicationSettings.Name = "groupBoxApplicationSettings";
-			this.groupBoxApplicationSettings.Size = new System.Drawing.Size(779, 131);
+			this.groupBoxApplicationSettings.Size = new System.Drawing.Size(782, 131);
 			this.groupBoxApplicationSettings.TabIndex = 2;
 			this.groupBoxApplicationSettings.TabStop = false;
 			this.groupBoxApplicationSettings.Text = "Application Settings";
 			// 
+			// checkBoxStartTrayAppWithWindows
+			// 
+			this.checkBoxStartTrayAppWithWindows.AutoSize = true;
+			this.checkBoxStartTrayAppWithWindows.Location = new System.Drawing.Point(154, 74);
+			this.checkBoxStartTrayAppWithWindows.Name = "checkBoxStartTrayAppWithWindows";
+			this.checkBoxStartTrayAppWithWindows.Size = new System.Drawing.Size(15, 14);
+			this.checkBoxStartTrayAppWithWindows.TabIndex = 7;
+			this.checkBoxStartTrayAppWithWindows.UseVisualStyleBackColor = true;
+			this.checkBoxStartTrayAppWithWindows.CheckedChanged += new System.EventHandler(this.checkBoxStartTrayAppWithWindows_CheckedChanged);
+			// 
+			// labelStartTrayAppWithWindows
+			// 
+			this.labelStartTrayAppWithWindows.AutoSize = true;
+			this.labelStartTrayAppWithWindows.Location = new System.Drawing.Point(6, 74);
+			this.labelStartTrayAppWithWindows.Name = "labelStartTrayAppWithWindows";
+			this.labelStartTrayAppWithWindows.Size = new System.Drawing.Size(142, 13);
+			this.labelStartTrayAppWithWindows.TabIndex = 6;
+			this.labelStartTrayAppWithWindows.Text = "Start tray app with Windows:";
+			// 
 			// buttonBrowseApplicationDataFolder
 			// 
 			this.buttonBrowseApplicationDataFolder.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonBrowseApplicationDataFolder.Location = new System.Drawing.Point(741, 17);
+			this.buttonBrowseApplicationDataFolder.Location = new System.Drawing.Point(744, 17);
 			this.buttonBrowseApplicationDataFolder.Name = "buttonBrowseApplicationDataFolder";
 			this.buttonBrowseApplicationDataFolder.Size = new System.Drawing.Size(32, 23);
 			this.buttonBrowseApplicationDataFolder.TabIndex = 5;
@@ -674,7 +792,7 @@
 			// labelSleepTimeMinutes
 			// 
 			this.labelSleepTimeMinutes.AutoSize = true;
-			this.labelSleepTimeMinutes.Location = new System.Drawing.Point(209, 48);
+			this.labelSleepTimeMinutes.Location = new System.Drawing.Point(236, 48);
 			this.labelSleepTimeMinutes.Name = "labelSleepTimeMinutes";
 			this.labelSleepTimeMinutes.Size = new System.Drawing.Size(43, 13);
 			this.labelSleepTimeMinutes.TabIndex = 4;
@@ -682,7 +800,7 @@
 			// 
 			// textBoxSleepTime
 			// 
-			this.textBoxSleepTime.Location = new System.Drawing.Point(127, 45);
+			this.textBoxSleepTime.Location = new System.Drawing.Point(154, 45);
 			this.textBoxSleepTime.Name = "textBoxSleepTime";
 			this.textBoxSleepTime.Size = new System.Drawing.Size(76, 20);
 			this.textBoxSleepTime.TabIndex = 2;
@@ -700,9 +818,9 @@
 			// 
 			this.textBoxApplicationDataFolder.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 							| System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxApplicationDataFolder.Location = new System.Drawing.Point(127, 19);
+			this.textBoxApplicationDataFolder.Location = new System.Drawing.Point(154, 19);
 			this.textBoxApplicationDataFolder.Name = "textBoxApplicationDataFolder";
-			this.textBoxApplicationDataFolder.Size = new System.Drawing.Size(608, 20);
+			this.textBoxApplicationDataFolder.Size = new System.Drawing.Size(584, 20);
 			this.textBoxApplicationDataFolder.TabIndex = 0;
 			// 
 			// labelApplicationDataFolder
@@ -721,27 +839,82 @@
 			this.notifyIcon.Text = "Unpakk Daemon";
 			this.notifyIcon.Visible = true;
 			this.notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
+			this.notifyIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDown);
 			// 
 			// contextMenuStrip
 			// 
 			this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemService,
+            this.toolStripMenuItemOptions,
+            this.toolStripSeparator,
             this.toolStripMenuItemRestore,
+            this.toolStripMenuItemMinimize,
             this.toolStripMenuItemClose});
 			this.contextMenuStrip.Name = "contextMenuStrip";
-			this.contextMenuStrip.Size = new System.Drawing.Size(119, 48);
+			this.contextMenuStrip.Size = new System.Drawing.Size(153, 142);
+			// 
+			// toolStripMenuItemService
+			// 
+			this.toolStripMenuItemService.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemServiceStart,
+            this.toolStripMenuItemServicePause});
+			this.toolStripMenuItemService.Name = "toolStripMenuItemService";
+			this.toolStripMenuItemService.Size = new System.Drawing.Size(152, 22);
+			this.toolStripMenuItemService.Text = "Service";
+			// 
+			// toolStripMenuItemServiceStart
+			// 
+			this.toolStripMenuItemServiceStart.Name = "toolStripMenuItemServiceStart";
+			this.toolStripMenuItemServiceStart.Size = new System.Drawing.Size(152, 22);
+			this.toolStripMenuItemServiceStart.Text = "Start";
+			this.toolStripMenuItemServiceStart.Click += new System.EventHandler(this.toolStripMenuItemServiceStart_Click);
+			// 
+			// toolStripMenuItemServicePause
+			// 
+			this.toolStripMenuItemServicePause.Name = "toolStripMenuItemServicePause";
+			this.toolStripMenuItemServicePause.Size = new System.Drawing.Size(152, 22);
+			this.toolStripMenuItemServicePause.Text = "Pause";
+			this.toolStripMenuItemServicePause.Click += new System.EventHandler(this.toolStripMenuItemServicePause_Click);
+			// 
+			// toolStripMenuItemOptions
+			// 
+			this.toolStripMenuItemOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemOptionsStartWithWindows});
+			this.toolStripMenuItemOptions.Name = "toolStripMenuItemOptions";
+			this.toolStripMenuItemOptions.Size = new System.Drawing.Size(152, 22);
+			this.toolStripMenuItemOptions.Text = "Options";
+			// 
+			// toolStripMenuItemOptionsStartWithWindows
+			// 
+			this.toolStripMenuItemOptionsStartWithWindows.Name = "toolStripMenuItemOptionsStartWithWindows";
+			this.toolStripMenuItemOptionsStartWithWindows.Size = new System.Drawing.Size(178, 22);
+			this.toolStripMenuItemOptionsStartWithWindows.Text = "Start With Windows";
+			this.toolStripMenuItemOptionsStartWithWindows.Click += new System.EventHandler(this.toolStripMenuItemOptionsStartWithWindows_Click);
+			// 
+			// toolStripSeparator
+			// 
+			this.toolStripSeparator.Name = "toolStripSeparator";
+			this.toolStripSeparator.Size = new System.Drawing.Size(149, 6);
 			// 
 			// toolStripMenuItemRestore
 			// 
 			this.toolStripMenuItemRestore.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
 			this.toolStripMenuItemRestore.Name = "toolStripMenuItemRestore";
-			this.toolStripMenuItemRestore.Size = new System.Drawing.Size(118, 22);
+			this.toolStripMenuItemRestore.Size = new System.Drawing.Size(152, 22);
 			this.toolStripMenuItemRestore.Text = "Restore";
 			this.toolStripMenuItemRestore.Click += new System.EventHandler(this.toolStripMenuItemRestore_Click);
+			// 
+			// toolStripMenuItemMinimize
+			// 
+			this.toolStripMenuItemMinimize.Name = "toolStripMenuItemMinimize";
+			this.toolStripMenuItemMinimize.Size = new System.Drawing.Size(152, 22);
+			this.toolStripMenuItemMinimize.Text = "Minimize";
+			this.toolStripMenuItemMinimize.Click += new System.EventHandler(this.toolStripMenuItemMinimize_Click);
 			// 
 			// toolStripMenuItemClose
 			// 
 			this.toolStripMenuItemClose.Name = "toolStripMenuItemClose";
-			this.toolStripMenuItemClose.Size = new System.Drawing.Size(118, 22);
+			this.toolStripMenuItemClose.Size = new System.Drawing.Size(152, 22);
 			this.toolStripMenuItemClose.Text = "Close";
 			this.toolStripMenuItemClose.Click += new System.EventHandler(this.toolStripMenuItemClose_Click);
 			// 
@@ -751,94 +924,6 @@
 			this.toolTip.AutoPopDelay = 5000;
 			this.toolTip.InitialDelay = 100;
 			this.toolTip.ReshowDelay = 20;
-			// 
-			// linkLabelSubRecordStatus
-			// 
-			this.linkLabelSubRecordStatus.AutoSize = true;
-			this.linkLabelSubRecordStatus.Location = new System.Drawing.Point(71, 126);
-			this.linkLabelSubRecordStatus.Name = "linkLabelSubRecordStatus";
-			this.linkLabelSubRecordStatus.Size = new System.Drawing.Size(0, 13);
-			this.linkLabelSubRecordStatus.TabIndex = 27;
-			this.linkLabelSubRecordStatus.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelSubRecordStatus_LinkClicked);
-			// 
-			// comboBoxLogFilterDaysBack
-			// 
-			this.comboBoxLogFilterDaysBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxLogFilterDaysBack.FormattingEnabled = true;
-			this.comboBoxLogFilterDaysBack.Location = new System.Drawing.Point(94, 0);
-			this.comboBoxLogFilterDaysBack.Name = "comboBoxLogFilterDaysBack";
-			this.comboBoxLogFilterDaysBack.Size = new System.Drawing.Size(258, 21);
-			this.comboBoxLogFilterDaysBack.TabIndex = 1;
-			this.comboBoxLogFilterDaysBack.SelectedIndexChanged += new System.EventHandler(this.comboBoxLogFilterDaysBack_SelectedIndexChanged);
-			// 
-			// labelLogFilterDaysBack
-			// 
-			this.labelLogFilterDaysBack.AutoSize = true;
-			this.labelLogFilterDaysBack.Location = new System.Drawing.Point(0, 3);
-			this.labelLogFilterDaysBack.Name = "labelLogFilterDaysBack";
-			this.labelLogFilterDaysBack.Size = new System.Drawing.Size(88, 13);
-			this.labelLogFilterDaysBack.TabIndex = 2;
-			this.labelLogFilterDaysBack.Text = "Show log entries:";
-			// 
-			// tableLayoutPanel
-			// 
-			this.tableLayoutPanel.ColumnCount = 3;
-			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.tableLayoutPanel.Controls.Add(this.panelLogFilterLeastLogType, 2, 0);
-			this.tableLayoutPanel.Controls.Add(this.panelLogFilterDaysBack, 0, 0);
-			this.tableLayoutPanel.Location = new System.Drawing.Point(6, 6);
-			this.tableLayoutPanel.Name = "tableLayoutPanel";
-			this.tableLayoutPanel.RowCount = 1;
-			this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-			this.tableLayoutPanel.Size = new System.Drawing.Size(779, 21);
-			this.tableLayoutPanel.TabIndex = 3;
-			// 
-			// panelLogFilterDaysBack
-			// 
-			this.panelLogFilterDaysBack.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-							| System.Windows.Forms.AnchorStyles.Left)
-							| System.Windows.Forms.AnchorStyles.Right)));
-			this.panelLogFilterDaysBack.Controls.Add(this.comboBoxLogFilterDaysBack);
-			this.panelLogFilterDaysBack.Controls.Add(this.labelLogFilterDaysBack);
-			this.panelLogFilterDaysBack.Location = new System.Drawing.Point(0, 0);
-			this.panelLogFilterDaysBack.Margin = new System.Windows.Forms.Padding(0);
-			this.panelLogFilterDaysBack.Name = "panelLogFilterDaysBack";
-			this.panelLogFilterDaysBack.Size = new System.Drawing.Size(379, 21);
-			this.panelLogFilterDaysBack.TabIndex = 0;
-			// 
-			// panelLogFilterLeastLogType
-			// 
-			this.panelLogFilterLeastLogType.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-							| System.Windows.Forms.AnchorStyles.Left)
-							| System.Windows.Forms.AnchorStyles.Right)));
-			this.panelLogFilterLeastLogType.Controls.Add(this.comboBoxLogFilterLeastLogType);
-			this.panelLogFilterLeastLogType.Controls.Add(this.labelLogFilterLeastLogType);
-			this.panelLogFilterLeastLogType.Location = new System.Drawing.Point(399, 0);
-			this.panelLogFilterLeastLogType.Margin = new System.Windows.Forms.Padding(0);
-			this.panelLogFilterLeastLogType.Name = "panelLogFilterLeastLogType";
-			this.panelLogFilterLeastLogType.Size = new System.Drawing.Size(380, 21);
-			this.panelLogFilterLeastLogType.TabIndex = 1;
-			// 
-			// comboBoxLogFilterLeastLogType
-			// 
-			this.comboBoxLogFilterLeastLogType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxLogFilterLeastLogType.FormattingEnabled = true;
-			this.comboBoxLogFilterLeastLogType.Location = new System.Drawing.Point(122, 0);
-			this.comboBoxLogFilterLeastLogType.Name = "comboBoxLogFilterLeastLogType";
-			this.comboBoxLogFilterLeastLogType.Size = new System.Drawing.Size(258, 21);
-			this.comboBoxLogFilterLeastLogType.TabIndex = 3;
-			this.comboBoxLogFilterLeastLogType.SelectedIndexChanged += new System.EventHandler(this.comboBoxLogFilterLeastLogType_SelectedIndexChanged);
-			// 
-			// labelLogFilterLeastLogType
-			// 
-			this.labelLogFilterLeastLogType.AutoSize = true;
-			this.labelLogFilterLeastLogType.Location = new System.Drawing.Point(1, 3);
-			this.labelLogFilterLeastLogType.Name = "labelLogFilterLeastLogType";
-			this.labelLogFilterLeastLogType.Size = new System.Drawing.Size(115, 13);
-			this.labelLogFilterLeastLogType.TabIndex = 4;
-			this.labelLogFilterLeastLogType.Text = "Least log type severity:";
 			// 
 			// MainForm
 			// 
@@ -865,16 +950,16 @@
 			this.groupBoxSubRecordDetails.PerformLayout();
 			((System.ComponentModel.ISupportInitialize) (this.pictureBoxSubRecord)).EndInit();
 			this.tabPageLog.ResumeLayout(false);
+			this.tableLayoutPanel.ResumeLayout(false);
+			this.panelLogFilterLeastLogType.ResumeLayout(false);
+			this.panelLogFilterLeastLogType.PerformLayout();
+			this.panelLogFilterDaysBack.ResumeLayout(false);
+			this.panelLogFilterDaysBack.PerformLayout();
 			this.tabPageSettings.ResumeLayout(false);
 			this.groupBoxScanSettings.ResumeLayout(false);
 			this.groupBoxApplicationSettings.ResumeLayout(false);
 			this.groupBoxApplicationSettings.PerformLayout();
 			this.contextMenuStrip.ResumeLayout(false);
-			this.tableLayoutPanel.ResumeLayout(false);
-			this.panelLogFilterDaysBack.ResumeLayout(false);
-			this.panelLogFilterDaysBack.PerformLayout();
-			this.panelLogFilterLeastLogType.ResumeLayout(false);
-			this.panelLogFilterLeastLogType.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -952,5 +1037,14 @@
 		private System.Windows.Forms.Panel panelLogFilterDaysBack;
 		private System.Windows.Forms.ComboBox comboBoxLogFilterLeastLogType;
 		private System.Windows.Forms.Label labelLogFilterLeastLogType;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMinimize;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemOptions;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemOptionsStartWithWindows;
+		private System.Windows.Forms.CheckBox checkBoxStartTrayAppWithWindows;
+		private System.Windows.Forms.Label labelStartTrayAppWithWindows;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemService;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemServiceStart;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemServicePause;
 	}
 }

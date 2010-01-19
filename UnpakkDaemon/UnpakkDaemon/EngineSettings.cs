@@ -8,9 +8,14 @@ namespace UnpakkDaemon
 	{
 		private const string PROGRAM_DATA_IDENTIFIER = "%ProgramData%";
 
+		public const string DEFAULT_APPLICATION_DATA_FOLDER = @"%ProgramData%\MoleCode\Unpakk Daemon";
+		public const string DEFAULT_SLEEP_TIME = "00:00:10";
+
 		static EngineSettings()
 		{
 			RootPaths = new List<string>();
+			SleepTime = TimeSpan.Parse(DEFAULT_SLEEP_TIME);
+			SetApplicationDataFolder(DEFAULT_APPLICATION_DATA_FOLDER);
 		}
 
 		#region Properties
@@ -46,12 +51,22 @@ namespace UnpakkDaemon
 
 		public static void Load()
 		{
-			RegistryHandler.LoadSettings();
+			RegistryHandler.LoadEngineSettings();
+		}
+
+		public static void Load(EngineSettingsType engineSettingsType)
+		{
+			RegistryHandler.LoadEngineSettings(engineSettingsType);
 		}
 
 		public static void Save()
 		{
-			RegistryHandler.SaveSettings();
+			RegistryHandler.LoadEngineSettings();
+		}
+
+		public static void Save(EngineSettingsType engineSettingsType)
+		{
+			RegistryHandler.LoadEngineSettings(engineSettingsType);
 		}
 
 		#region Helpers

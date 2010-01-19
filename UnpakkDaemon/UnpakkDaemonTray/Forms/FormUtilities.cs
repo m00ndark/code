@@ -27,7 +27,7 @@ namespace UnpakkDaemonTray.Forms
 
 		public static DialogResult ShowMessage(Form form, string message, MessageBoxButtons buttons, MessageBoxIcon icon)
 		{
-			return MessageBox.Show(form, message, "Media Gallery", buttons, icon);
+			return MessageBox.Show(form, message, "Unpakk Daemon", buttons, icon);
 		}
 	}
 }

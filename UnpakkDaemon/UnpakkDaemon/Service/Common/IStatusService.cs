@@ -10,5 +10,14 @@ namespace UnpakkDaemon.Service.Common
 
 		[OperationContract(IsTerminating = true)]
 		void Unsubscribe();
+
+		[OperationContract]
+		bool IsPaused();
+
+		[OperationContract]
+		void Resume();
+
+		[OperationContract]
+		void Pause();
 	}
 }

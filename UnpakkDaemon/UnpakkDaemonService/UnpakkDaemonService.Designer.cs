@@ -1,4 +1,6 @@
-﻿namespace UnpakkDaemonService
+﻿using UnpakkDaemon.DataAccess;
+
+namespace UnpakkDaemonService
 {
 	partial class UnpakkDaemonService
 	{
@@ -31,8 +33,7 @@
 			// 
 			// UnpakkDaemonService
 			// 
-			this.ServiceName = "UnpakkDaemonService";
-
+			this.ServiceName = ServiceHandler.APPLICATION_SERVICE_NAME;
 		}
 
 		#endregion
