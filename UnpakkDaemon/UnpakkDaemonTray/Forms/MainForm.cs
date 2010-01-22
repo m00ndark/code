@@ -361,7 +361,8 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
-				AddLogEntry(e.LogTime, e.LogType, e.LogText);
+				if (e.LogType >= ObjectPool.LogFilterLeastLogType)
+					AddLogEntry(e.LogTime, e.LogType, e.LogText);
 			}
 		}
 
