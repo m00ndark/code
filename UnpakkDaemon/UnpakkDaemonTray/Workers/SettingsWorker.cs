@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using UnpakkDaemon;
 using UnpakkDaemon.DataAccess;
+using UnpakkDaemon.DataObjects;
 using UnpakkDaemon.EventArguments;
 
 namespace UnpakkDaemonTray.Workers
 {
 	public class SettingsWorker
 	{
-		private string _lastBrowsedRootPath;
-
 		public event EventHandler<StringEventArgs> ApplicationDataFolderUpdated;
 		public event EventHandler<TimeSpanEventArgs> SleepTimeUpdated;
 		public event EventHandler<RootPathListEventArgs> RootPathListUpdated;
+
+		public string LastBrowsedRootPath { get; set; }
 
 		#region Event raisers
 
@@ -33,7 +34,7 @@ namespace UnpakkDaemonTray.Workers
 			}
 		}
 
-		private void RaiseRootPathListUpdatedEvent(IEnumerable<string> rootPaths)
+		private void RaiseRootPathListUpdatedEvent(IEnumerable<RootPath> rootPaths)
 		{
 			if (RootPathListUpdated != null)
 			{
@@ -51,7 +52,7 @@ namespace UnpakkDaemonTray.Workers
 				RaiseApplicationDataFolderUpdatedEvent(EngineSettings.ApplicationDataFolder);
 				RaiseSleepTimeUpdatedEvent(EngineSettings.SleepTime);
 				RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
-				_lastBrowsedRootPath = string.Empty;
+				LastBrowsedRootPath = string.Empty;
 			}
 			catch (Exception ex)
 			{
@@ -112,20 +113,13 @@ namespace UnpakkDaemonTray.Workers
 			return true;
 		}
 
-		public void AddRootPath()
+		public void AddRootPath(RootPath rootPath)
 		{
 			try
 			{
-				FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-				folderBrowserDialog.Description = "Please select a scan root folder...";
-				folderBrowserDialog.SelectedPath = _lastBrowsedRootPath;
-				if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-				{
-					EngineSettings.AddRootPath(folderBrowserDialog.SelectedPath);
-					RegistryHandler.SaveEngineSettings(EngineSettingsType.RootPaths);
-					RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
-				}
-				_lastBrowsedRootPath = folderBrowserDialog.SelectedPath;
+				EngineSettings.AddRootPath(rootPath);
+				RegistryHandler.SaveEngineSettings(EngineSettingsType.RootPaths);
+				RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
 			}
 			catch (Exception ex)
 			{
@@ -133,11 +127,27 @@ namespace UnpakkDaemonTray.Workers
 			}
 		}
 
-		public void RemoveRootPath(string rootPath)
+		public void UpdateRootPath()
 		{
 			try
 			{
-				EngineSettings.RemoveRootPath(rootPath);
+				RegistryHandler.SaveEngineSettings(EngineSettingsType.RootPaths);
+				RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
+			}
+			catch (Exception ex)
+			{
+				CommonWorker.ShowError(ex);
+			}
+		}
+
+		public void RemoveRootPath(params RootPath[] rootPaths)
+		{
+			try
+			{
+				foreach (RootPath rootPath in rootPaths)
+				{
+					EngineSettings.RemoveRootPath(rootPath);
+				}
 				RegistryHandler.SaveEngineSettings(EngineSettingsType.RootPaths);
 				RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
 			}

@@ -267,17 +267,32 @@ namespace UnpakkDaemonTray.Forms
 			EnableControls(true);
 		}
 
+		private void listViewRootPath_DoubleClick(object sender, EventArgs e)
+		{
+			if (listViewRootPath.SelectedItems.Count == 1)
+			{
+				RootPath selectedRootPath = (RootPath) listViewRootPath.SelectedItems[0].Tag;
+				RootPathForm rootPathForm = new RootPathForm(_settingsWorker, selectedRootPath);
+				if (rootPathForm.ShowDialog(this) == DialogResult.OK)
+				{
+					_settingsWorker.UpdateRootPath();
+				}
+			}
+		}
+
 		private void buttonAddRootPath_Click(object sender, EventArgs e)
 		{
-			_settingsWorker.AddRootPath();
+			RootPathForm rootPathForm = new RootPathForm(_settingsWorker, null);
+			if (rootPathForm.ShowDialog(this) == DialogResult.OK)
+			{
+				_settingsWorker.AddRootPath(rootPathForm.RootPath);
+			}
 		}
 
 		private void buttonRemoveRootPath_Click(object sender, EventArgs e)
 		{
-			foreach (ListViewItem item in listViewRootPath.SelectedItems)
-			{
-				_settingsWorker.RemoveRootPath(item.Text);
-			}
+			RootPath[] rootPaths = listViewRootPath.SelectedItems.Cast<ListViewItem>().Select(item => (RootPath) item.Tag).ToArray();
+			_settingsWorker.RemoveRootPath(rootPaths);
 		}
 
 		#endregion
@@ -424,9 +439,11 @@ namespace UnpakkDaemonTray.Forms
 				{
 					listViewRootPath.BeginUpdate();
 					listViewRootPath.Items.Clear();
-					foreach (string rootPath in e.RootPaths)
+					foreach (RootPath rootPath in e.RootPaths)
 					{
-						listViewRootPath.Items.Add(rootPath);
+						ListViewItem item = listViewRootPath.Items.Add(rootPath.Path);
+						item.SubItems.Add(rootPath.UserName);
+						item.Tag = rootPath;
 					}
 					listViewRootPath.EndUpdate();
 				}

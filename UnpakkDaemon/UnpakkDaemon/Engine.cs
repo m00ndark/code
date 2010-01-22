@@ -280,23 +280,54 @@ namespace UnpakkDaemon
 					WriteLogEntry("Waking up, reloading settings..");
 					EngineSettings.Load();
 
+					// scan root folders for sfv files..
 					RaiseSubProgressEvent(string.Empty, 0);
 					RaiseProgressEvent("Scanning root folders...", 0);
-					List<string> sfvFilePaths = new List<string>();
-					foreach (string rootPath in EngineSettings.RootPaths)
+					IDictionary<RootPath, List<string>> scannedRootPaths = new Dictionary<RootPath, List<string>>();
+					int totalPaths = 0;
+					foreach (RootPath rootPath in EngineSettings.RootPaths)
 					{
-						WriteLogEntry("Scanning root folder, path=" + rootPath);
-						sfvFilePaths.AddRange(Directory.GetFiles(rootPath, "*.sfv", SearchOption.AllDirectories));
 						if (_shutDown) break;
+						UNC unc;
+						if (!OpenUNC(rootPath, out unc)) continue;
+						try
+						{
+							WriteLogEntry("Scanning root folder, path=" + rootPath.Path);
+							List<string> sfvFilePaths = Directory.GetFiles(rootPath.Path, "*.sfv", SearchOption.AllDirectories).ToList();
+							sfvFilePaths.Sort();
+							totalPaths += sfvFilePaths.Count;
+							scannedRootPaths.Add(rootPath, sfvFilePaths);
+						}
+						finally
+						{
+							CloseUNC(ref unc);
+						}
 					}
 
-					sfvFilePaths.Sort();
-					for (int i = 0; i < sfvFilePaths.Count && !_shutDown; i++)
+					// process found sfv files..
+					int pathCounter = 0;
+					foreach (RootPath rootPath in scannedRootPaths.Keys.OrderBy(x => x))
 					{
 						WaitIfPaused();
-						RaiseSubProgressEvent(string.Empty, 0);
-						RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[i]), 100 * (i / (double) sfvFilePaths.Count), i + 1, sfvFilePaths.Count);
-						ProcessSFVFile(sfvFilePaths[i]);
+						UNC unc;
+						if (!OpenUNC(rootPath, out unc)) continue;
+						try
+						{
+							List<string> sfvFilePaths = scannedRootPaths[rootPath];
+							for (int i = 0; i < sfvFilePaths.Count && !_shutDown; i++)
+							{
+								WaitIfPaused();
+								if (_shutDown) break;
+								RaiseSubProgressEvent(string.Empty, 0);
+								RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[i]), 100 * (pathCounter / (double) totalPaths), pathCounter + 1, totalPaths);
+								ProcessSFVFile(sfvFilePaths[i]);
+								pathCounter++;
+							}
+						}
+						finally
+						{
+							CloseUNC(ref unc);
+						}
 					}
 
 					if (!_shutDown)
@@ -324,6 +355,27 @@ namespace UnpakkDaemon
 			}
 		}
 
+		private static bool OpenUNC(RootPath rootPath, out UNC unc)
+		{
+			unc = null;
+			if (rootPath.IsUNCPath && !string.IsNullOrEmpty(rootPath.UserName))
+			{
+				unc = new UNC(rootPath.Path, rootPath.Domain, rootPath.UserNameWithoutDomain, rootPath.Password);
+				return unc.Open();
+			}
+			return true;
+		}
+
+		private static void CloseUNC(ref UNC unc)
+		{
+			if (unc != null)
+			{
+				unc.Close();
+				unc.Dispose();
+				unc = null;
+			}
+		}
+
 		private void WaitIfPaused()
 		{
 			if (IsPaused)
@@ -331,7 +383,7 @@ namespace UnpakkDaemon
 				RaiseSubProgressEvent(string.Empty, 0);
 				RaiseProgressEvent("Paused, awaiting resume instruction...", 0);
 			}
-			while (IsPaused) Thread.Sleep(100);
+			while (IsPaused && !_shutDown) Thread.Sleep(100);
 		}
 
 		private void ProcessSFVFile(string sfvFilePath)

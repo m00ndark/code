@@ -86,9 +86,11 @@
   <ItemGroup>
     <Compile Include="DataAccess\FileHandler.cs" />
     <Compile Include="DataAccess\RegistryHandler.cs" />
+    <Compile Include="DataAccess\UNC.cs" />
     <Compile Include="DataObjects\Record.cs" />
     <Compile Include="DataObjects\RecordList.cs" />
     <Compile Include="DataObjects\RecordStatus.cs" />
+    <Compile Include="DataObjects\RootPath.cs" />
     <Compile Include="DataObjects\SubRecord.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />

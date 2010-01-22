@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32;
+using UnpakkDaemon.DataObjects;
 
 namespace UnpakkDaemon.DataAccess
 {
@@ -49,17 +50,22 @@ namespace UnpakkDaemon.DataAccess
 
 					case EngineSettingsType.RootPaths:
 						EngineSettings.RootPaths.Clear();
-						RegistryKey subKey = key.OpenSubKey("Root Paths", false);
-						if (subKey != null)
+						List<string> subKeys = key.GetSubKeyNames().ToList();
+						subKeys.Sort();
+						foreach (string subKey in subKeys)
 						{
-							List<string> valueNames = subKey.GetValueNames().ToList();
-							valueNames.Sort();
-							foreach (string valueName in valueNames)
+							if (subKey.StartsWith("Root Path "))
 							{
-								if (valueName.StartsWith("Root Path "))
-									EngineSettings.AddRootPath((string) subKey.GetValue(valueName, null));
+								RegistryKey rootPathKey = key.OpenSubKey(subKey, false);
+								if (rootPathKey != null)
+								{
+									string path = (string) rootPathKey.GetValue("Path", null);
+									string userName = (string) rootPathKey.GetValue("User Name", string.Empty);
+									string password = (string) rootPathKey.GetValue("Password", string.Empty);
+									if (path != null) EngineSettings.AddRootPath(new RootPath(path, userName, password));
+									rootPathKey.Close();
+								}
 							}
-							subKey.Close();
 						}
 						break;
 				}
@@ -118,19 +124,23 @@ namespace UnpakkDaemon.DataAccess
 						break;
 
 					case EngineSettingsType.RootPaths:
-						RegistryKey subKey = key.CreateSubKey("Root Paths");
-						if (subKey != null)
+						foreach (string subKey in key.GetSubKeyNames())
 						{
-							foreach (string valueName in subKey.GetValueNames())
+							if (subKey.StartsWith("Root Path "))
+								key.DeleteSubKeyTree(subKey);
+						}
+						int rootPathCount = 0;
+						foreach (RootPath rootPath in EngineSettings.RootPaths)
+						{
+							RegistryKey rootPathKey = key.CreateSubKey("Root Path " + rootPathCount.ToString("00"));
+							if (rootPathKey != null)
 							{
-								subKey.DeleteValue(valueName);
+								rootPathKey.SetValue("Path", rootPath.Path);
+								rootPathKey.SetValue("User Name", rootPath.UserName);
+								rootPathKey.SetValue("Password", rootPath.Password);
+								rootPathKey.Close();
 							}
-							int rootPathCount = 0;
-							foreach (string rootPath in EngineSettings.RootPaths)
-							{
-								subKey.SetValue("Root Path " + rootPathCount.ToString("00"), rootPath);
-								rootPathCount++;
-							}
+							rootPathCount++;
 						}
 						break;
 				}

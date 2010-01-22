@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnpakkDaemon.DataAccess;
+using UnpakkDaemon.DataObjects;
 
 namespace UnpakkDaemon
 {
@@ -13,7 +15,7 @@ namespace UnpakkDaemon
 
 		static EngineSettings()
 		{
-			RootPaths = new List<string>();
+			RootPaths = new List<RootPath>();
 			SleepTime = TimeSpan.Parse(DEFAULT_SLEEP_TIME);
 			SetApplicationDataFolder(DEFAULT_APPLICATION_DATA_FOLDER);
 		}
@@ -26,7 +28,7 @@ namespace UnpakkDaemon
 		// persistant objects
 		public static TimeSpan SleepTime { get; set; }
 		public static string ApplicationDataFolder { get; private set; }
-		public static List<string> RootPaths { get; private set; }
+		public static List<RootPath> RootPaths { get; private set; }
 
 		#endregion
 
@@ -35,18 +37,18 @@ namespace UnpakkDaemon
 			ApplicationDataFolder = ReplaceWithPathIdentifier(path);
 		}
 
-		public static void AddRootPath(string path)
+		public static void AddRootPath(RootPath rootPath)
 		{
-			if (path != null && !RootPaths.Contains(path))
+			if (rootPath != null && !RootPaths.Contains(rootPath))
 			{
-				RootPaths.Add(path);
+				RootPaths.Add(rootPath);
 				RootPaths.Sort();
 			}
 		}
 
-		public static void RemoveRootPath(string path)
+		public static void RemoveRootPath(RootPath rootPath)
 		{
-			RootPaths.Remove(path);
+			RootPaths.Remove(rootPath);
 		}
 
 		public static void Load()

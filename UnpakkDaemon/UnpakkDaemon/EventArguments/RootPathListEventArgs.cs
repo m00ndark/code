@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnpakkDaemon.DataObjects;
 
 namespace UnpakkDaemon.EventArguments
 {
 	public class RootPathListEventArgs : EventArgs
 	{
-		public RootPathListEventArgs(IEnumerable<string> rootPaths)
+		public RootPathListEventArgs(IEnumerable<RootPath> rootPaths)
 		{
 			RootPaths = rootPaths;
 		}
 
-		public IEnumerable<string> RootPaths { get; private set; }
+		public IEnumerable<RootPath> RootPaths { get; private set; }
 	}
 }
