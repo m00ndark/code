@@ -247,6 +247,21 @@ namespace UnpakkDaemonTray.Forms
 			}
 		}
 
+		private void listViewLog_DoubleClick(object sender, EventArgs e)
+		{
+			if (listViewLog.SelectedItems.Count == 1)
+			{
+				ListViewItem selectedLogItem = listViewLog.SelectedItems[0];
+				DateTime logTime = DateTime.Parse(selectedLogItem.SubItems[0].Text);
+				FileLogger fileLogger = new FileLogger();
+				Process.Start(new ProcessStartInfo()
+					{
+						FileName = Path.Combine(fileLogger.LogPath, fileLogger.MakeLogFileName(logTime)),
+						Verb = "open"
+					});
+			}
+		}
+
 		#endregion
 
 		#region Settings tab
@@ -361,6 +376,7 @@ namespace UnpakkDaemonTray.Forms
 			}
 			else
 			{
+				RemoveOldLogEntries();
 				if (e.LogType >= ObjectPool.LogFilterLeastLogType)
 					AddLogEntry(e.LogTime, e.LogType, e.LogText);
 			}
@@ -511,16 +527,26 @@ namespace UnpakkDaemonTray.Forms
 			int imageIndex = (record.Status == RecordStatus.Failure || record.SubRecordStatus == RecordStatus.Failure ? 1 : 0);
 
 			if (node == null)
-				node = treeViewRecords.Nodes.Add(record.ID.ToString(), Path.GetFileNameWithoutExtension(record.SFVName), imageIndex, imageIndex);
+				node = treeViewRecords.Nodes.Add(record.ID.ToString(), GetRecordDisplayName(record), imageIndex, imageIndex);
 			else if (update)
 			{
-				node.Text = Path.GetFileNameWithoutExtension(record.SFVName);
+				node.Text = GetRecordDisplayName(record);
 				node.ImageIndex = node.SelectedImageIndex = imageIndex;
 				if (node.IsSelected) ShowRecordDetails(record);
 			}
 
 			node.Tag = record;
 			node.EnsureVisible();
+		}
+
+		private static string GetRecordDisplayName(Record record)
+		{
+			string displayName = Path.GetFileName(record.Folder);
+			while (!displayName.Contains(".") && !displayName.Contains(Path.DirectorySeparatorChar))
+			{
+				displayName = Path.Combine(Path.GetFileName(Path.GetDirectoryName(record.Folder)), displayName);
+			}
+			return displayName;
 		}
 
 		private void AddSubRecord(Guid parentID, SubRecord subRecord, bool update)
@@ -598,6 +624,18 @@ namespace UnpakkDaemonTray.Forms
 			{
 				groupBoxRecordDetails.Visible = false;
 				groupBoxSubRecordDetails.Visible = false;
+			}
+		}
+
+		private void RemoveOldLogEntries()
+		{
+			DateTime oldestLogTime = DateTime.Now.AddDays(-(ObjectPool.LogFilterDaysBack + 1));
+			foreach (ListViewItem item in listViewLog.Items.Cast<ListViewItem>().ToList())
+			{
+				if (((DateTime) item.Tag) < oldestLogTime)
+					listViewLog.Items.Remove(item);
+				else
+					break;
 			}
 		}
 

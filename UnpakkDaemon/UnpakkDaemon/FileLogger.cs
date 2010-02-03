@@ -47,7 +47,7 @@ namespace UnpakkDaemon
 
 		public string LogPathName
 		{
-			get { return Path.Combine(LogPath, LogName.Replace("%date%", DateTime.Now.ToString("yyyy-MM-dd"))); }
+			get { return Path.Combine(LogPath, MakeLogFileName(DateTime.Now)); }
 		}
 
 		#endregion
@@ -74,13 +74,18 @@ namespace UnpakkDaemon
 			_logTypeIndentationDepth = logTypeNames.Max(logTypeName => logTypeName.Length);
 		}
 
+		public string MakeLogFileName(DateTime date)
+		{
+			return LogName.Replace("%date%", date.ToString("yyyy-MM-dd"));
+		}
+
 		public void Load(int daysBack, LogType leastLogType)
 		{
 			try
 			{
 				for (int i = daysBack; i >= 0; i--)
 				{
-					string logPathName = Path.Combine(LogPath, LogName.Replace("%date%", DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd")));
+					string logPathName = Path.Combine(LogPath, MakeLogFileName(DateTime.Now.AddDays(-i)));
 					if (FileHandler.FileExists(logPathName))
 					{
 						string[] logLines = FileHandler.FileReadLines(logPathName);

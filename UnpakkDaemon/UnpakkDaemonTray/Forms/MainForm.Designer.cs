@@ -89,6 +89,7 @@
 			this.buttonAddRootPath = new System.Windows.Forms.Button();
 			this.listViewRootPath = new System.Windows.Forms.ListView();
 			this.columnHeaderRootPath = new System.Windows.Forms.ColumnHeader();
+			this.columnHeaderUserName = new System.Windows.Forms.ColumnHeader();
 			this.groupBoxApplicationSettings = new System.Windows.Forms.GroupBox();
 			this.checkBoxStartTrayAppWithWindows = new System.Windows.Forms.CheckBox();
 			this.labelStartTrayAppWithWindows = new System.Windows.Forms.Label();
@@ -110,7 +111,6 @@
 			this.toolStripMenuItemMinimize = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.columnHeaderUserName = new System.Windows.Forms.ColumnHeader();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
 			this.groupBoxRecordDetails.SuspendLayout();
@@ -653,6 +653,7 @@
 			this.listViewLog.TabIndex = 0;
 			this.listViewLog.UseCompatibleStateImageBehavior = false;
 			this.listViewLog.View = System.Windows.Forms.View.Details;
+			this.listViewLog.DoubleClick += new System.EventHandler(this.listViewLog_DoubleClick);
 			// 
 			// columnHeaderTime
 			// 
@@ -743,6 +744,11 @@
 			// 
 			this.columnHeaderRootPath.Text = "Root Path";
 			this.columnHeaderRootPath.Width = 545;
+			// 
+			// columnHeaderUserName
+			// 
+			this.columnHeaderUserName.Text = "User Name";
+			this.columnHeaderUserName.Width = 120;
 			// 
 			// groupBoxApplicationSettings
 			// 
@@ -928,11 +934,6 @@
 			this.toolTip.AutoPopDelay = 5000;
 			this.toolTip.InitialDelay = 100;
 			this.toolTip.ReshowDelay = 20;
-			// 
-			// columnHeaderUserName
-			// 
-			this.columnHeaderUserName.Text = "User Name";
-			this.columnHeaderUserName.Width = 120;
 			// 
 			// MainForm
 			// 
