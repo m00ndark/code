@@ -111,6 +111,7 @@
 			this.toolStripMenuItemMinimize = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+			this.splitContainer = new System.Windows.Forms.SplitContainer();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
 			this.groupBoxRecordDetails.SuspendLayout();
@@ -125,6 +126,9 @@
 			this.groupBoxScanSettings.SuspendLayout();
 			this.groupBoxApplicationSettings.SuspendLayout();
 			this.contextMenuStrip.SuspendLayout();
+			this.splitContainer.Panel1.SuspendLayout();
+			this.splitContainer.Panel2.SuspendLayout();
+			this.splitContainer.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl
@@ -146,15 +150,13 @@
 			// 
 			// tabPageProgress
 			// 
-			this.tabPageProgress.Controls.Add(this.treeViewRecords);
+			this.tabPageProgress.Controls.Add(this.splitContainer);
 			this.tabPageProgress.Controls.Add(this.labelSubProgress);
 			this.tabPageProgress.Controls.Add(this.labelMainProgress);
 			this.tabPageProgress.Controls.Add(this.labelSubMessage);
 			this.tabPageProgress.Controls.Add(this.labelMainMessage);
 			this.tabPageProgress.Controls.Add(this.progressBarMainProgress);
 			this.tabPageProgress.Controls.Add(this.progressBarSubProgress);
-			this.tabPageProgress.Controls.Add(this.groupBoxRecordDetails);
-			this.tabPageProgress.Controls.Add(this.groupBoxSubRecordDetails);
 			this.tabPageProgress.Location = new System.Drawing.Point(4, 22);
 			this.tabPageProgress.Name = "tabPageProgress";
 			this.tabPageProgress.Padding = new System.Windows.Forms.Padding(3);
@@ -165,10 +167,13 @@
 			// 
 			// treeViewRecords
 			// 
+			this.treeViewRecords.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.treeViewRecords.HideSelection = false;
 			this.treeViewRecords.ImageIndex = 0;
 			this.treeViewRecords.ImageList = this.imageList;
-			this.treeViewRecords.Location = new System.Drawing.Point(6, 87);
+			this.treeViewRecords.Location = new System.Drawing.Point(0, 6);
 			this.treeViewRecords.Name = "treeViewRecords";
 			this.treeViewRecords.SelectedImageIndex = 0;
 			this.treeViewRecords.Size = new System.Drawing.Size(336, 277);
@@ -220,6 +225,8 @@
 			// 
 			// progressBarMainProgress
 			// 
+			this.progressBarMainProgress.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.progressBarMainProgress.Location = new System.Drawing.Point(6, 6);
 			this.progressBarMainProgress.Name = "progressBarMainProgress";
 			this.progressBarMainProgress.Size = new System.Drawing.Size(779, 15);
@@ -227,6 +234,8 @@
 			// 
 			// progressBarSubProgress
 			// 
+			this.progressBarSubProgress.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.progressBarSubProgress.Location = new System.Drawing.Point(6, 44);
 			this.progressBarSubProgress.Name = "progressBarSubProgress";
 			this.progressBarSubProgress.Size = new System.Drawing.Size(779, 15);
@@ -234,6 +243,9 @@
 			// 
 			// groupBoxRecordDetails
 			// 
+			this.groupBoxRecordDetails.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBoxRecordDetails.Controls.Add(this.linkLabelRecordStatus);
 			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTimeValue);
 			this.groupBoxRecordDetails.Controls.Add(this.labelRecordTime);
@@ -250,7 +262,7 @@
 			this.groupBoxRecordDetails.Controls.Add(this.textBoxRecordSFVFile);
 			this.groupBoxRecordDetails.Controls.Add(this.labelRecordSFVFile);
 			this.groupBoxRecordDetails.Controls.Add(this.labelRecordPath);
-			this.groupBoxRecordDetails.Location = new System.Drawing.Point(348, 81);
+			this.groupBoxRecordDetails.Location = new System.Drawing.Point(0, 0);
 			this.groupBoxRecordDetails.Name = "groupBoxRecordDetails";
 			this.groupBoxRecordDetails.Size = new System.Drawing.Size(437, 284);
 			this.groupBoxRecordDetails.TabIndex = 11;
@@ -295,6 +307,7 @@
 			// 
 			// pictureBoxRecord
 			// 
+			this.pictureBoxRecord.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.pictureBoxRecord.Location = new System.Drawing.Point(9, 225);
 			this.pictureBoxRecord.Name = "pictureBoxRecord";
 			this.pictureBoxRecord.Size = new System.Drawing.Size(48, 48);
@@ -319,6 +332,7 @@
 			// 
 			// linkLabelRecordOpenFolder
 			// 
+			this.linkLabelRecordOpenFolder.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.linkLabelRecordOpenFolder.AutoSize = true;
 			this.linkLabelRecordOpenFolder.LinkArea = new System.Windows.Forms.LinkArea(0, 11);
 			this.linkLabelRecordOpenFolder.Location = new System.Drawing.Point(366, 260);
@@ -349,6 +363,8 @@
 			// 
 			// textBoxRecordRARFile
 			// 
+			this.textBoxRecordRARFile.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxRecordRARFile.BackColor = System.Drawing.Color.White;
 			this.textBoxRecordRARFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.textBoxRecordRARFile.Location = new System.Drawing.Point(74, 74);
@@ -368,6 +384,8 @@
 			// 
 			// textBoxRecordPath
 			// 
+			this.textBoxRecordPath.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxRecordPath.BackColor = System.Drawing.Color.White;
 			this.textBoxRecordPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.textBoxRecordPath.Location = new System.Drawing.Point(74, 22);
@@ -378,6 +396,8 @@
 			// 
 			// textBoxRecordSFVFile
 			// 
+			this.textBoxRecordSFVFile.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxRecordSFVFile.BackColor = System.Drawing.Color.White;
 			this.textBoxRecordSFVFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.textBoxRecordSFVFile.Location = new System.Drawing.Point(74, 48);
@@ -406,6 +426,9 @@
 			// 
 			// groupBoxSubRecordDetails
 			// 
+			this.groupBoxSubRecordDetails.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBoxSubRecordDetails.Controls.Add(this.linkLabelSubRecordStatus);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordTimeValue);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordTime);
@@ -419,7 +442,7 @@
 			this.groupBoxSubRecordDetails.Controls.Add(this.textBoxSubRecordFile);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordFile);
 			this.groupBoxSubRecordDetails.Controls.Add(this.labelSubRecordPath);
-			this.groupBoxSubRecordDetails.Location = new System.Drawing.Point(348, 81);
+			this.groupBoxSubRecordDetails.Location = new System.Drawing.Point(0, 0);
 			this.groupBoxSubRecordDetails.Name = "groupBoxSubRecordDetails";
 			this.groupBoxSubRecordDetails.Size = new System.Drawing.Size(437, 284);
 			this.groupBoxSubRecordDetails.TabIndex = 18;
@@ -464,6 +487,7 @@
 			// 
 			// pictureBoxSubRecord
 			// 
+			this.pictureBoxSubRecord.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.pictureBoxSubRecord.Location = new System.Drawing.Point(9, 225);
 			this.pictureBoxSubRecord.Name = "pictureBoxSubRecord";
 			this.pictureBoxSubRecord.Size = new System.Drawing.Size(48, 48);
@@ -480,6 +504,7 @@
 			// 
 			// linkLabelSubRecordOpenFile
 			// 
+			this.linkLabelSubRecordOpenFile.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.linkLabelSubRecordOpenFile.AutoSize = true;
 			this.linkLabelSubRecordOpenFile.Location = new System.Drawing.Point(308, 260);
 			this.linkLabelSubRecordOpenFile.Name = "linkLabelSubRecordOpenFile";
@@ -491,6 +516,7 @@
 			// 
 			// linkLabelSubRecordOpenFolder
 			// 
+			this.linkLabelSubRecordOpenFolder.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.linkLabelSubRecordOpenFolder.AutoSize = true;
 			this.linkLabelSubRecordOpenFolder.Location = new System.Drawing.Point(366, 260);
 			this.linkLabelSubRecordOpenFolder.Name = "linkLabelSubRecordOpenFolder";
@@ -511,6 +537,8 @@
 			// 
 			// textBoxSubRecordPath
 			// 
+			this.textBoxSubRecordPath.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxSubRecordPath.BackColor = System.Drawing.Color.White;
 			this.textBoxSubRecordPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.textBoxSubRecordPath.Location = new System.Drawing.Point(74, 22);
@@ -521,6 +549,8 @@
 			// 
 			// textBoxSubRecordFile
 			// 
+			this.textBoxSubRecordFile.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxSubRecordFile.BackColor = System.Drawing.Color.White;
 			this.textBoxSubRecordFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.textBoxSubRecordFile.Location = new System.Drawing.Point(74, 48);
@@ -561,6 +591,8 @@
 			// 
 			// tableLayoutPanel
 			// 
+			this.tableLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.tableLayoutPanel.ColumnCount = 3;
 			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
@@ -589,6 +621,8 @@
 			// 
 			// comboBoxLogFilterLeastLogType
 			// 
+			this.comboBoxLogFilterLeastLogType.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.comboBoxLogFilterLeastLogType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxLogFilterLeastLogType.FormattingEnabled = true;
 			this.comboBoxLogFilterLeastLogType.Location = new System.Drawing.Point(122, 0);
@@ -621,6 +655,8 @@
 			// 
 			// comboBoxLogFilterDaysBack
 			// 
+			this.comboBoxLogFilterDaysBack.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.comboBoxLogFilterDaysBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxLogFilterDaysBack.FormattingEnabled = true;
 			this.comboBoxLogFilterDaysBack.Location = new System.Drawing.Point(94, 0);
@@ -640,6 +676,9 @@
 			// 
 			// listViewLog
 			// 
+			this.listViewLog.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
 			this.listViewLog.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeaderTime,
             this.columnHeaderType,
@@ -935,13 +974,33 @@
 			this.toolTip.InitialDelay = 100;
 			this.toolTip.ReshowDelay = 20;
 			// 
+			// splitContainer
+			// 
+			this.splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.splitContainer.Location = new System.Drawing.Point(6, 81);
+			this.splitContainer.Name = "splitContainer";
+			// 
+			// splitContainer.Panel1
+			// 
+			this.splitContainer.Panel1.Controls.Add(this.treeViewRecords);
+			// 
+			// splitContainer.Panel2
+			// 
+			this.splitContainer.Panel2.Controls.Add(this.groupBoxRecordDetails);
+			this.splitContainer.Panel2.Controls.Add(this.groupBoxSubRecordDetails);
+			this.splitContainer.Size = new System.Drawing.Size(779, 284);
+			this.splitContainer.SplitterDistance = 336;
+			this.splitContainer.SplitterWidth = 6;
+			this.splitContainer.TabIndex = 19;
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(817, 414);
 			this.Controls.Add(this.tabControl);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
@@ -970,6 +1029,9 @@
 			this.groupBoxApplicationSettings.ResumeLayout(false);
 			this.groupBoxApplicationSettings.PerformLayout();
 			this.contextMenuStrip.ResumeLayout(false);
+			this.splitContainer.Panel1.ResumeLayout(false);
+			this.splitContainer.Panel2.ResumeLayout(false);
+			this.splitContainer.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -1057,5 +1119,6 @@
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemServiceStart;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemServicePause;
 		private System.Windows.Forms.ColumnHeader columnHeaderUserName;
+		private System.Windows.Forms.SplitContainer splitContainer;
 	}
 }
