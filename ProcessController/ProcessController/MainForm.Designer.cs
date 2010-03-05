@@ -295,6 +295,7 @@
             this.notifyIcon.Text = "Process Controller";
             this.notifyIcon.Visible = true;
             this.notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
+            this.notifyIcon.MouseUp += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseUp);
             // 
             // contextMenuStripSystemTray
             // 

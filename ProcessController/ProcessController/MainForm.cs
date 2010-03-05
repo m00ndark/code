@@ -125,6 +125,16 @@ namespace ProcessController
             }
         }
 
+        private void notifyIcon_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                // ShowContextMenu method is private.. have to use reflection to call it
+                MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+                mi.Invoke(notifyIcon, null);
+            }
+        }
+
         #endregion
 
         #region System tray context menu
