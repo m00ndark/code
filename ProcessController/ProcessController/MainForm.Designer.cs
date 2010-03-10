@@ -53,15 +53,10 @@
             this.buttonExit = new System.Windows.Forms.Button();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStripSystemTray = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItemSystemTrayStartSingle = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStartBySet = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItemSystemTrayStopSingle = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStopBySet = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemSystemTrayOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSystemTrayOptionsStartWithWindows = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemSystemTrayRestoreMinimize = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSystemTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripApplicationList = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -73,6 +68,15 @@
             this.comboBoxSets = new System.Windows.Forms.ComboBox();
             this.buttonExport = new System.Windows.Forms.Button();
             this.buttonImport = new System.Windows.Forms.Button();
+            this.toolStripMenuItemSystemTrayStart = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRestart = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStop = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStartSingle = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStartBySet = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRestartSingle = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRestartBySet = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStopSingle = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStopBySet = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxSelectedApplication.SuspendLayout();
             this.contextMenuStripSystemTray.SuspendLayout();
             this.contextMenuStripApplicationList.SuspendLayout();
@@ -300,59 +304,28 @@
             // contextMenuStripSystemTray
             // 
             this.contextMenuStripSystemTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemSystemTrayStartSingle,
-            this.toolStripMenuItemSystemTrayStartBySet,
-            this.toolStripSeparator3,
-            this.toolStripMenuItemSystemTrayStopSingle,
-            this.toolStripMenuItemSystemTrayStopBySet,
+            this.toolStripMenuItemSystemTrayStart,
+            this.toolStripMenuItemSystemTrayRestart,
+            this.toolStripMenuItemSystemTrayStop,
             this.toolStripSeparator2,
             this.toolStripMenuItemSystemTrayOptions,
-            this.toolStripSeparator4,
+            this.toolStripSeparator3,
             this.toolStripMenuItemSystemTrayRestoreMinimize,
             this.toolStripMenuItemSystemTrayExit});
             this.contextMenuStripSystemTray.Name = "contextMenuStripSystemTray";
-            this.contextMenuStripSystemTray.Size = new System.Drawing.Size(134, 176);
-            // 
-            // toolStripMenuItemSystemTrayStartSingle
-            // 
-            this.toolStripMenuItemSystemTrayStartSingle.Name = "toolStripMenuItemSystemTrayStartSingle";
-            this.toolStripMenuItemSystemTrayStartSingle.Size = new System.Drawing.Size(133, 22);
-            this.toolStripMenuItemSystemTrayStartSingle.Text = "Start Single";
-            // 
-            // toolStripMenuItemSystemTrayStartBySet
-            // 
-            this.toolStripMenuItemSystemTrayStartBySet.Name = "toolStripMenuItemSystemTrayStartBySet";
-            this.toolStripMenuItemSystemTrayStartBySet.Size = new System.Drawing.Size(133, 22);
-            this.toolStripMenuItemSystemTrayStartBySet.Text = "Start By Set";
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(130, 6);
-            // 
-            // toolStripMenuItemSystemTrayStopSingle
-            // 
-            this.toolStripMenuItemSystemTrayStopSingle.Name = "toolStripMenuItemSystemTrayStopSingle";
-            this.toolStripMenuItemSystemTrayStopSingle.Size = new System.Drawing.Size(133, 22);
-            this.toolStripMenuItemSystemTrayStopSingle.Text = "Stop Single";
-            // 
-            // toolStripMenuItemSystemTrayStopBySet
-            // 
-            this.toolStripMenuItemSystemTrayStopBySet.Name = "toolStripMenuItemSystemTrayStopBySet";
-            this.toolStripMenuItemSystemTrayStopBySet.Size = new System.Drawing.Size(133, 22);
-            this.toolStripMenuItemSystemTrayStopBySet.Text = "Stop By Set";
+            this.contextMenuStripSystemTray.Size = new System.Drawing.Size(119, 148);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(130, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(115, 6);
             // 
             // toolStripMenuItemSystemTrayOptions
             // 
             this.toolStripMenuItemSystemTrayOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemSystemTrayOptionsStartWithWindows});
             this.toolStripMenuItemSystemTrayOptions.Name = "toolStripMenuItemSystemTrayOptions";
-            this.toolStripMenuItemSystemTrayOptions.Size = new System.Drawing.Size(133, 22);
+            this.toolStripMenuItemSystemTrayOptions.Size = new System.Drawing.Size(118, 22);
             this.toolStripMenuItemSystemTrayOptions.Text = "Options";
             // 
             // toolStripMenuItemSystemTrayOptionsStartWithWindows
@@ -362,23 +335,23 @@
             this.toolStripMenuItemSystemTrayOptionsStartWithWindows.Text = "Start With Windows";
             this.toolStripMenuItemSystemTrayOptionsStartWithWindows.Click += new System.EventHandler(this.toolStripMenuItemSystemTrayOptionsStartWithWindows_Click);
             // 
-            // toolStripSeparator4
+            // toolStripSeparator3
             // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(130, 6);
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(115, 6);
             // 
             // toolStripMenuItemSystemTrayRestoreMinimize
             // 
             this.toolStripMenuItemSystemTrayRestoreMinimize.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripMenuItemSystemTrayRestoreMinimize.Name = "toolStripMenuItemSystemTrayRestoreMinimize";
-            this.toolStripMenuItemSystemTrayRestoreMinimize.Size = new System.Drawing.Size(133, 22);
+            this.toolStripMenuItemSystemTrayRestoreMinimize.Size = new System.Drawing.Size(118, 22);
             this.toolStripMenuItemSystemTrayRestoreMinimize.Text = "Restore";
             this.toolStripMenuItemSystemTrayRestoreMinimize.Click += new System.EventHandler(this.toolStripMenuItemSystemTrayRestoreMinimize_Click);
             // 
             // toolStripMenuItemSystemTrayExit
             // 
             this.toolStripMenuItemSystemTrayExit.Name = "toolStripMenuItemSystemTrayExit";
-            this.toolStripMenuItemSystemTrayExit.Size = new System.Drawing.Size(133, 22);
+            this.toolStripMenuItemSystemTrayExit.Size = new System.Drawing.Size(118, 22);
             this.toolStripMenuItemSystemTrayExit.Text = "Exit";
             this.toolStripMenuItemSystemTrayExit.Click += new System.EventHandler(this.toolStripMenuItemSystemTrayExit_Click);
             // 
@@ -460,6 +433,69 @@
             this.buttonImport.UseVisualStyleBackColor = true;
             this.buttonImport.Click += new System.EventHandler(this.buttonImport_Click);
             // 
+            // toolStripMenuItemSystemTrayStart
+            // 
+            this.toolStripMenuItemSystemTrayStart.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSystemTrayStartSingle,
+            this.toolStripMenuItemSystemTrayStartBySet});
+            this.toolStripMenuItemSystemTrayStart.Name = "toolStripMenuItemSystemTrayStart";
+            this.toolStripMenuItemSystemTrayStart.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayStart.Text = "Start";
+            // 
+            // toolStripMenuItemSystemTrayRestart
+            // 
+            this.toolStripMenuItemSystemTrayRestart.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSystemTrayRestartSingle,
+            this.toolStripMenuItemSystemTrayRestartBySet});
+            this.toolStripMenuItemSystemTrayRestart.Name = "toolStripMenuItemSystemTrayRestart";
+            this.toolStripMenuItemSystemTrayRestart.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayRestart.Text = "Restart";
+            // 
+            // toolStripMenuItemSystemTrayStop
+            // 
+            this.toolStripMenuItemSystemTrayStop.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSystemTrayStopSingle,
+            this.toolStripMenuItemSystemTrayStopBySet});
+            this.toolStripMenuItemSystemTrayStop.Name = "toolStripMenuItemSystemTrayStop";
+            this.toolStripMenuItemSystemTrayStop.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayStop.Text = "Stop";
+            // 
+            // toolStripMenuItemSystemTrayStartSingle
+            // 
+            this.toolStripMenuItemSystemTrayStartSingle.Name = "toolStripMenuItemSystemTrayStartSingle";
+            this.toolStripMenuItemSystemTrayStartSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStartSingle.Text = "Single";
+            // 
+            // toolStripMenuItemSystemTrayStartBySet
+            // 
+            this.toolStripMenuItemSystemTrayStartBySet.Name = "toolStripMenuItemSystemTrayStartBySet";
+            this.toolStripMenuItemSystemTrayStartBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStartBySet.Text = "By Set";
+            // 
+            // toolStripMenuItemSystemTrayRestartSingle
+            // 
+            this.toolStripMenuItemSystemTrayRestartSingle.Name = "toolStripMenuItemSystemTrayRestartSingle";
+            this.toolStripMenuItemSystemTrayRestartSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayRestartSingle.Text = "Single";
+            // 
+            // toolStripMenuItemSystemTrayRestartBySet
+            // 
+            this.toolStripMenuItemSystemTrayRestartBySet.Name = "toolStripMenuItemSystemTrayRestartBySet";
+            this.toolStripMenuItemSystemTrayRestartBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayRestartBySet.Text = "By Set";
+            // 
+            // toolStripMenuItemSystemTrayStopSingle
+            // 
+            this.toolStripMenuItemSystemTrayStopSingle.Name = "toolStripMenuItemSystemTrayStopSingle";
+            this.toolStripMenuItemSystemTrayStopSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStopSingle.Text = "Single";
+            // 
+            // toolStripMenuItemSystemTrayStopBySet
+            // 
+            this.toolStripMenuItemSystemTrayStopBySet.Name = "toolStripMenuItemSystemTrayStopBySet";
+            this.toolStripMenuItemSystemTrayStopBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStopBySet.Text = "By Set";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -519,11 +555,6 @@
         private System.Windows.Forms.ColumnHeader columnHeaderStatus;
         private System.Windows.Forms.ComboBox comboBoxSets;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStartSingle;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStartBySet;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStopSingle;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStopBySet;
         private System.Windows.Forms.Label labelSets;
         private System.Windows.Forms.Label labelHeaderSets;
         private System.Windows.Forms.ColumnHeader columnHeaderGroup;
@@ -531,9 +562,18 @@
         private System.Windows.Forms.TextBox textBoxPath;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayOptions;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayOptionsStartWithWindows;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.Button buttonExport;
         private System.Windows.Forms.Button buttonImport;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStart;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStartSingle;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStartBySet;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayRestart;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayRestartSingle;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayRestartBySet;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStop;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStopSingle;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStopBySet;
     }
 }
 
