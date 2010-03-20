@@ -12,6 +12,8 @@ namespace UnpakkDaemonTray.Workers
 	{
 		public event EventHandler<StringEventArgs> ApplicationDataFolderUpdated;
 		public event EventHandler<TimeSpanEventArgs> SleepTimeUpdated;
+		public event EventHandler<BooleanEventArgs> UseSpecificOutputFolderUpdated;
+		public event EventHandler<StringEventArgs> OutputFolderUpdated;
 		public event EventHandler<RootPathListEventArgs> RootPathListUpdated;
 
 		public string LastBrowsedRootPath { get; set; }
@@ -34,6 +36,22 @@ namespace UnpakkDaemonTray.Workers
 			}
 		}
 
+		private void RaiseUseSpecificOutputFolderUpdatedEvent(bool useSpecificOutputFolder)
+		{
+			if (UseSpecificOutputFolderUpdated != null)
+			{
+				UseSpecificOutputFolderUpdated(this, new BooleanEventArgs(useSpecificOutputFolder));
+			}
+		}
+
+		private void RaiseOutputFolderUpdatedEvent(string outputFolder)
+		{
+			if (OutputFolderUpdated != null)
+			{
+				OutputFolderUpdated(this, new StringEventArgs(outputFolder));
+			}
+		}
+
 		private void RaiseRootPathListUpdatedEvent(IEnumerable<RootPath> rootPaths)
 		{
 			if (RootPathListUpdated != null)
@@ -51,6 +69,8 @@ namespace UnpakkDaemonTray.Workers
 				EngineSettings.Load();
 				RaiseApplicationDataFolderUpdatedEvent(EngineSettings.ApplicationDataFolder);
 				RaiseSleepTimeUpdatedEvent(EngineSettings.SleepTime);
+				RaiseUseSpecificOutputFolderUpdatedEvent(EngineSettings.UseSpecificOutputFolder);
+				RaiseOutputFolderUpdatedEvent(EngineSettings.OutputFolder);
 				RaiseRootPathListUpdatedEvent(EngineSettings.RootPaths);
 				LastBrowsedRootPath = string.Empty;
 			}
@@ -72,7 +92,7 @@ namespace UnpakkDaemonTray.Workers
 			}
 		}
 
-		public void SetApplicationDataFolder()
+		public void BrowseApplicationDataFolder()
 		{
 			try
 			{
@@ -92,6 +112,30 @@ namespace UnpakkDaemonTray.Workers
 			}
 		}
 
+		public bool SetApplicationDataFolder(string path)
+		{
+			try
+			{
+				if (FileHandler.DirectoryExists(EngineSettings.ReplacePathIdentifier(path)))
+				{
+					EngineSettings.SetApplicationDataFolder(path);
+					RegistryHandler.SaveEngineSettings(EngineSettingsType.ApplicationDataFolder);
+					RaiseApplicationDataFolderUpdatedEvent(EngineSettings.ApplicationDataFolder);
+				}
+				else
+				{
+					CommonWorker.ShowError("The specified Application Data Folder does not exist.");
+					return false;
+				}
+			}
+			catch (Exception ex)
+			{
+				CommonWorker.ShowError(ex);
+				return false;
+			}
+			return true;
+		}
+
 		public bool SetSleepTime(string sleepTimeMinutes)
 		{
 			try
@@ -104,6 +148,64 @@ namespace UnpakkDaemonTray.Workers
 			{
 				CommonWorker.ShowError("Incorrect format of Sleep Time value.");
 				return false;
+			}
+			catch (Exception ex)
+			{
+				CommonWorker.ShowError(ex);
+				return false;
+			}
+			return true;
+		}
+
+		public void ToggleUseSpecificOutputFolder()
+		{
+			try
+			{
+				EngineSettings.UseSpecificOutputFolder = !EngineSettings.UseSpecificOutputFolder;
+				RegistryHandler.SaveEngineSettings(EngineSettingsType.UseSpecificOutputFolder);
+				RaiseUseSpecificOutputFolderUpdatedEvent(EngineSettings.UseSpecificOutputFolder);
+			}
+			catch (Exception ex)
+			{
+				CommonWorker.ShowError(ex);
+			}
+		}
+
+		public void BrowseOutputFolder()
+		{
+			try
+			{
+				FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+				folderBrowserDialog.Description = "Please select an output folder...";
+				folderBrowserDialog.SelectedPath = EngineSettings.OutputFolderComplete;
+				if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+				{
+					EngineSettings.SetOutputFolder(folderBrowserDialog.SelectedPath);
+					RegistryHandler.SaveEngineSettings(EngineSettingsType.OutputFolder);
+					RaiseOutputFolderUpdatedEvent(EngineSettings.OutputFolder);
+				}
+			}
+			catch (Exception ex)
+			{
+				CommonWorker.ShowError(ex);
+			}
+		}
+
+		public bool SetOutputFolder(string path)
+		{
+			try
+			{
+				if (FileHandler.DirectoryExists(EngineSettings.ReplacePathIdentifier(path)))
+				{
+					EngineSettings.SetOutputFolder(path);
+					RegistryHandler.SaveEngineSettings(EngineSettingsType.OutputFolder);
+					RaiseOutputFolderUpdatedEvent(EngineSettings.OutputFolder);
+				}
+				else
+				{
+					CommonWorker.ShowError("The specified Output Folder does not exist.");
+					return false;
+				}
 			}
 			catch (Exception ex)
 			{

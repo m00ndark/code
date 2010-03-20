@@ -94,6 +94,7 @@
     <Compile Include="DataObjects\SubRecord.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="EventArguments\BooleanEventArgs.cs" />
     <Compile Include="EventArguments\SubRecordEventArgs.cs" />
     <Compile Include="EventArguments\RecordEventArgs.cs" />
     <Compile Include="EventArguments\TimeSpanEventArgs.cs" />

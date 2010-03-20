@@ -22,9 +22,14 @@ namespace UnpakkDaemon.DataAccess
 			return new FileInfo(filePath).Length;
 		}
 
+		public static bool DirectoryExists(string path)
+		{
+			return Directory.Exists(path);
+		}
+
 		public static void MakeDirectory(string path)
 		{
-			if (!Directory.Exists(path))
+			if (!DirectoryExists(path))
 				Directory.CreateDirectory(path);
 		}
 

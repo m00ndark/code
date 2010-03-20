@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnpakkDaemon.DataAccess;
 using UnpakkDaemon.DataObjects;
 
@@ -12,22 +11,29 @@ namespace UnpakkDaemon
 
 		public const string DEFAULT_APPLICATION_DATA_FOLDER = @"%ProgramData%\MoleCode\Unpakk Daemon";
 		public const string DEFAULT_SLEEP_TIME = "00:00:10";
+		public const string DEFAULT_USE_SPECIFIC_OUTPUT_FOLDER = "False";
+		public const string DEFAULT_OUTPUT_FOLDER = "";
 
 		static EngineSettings()
 		{
 			RootPaths = new List<RootPath>();
 			SleepTime = TimeSpan.Parse(DEFAULT_SLEEP_TIME);
 			SetApplicationDataFolder(DEFAULT_APPLICATION_DATA_FOLDER);
+			UseSpecificOutputFolder = bool.Parse(DEFAULT_USE_SPECIFIC_OUTPUT_FOLDER);
+			SetOutputFolder(DEFAULT_OUTPUT_FOLDER);
 		}
 
 		#region Properties
 
 		// runtime objects
 		public static string ApplicationDataFolderComplete { get { return ReplacePathIdentifier(ApplicationDataFolder); } }
+		public static string OutputFolderComplete { get { return ReplacePathIdentifier(OutputFolder); } }
 
 		// persistant objects
-		public static TimeSpan SleepTime { get; set; }
 		public static string ApplicationDataFolder { get; private set; }
+		public static TimeSpan SleepTime { get; set; }
+		public static string OutputFolder { get; private set; }
+		public static bool UseSpecificOutputFolder { get; set; }
 		public static List<RootPath> RootPaths { get; private set; }
 
 		#endregion
@@ -35,6 +41,11 @@ namespace UnpakkDaemon
 		public static void SetApplicationDataFolder(string path)
 		{
 			ApplicationDataFolder = ReplaceWithPathIdentifier(path);
+		}
+
+		public static void SetOutputFolder(string path)
+		{
+			OutputFolder = ReplaceWithPathIdentifier(path);
 		}
 
 		public static void AddRootPath(RootPath rootPath)
@@ -63,12 +74,12 @@ namespace UnpakkDaemon
 
 		public static void Save()
 		{
-			RegistryHandler.LoadEngineSettings();
+			RegistryHandler.SaveEngineSettings();
 		}
 
 		public static void Save(EngineSettingsType engineSettingsType)
 		{
-			RegistryHandler.LoadEngineSettings(engineSettingsType);
+			RegistryHandler.SaveEngineSettings(engineSettingsType);
 		}
 
 		#region Helpers
@@ -83,7 +94,7 @@ namespace UnpakkDaemon
 			return path;
 		}
 
-		private static string ReplacePathIdentifier(string path)
+		public static string ReplacePathIdentifier(string path)
 		{
 			if (path.StartsWith(PROGRAM_DATA_IDENTIFIER, StringComparison.CurrentCultureIgnoreCase))
 				return path.Replace(PROGRAM_DATA_IDENTIFIER, Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));

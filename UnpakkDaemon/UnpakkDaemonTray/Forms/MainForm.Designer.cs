@@ -32,14 +32,9 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.tabPageProgress = new System.Windows.Forms.TabPage();
+			this.splitContainer = new System.Windows.Forms.SplitContainer();
 			this.treeViewRecords = new System.Windows.Forms.TreeView();
 			this.imageList = new System.Windows.Forms.ImageList(this.components);
-			this.labelSubProgress = new System.Windows.Forms.Label();
-			this.labelMainProgress = new System.Windows.Forms.Label();
-			this.labelSubMessage = new System.Windows.Forms.Label();
-			this.labelMainMessage = new System.Windows.Forms.Label();
-			this.progressBarMainProgress = new System.Windows.Forms.ProgressBar();
-			this.progressBarSubProgress = new System.Windows.Forms.ProgressBar();
 			this.groupBoxRecordDetails = new System.Windows.Forms.GroupBox();
 			this.linkLabelRecordStatus = new System.Windows.Forms.LinkLabel();
 			this.labelRecordTimeValue = new System.Windows.Forms.Label();
@@ -71,6 +66,12 @@
 			this.textBoxSubRecordFile = new System.Windows.Forms.TextBox();
 			this.labelSubRecordFile = new System.Windows.Forms.Label();
 			this.labelSubRecordPath = new System.Windows.Forms.Label();
+			this.labelSubProgress = new System.Windows.Forms.Label();
+			this.labelMainProgress = new System.Windows.Forms.Label();
+			this.labelSubMessage = new System.Windows.Forms.Label();
+			this.labelMainMessage = new System.Windows.Forms.Label();
+			this.progressBarMainProgress = new System.Windows.Forms.ProgressBar();
+			this.progressBarSubProgress = new System.Windows.Forms.ProgressBar();
 			this.tabPageLog = new System.Windows.Forms.TabPage();
 			this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
 			this.panelLogFilterLeastLogType = new System.Windows.Forms.Panel();
@@ -92,7 +93,6 @@
 			this.columnHeaderUserName = new System.Windows.Forms.ColumnHeader();
 			this.groupBoxApplicationSettings = new System.Windows.Forms.GroupBox();
 			this.checkBoxStartTrayAppWithWindows = new System.Windows.Forms.CheckBox();
-			this.labelStartTrayAppWithWindows = new System.Windows.Forms.Label();
 			this.buttonBrowseApplicationDataFolder = new System.Windows.Forms.Button();
 			this.labelSleepTimeMinutes = new System.Windows.Forms.Label();
 			this.textBoxSleepTime = new System.Windows.Forms.TextBox();
@@ -111,9 +111,14 @@
 			this.toolStripMenuItemMinimize = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.splitContainer = new System.Windows.Forms.SplitContainer();
+			this.checkBoxUseSpecificOutputFolder = new System.Windows.Forms.CheckBox();
+			this.buttonBrowseOutputFolder = new System.Windows.Forms.Button();
+			this.textBoxOutputFolder = new System.Windows.Forms.TextBox();
 			this.tabControl.SuspendLayout();
 			this.tabPageProgress.SuspendLayout();
+			this.splitContainer.Panel1.SuspendLayout();
+			this.splitContainer.Panel2.SuspendLayout();
+			this.splitContainer.SuspendLayout();
 			this.groupBoxRecordDetails.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize) (this.pictureBoxRecord)).BeginInit();
 			this.groupBoxSubRecordDetails.SuspendLayout();
@@ -126,9 +131,6 @@
 			this.groupBoxScanSettings.SuspendLayout();
 			this.groupBoxApplicationSettings.SuspendLayout();
 			this.contextMenuStrip.SuspendLayout();
-			this.splitContainer.Panel1.SuspendLayout();
-			this.splitContainer.Panel2.SuspendLayout();
-			this.splitContainer.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl
@@ -165,6 +167,27 @@
 			this.tabPageProgress.Text = "Progress";
 			this.tabPageProgress.UseVisualStyleBackColor = true;
 			// 
+			// splitContainer
+			// 
+			this.splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+							| System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.splitContainer.Location = new System.Drawing.Point(6, 81);
+			this.splitContainer.Name = "splitContainer";
+			// 
+			// splitContainer.Panel1
+			// 
+			this.splitContainer.Panel1.Controls.Add(this.treeViewRecords);
+			// 
+			// splitContainer.Panel2
+			// 
+			this.splitContainer.Panel2.Controls.Add(this.groupBoxRecordDetails);
+			this.splitContainer.Panel2.Controls.Add(this.groupBoxSubRecordDetails);
+			this.splitContainer.Size = new System.Drawing.Size(779, 284);
+			this.splitContainer.SplitterDistance = 336;
+			this.splitContainer.SplitterWidth = 6;
+			this.splitContainer.TabIndex = 19;
+			// 
 			// treeViewRecords
 			// 
 			this.treeViewRecords.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -188,58 +211,6 @@
 			this.imageList.Images.SetKeyName(1, "Record-Red-16.ico");
 			this.imageList.Images.SetKeyName(2, "SubRecord-16.ico");
 			this.imageList.Images.SetKeyName(3, "SubRecord-Red-16.ico");
-			// 
-			// labelSubProgress
-			// 
-			this.labelSubProgress.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.labelSubProgress.Location = new System.Drawing.Point(665, 62);
-			this.labelSubProgress.Name = "labelSubProgress";
-			this.labelSubProgress.Size = new System.Drawing.Size(120, 13);
-			this.labelSubProgress.TabIndex = 4;
-			this.labelSubProgress.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			// 
-			// labelMainProgress
-			// 
-			this.labelMainProgress.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.labelMainProgress.Location = new System.Drawing.Point(665, 24);
-			this.labelMainProgress.Name = "labelMainProgress";
-			this.labelMainProgress.Size = new System.Drawing.Size(120, 13);
-			this.labelMainProgress.TabIndex = 5;
-			this.labelMainProgress.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			// 
-			// labelSubMessage
-			// 
-			this.labelSubMessage.AutoSize = true;
-			this.labelSubMessage.Location = new System.Drawing.Point(6, 62);
-			this.labelSubMessage.Name = "labelSubMessage";
-			this.labelSubMessage.Size = new System.Drawing.Size(0, 13);
-			this.labelSubMessage.TabIndex = 4;
-			// 
-			// labelMainMessage
-			// 
-			this.labelMainMessage.AutoSize = true;
-			this.labelMainMessage.Location = new System.Drawing.Point(6, 24);
-			this.labelMainMessage.Name = "labelMainMessage";
-			this.labelMainMessage.Size = new System.Drawing.Size(0, 13);
-			this.labelMainMessage.TabIndex = 3;
-			// 
-			// progressBarMainProgress
-			// 
-			this.progressBarMainProgress.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-							| System.Windows.Forms.AnchorStyles.Right)));
-			this.progressBarMainProgress.Location = new System.Drawing.Point(6, 6);
-			this.progressBarMainProgress.Name = "progressBarMainProgress";
-			this.progressBarMainProgress.Size = new System.Drawing.Size(779, 15);
-			this.progressBarMainProgress.TabIndex = 2;
-			// 
-			// progressBarSubProgress
-			// 
-			this.progressBarSubProgress.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-							| System.Windows.Forms.AnchorStyles.Right)));
-			this.progressBarSubProgress.Location = new System.Drawing.Point(6, 44);
-			this.progressBarSubProgress.Name = "progressBarSubProgress";
-			this.progressBarSubProgress.Size = new System.Drawing.Size(779, 15);
-			this.progressBarSubProgress.TabIndex = 1;
 			// 
 			// groupBoxRecordDetails
 			// 
@@ -577,6 +548,58 @@
 			this.labelSubRecordPath.TabIndex = 9;
 			this.labelSubRecordPath.Text = "Path:";
 			// 
+			// labelSubProgress
+			// 
+			this.labelSubProgress.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelSubProgress.Location = new System.Drawing.Point(665, 62);
+			this.labelSubProgress.Name = "labelSubProgress";
+			this.labelSubProgress.Size = new System.Drawing.Size(120, 13);
+			this.labelSubProgress.TabIndex = 4;
+			this.labelSubProgress.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			// 
+			// labelMainProgress
+			// 
+			this.labelMainProgress.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelMainProgress.Location = new System.Drawing.Point(665, 24);
+			this.labelMainProgress.Name = "labelMainProgress";
+			this.labelMainProgress.Size = new System.Drawing.Size(120, 13);
+			this.labelMainProgress.TabIndex = 5;
+			this.labelMainProgress.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			// 
+			// labelSubMessage
+			// 
+			this.labelSubMessage.AutoSize = true;
+			this.labelSubMessage.Location = new System.Drawing.Point(6, 62);
+			this.labelSubMessage.Name = "labelSubMessage";
+			this.labelSubMessage.Size = new System.Drawing.Size(0, 13);
+			this.labelSubMessage.TabIndex = 4;
+			// 
+			// labelMainMessage
+			// 
+			this.labelMainMessage.AutoSize = true;
+			this.labelMainMessage.Location = new System.Drawing.Point(6, 24);
+			this.labelMainMessage.Name = "labelMainMessage";
+			this.labelMainMessage.Size = new System.Drawing.Size(0, 13);
+			this.labelMainMessage.TabIndex = 3;
+			// 
+			// progressBarMainProgress
+			// 
+			this.progressBarMainProgress.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.progressBarMainProgress.Location = new System.Drawing.Point(6, 6);
+			this.progressBarMainProgress.Name = "progressBarMainProgress";
+			this.progressBarMainProgress.Size = new System.Drawing.Size(779, 15);
+			this.progressBarMainProgress.TabIndex = 2;
+			// 
+			// progressBarSubProgress
+			// 
+			this.progressBarSubProgress.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+							| System.Windows.Forms.AnchorStyles.Right)));
+			this.progressBarSubProgress.Location = new System.Drawing.Point(6, 44);
+			this.progressBarSubProgress.Name = "progressBarSubProgress";
+			this.progressBarSubProgress.Size = new System.Drawing.Size(779, 15);
+			this.progressBarSubProgress.TabIndex = 1;
+			// 
 			// tabPageLog
 			// 
 			this.tabPageLog.Controls.Add(this.tableLayoutPanel);
@@ -793,8 +816,10 @@
 			// 
 			this.groupBoxApplicationSettings.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 							| System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBoxApplicationSettings.Controls.Add(this.buttonBrowseOutputFolder);
+			this.groupBoxApplicationSettings.Controls.Add(this.textBoxOutputFolder);
+			this.groupBoxApplicationSettings.Controls.Add(this.checkBoxUseSpecificOutputFolder);
 			this.groupBoxApplicationSettings.Controls.Add(this.checkBoxStartTrayAppWithWindows);
-			this.groupBoxApplicationSettings.Controls.Add(this.labelStartTrayAppWithWindows);
 			this.groupBoxApplicationSettings.Controls.Add(this.buttonBrowseApplicationDataFolder);
 			this.groupBoxApplicationSettings.Controls.Add(this.labelSleepTimeMinutes);
 			this.groupBoxApplicationSettings.Controls.Add(this.textBoxSleepTime);
@@ -811,21 +836,13 @@
 			// checkBoxStartTrayAppWithWindows
 			// 
 			this.checkBoxStartTrayAppWithWindows.AutoSize = true;
-			this.checkBoxStartTrayAppWithWindows.Location = new System.Drawing.Point(154, 74);
+			this.checkBoxStartTrayAppWithWindows.Location = new System.Drawing.Point(9, 99);
 			this.checkBoxStartTrayAppWithWindows.Name = "checkBoxStartTrayAppWithWindows";
-			this.checkBoxStartTrayAppWithWindows.Size = new System.Drawing.Size(15, 14);
+			this.checkBoxStartTrayAppWithWindows.Size = new System.Drawing.Size(191, 17);
 			this.checkBoxStartTrayAppWithWindows.TabIndex = 7;
+			this.checkBoxStartTrayAppWithWindows.Text = "Start tray application with Windows";
 			this.checkBoxStartTrayAppWithWindows.UseVisualStyleBackColor = true;
 			this.checkBoxStartTrayAppWithWindows.CheckedChanged += new System.EventHandler(this.checkBoxStartTrayAppWithWindows_CheckedChanged);
-			// 
-			// labelStartTrayAppWithWindows
-			// 
-			this.labelStartTrayAppWithWindows.AutoSize = true;
-			this.labelStartTrayAppWithWindows.Location = new System.Drawing.Point(6, 74);
-			this.labelStartTrayAppWithWindows.Name = "labelStartTrayAppWithWindows";
-			this.labelStartTrayAppWithWindows.Size = new System.Drawing.Size(142, 13);
-			this.labelStartTrayAppWithWindows.TabIndex = 6;
-			this.labelStartTrayAppWithWindows.Text = "Start tray app with Windows:";
 			// 
 			// buttonBrowseApplicationDataFolder
 			// 
@@ -841,7 +858,7 @@
 			// labelSleepTimeMinutes
 			// 
 			this.labelSleepTimeMinutes.AutoSize = true;
-			this.labelSleepTimeMinutes.Location = new System.Drawing.Point(236, 48);
+			this.labelSleepTimeMinutes.Location = new System.Drawing.Point(246, 48);
 			this.labelSleepTimeMinutes.Name = "labelSleepTimeMinutes";
 			this.labelSleepTimeMinutes.Size = new System.Drawing.Size(43, 13);
 			this.labelSleepTimeMinutes.TabIndex = 4;
@@ -849,7 +866,7 @@
 			// 
 			// textBoxSleepTime
 			// 
-			this.textBoxSleepTime.Location = new System.Drawing.Point(154, 45);
+			this.textBoxSleepTime.Location = new System.Drawing.Point(164, 45);
 			this.textBoxSleepTime.Name = "textBoxSleepTime";
 			this.textBoxSleepTime.Size = new System.Drawing.Size(76, 20);
 			this.textBoxSleepTime.TabIndex = 2;
@@ -867,9 +884,9 @@
 			// 
 			this.textBoxApplicationDataFolder.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 							| System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxApplicationDataFolder.Location = new System.Drawing.Point(154, 19);
+			this.textBoxApplicationDataFolder.Location = new System.Drawing.Point(164, 19);
 			this.textBoxApplicationDataFolder.Name = "textBoxApplicationDataFolder";
-			this.textBoxApplicationDataFolder.Size = new System.Drawing.Size(584, 20);
+			this.textBoxApplicationDataFolder.Size = new System.Drawing.Size(574, 20);
 			this.textBoxApplicationDataFolder.TabIndex = 0;
 			// 
 			// labelApplicationDataFolder
@@ -974,26 +991,36 @@
 			this.toolTip.InitialDelay = 100;
 			this.toolTip.ReshowDelay = 20;
 			// 
-			// splitContainer
+			// checkBoxUseSpecificOutputFolder
 			// 
-			this.splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-							| System.Windows.Forms.AnchorStyles.Left)
+			this.checkBoxUseSpecificOutputFolder.AutoSize = true;
+			this.checkBoxUseSpecificOutputFolder.Location = new System.Drawing.Point(9, 73);
+			this.checkBoxUseSpecificOutputFolder.Name = "checkBoxUseSpecificOutputFolder";
+			this.checkBoxUseSpecificOutputFolder.Size = new System.Drawing.Size(149, 17);
+			this.checkBoxUseSpecificOutputFolder.TabIndex = 8;
+			this.checkBoxUseSpecificOutputFolder.Text = "Use specific output folder:";
+			this.checkBoxUseSpecificOutputFolder.UseVisualStyleBackColor = true;
+			this.checkBoxUseSpecificOutputFolder.CheckedChanged += new System.EventHandler(this.checkBoxUseSpecificOutputFolder_CheckedChanged);
+			// 
+			// buttonBrowseOutputFolder
+			// 
+			this.buttonBrowseOutputFolder.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonBrowseOutputFolder.Location = new System.Drawing.Point(744, 69);
+			this.buttonBrowseOutputFolder.Name = "buttonBrowseOutputFolder";
+			this.buttonBrowseOutputFolder.Size = new System.Drawing.Size(32, 23);
+			this.buttonBrowseOutputFolder.TabIndex = 10;
+			this.buttonBrowseOutputFolder.Text = "...";
+			this.buttonBrowseOutputFolder.UseVisualStyleBackColor = true;
+			this.buttonBrowseOutputFolder.Click += new System.EventHandler(this.buttonBrowseOutputFolder_Click);
+			// 
+			// textBoxOutputFolder
+			// 
+			this.textBoxOutputFolder.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 							| System.Windows.Forms.AnchorStyles.Right)));
-			this.splitContainer.Location = new System.Drawing.Point(6, 81);
-			this.splitContainer.Name = "splitContainer";
-			// 
-			// splitContainer.Panel1
-			// 
-			this.splitContainer.Panel1.Controls.Add(this.treeViewRecords);
-			// 
-			// splitContainer.Panel2
-			// 
-			this.splitContainer.Panel2.Controls.Add(this.groupBoxRecordDetails);
-			this.splitContainer.Panel2.Controls.Add(this.groupBoxSubRecordDetails);
-			this.splitContainer.Size = new System.Drawing.Size(779, 284);
-			this.splitContainer.SplitterDistance = 336;
-			this.splitContainer.SplitterWidth = 6;
-			this.splitContainer.TabIndex = 19;
+			this.textBoxOutputFolder.Location = new System.Drawing.Point(164, 71);
+			this.textBoxOutputFolder.Name = "textBoxOutputFolder";
+			this.textBoxOutputFolder.Size = new System.Drawing.Size(574, 20);
+			this.textBoxOutputFolder.TabIndex = 9;
 			// 
 			// MainForm
 			// 
@@ -1012,6 +1039,9 @@
 			this.tabControl.ResumeLayout(false);
 			this.tabPageProgress.ResumeLayout(false);
 			this.tabPageProgress.PerformLayout();
+			this.splitContainer.Panel1.ResumeLayout(false);
+			this.splitContainer.Panel2.ResumeLayout(false);
+			this.splitContainer.ResumeLayout(false);
 			this.groupBoxRecordDetails.ResumeLayout(false);
 			this.groupBoxRecordDetails.PerformLayout();
 			((System.ComponentModel.ISupportInitialize) (this.pictureBoxRecord)).EndInit();
@@ -1029,9 +1059,6 @@
 			this.groupBoxApplicationSettings.ResumeLayout(false);
 			this.groupBoxApplicationSettings.PerformLayout();
 			this.contextMenuStrip.ResumeLayout(false);
-			this.splitContainer.Panel1.ResumeLayout(false);
-			this.splitContainer.Panel2.ResumeLayout(false);
-			this.splitContainer.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -1114,11 +1141,13 @@
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemOptions;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemOptionsStartWithWindows;
 		private System.Windows.Forms.CheckBox checkBoxStartTrayAppWithWindows;
-		private System.Windows.Forms.Label labelStartTrayAppWithWindows;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemService;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemServiceStart;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemServicePause;
 		private System.Windows.Forms.ColumnHeader columnHeaderUserName;
 		private System.Windows.Forms.SplitContainer splitContainer;
+		private System.Windows.Forms.Button buttonBrowseOutputFolder;
+		private System.Windows.Forms.TextBox textBoxOutputFolder;
+		private System.Windows.Forms.CheckBox checkBoxUseSpecificOutputFolder;
 	}
 }

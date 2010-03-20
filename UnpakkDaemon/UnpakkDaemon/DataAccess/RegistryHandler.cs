@@ -10,6 +10,8 @@ namespace UnpakkDaemon.DataAccess
 	{
 		ApplicationDataFolder,
 		SleepTime,
+		UseSpecificOutputFolder,
+		OutputFolder,
 		RootPaths
 	}
 
@@ -46,6 +48,14 @@ namespace UnpakkDaemon.DataAccess
 
 					case EngineSettingsType.SleepTime:
 						EngineSettings.SleepTime = TimeSpan.Parse((string) key.GetValue("Sleep Time", EngineSettings.DEFAULT_SLEEP_TIME));
+						break;
+
+					case EngineSettingsType.UseSpecificOutputFolder:
+						EngineSettings.UseSpecificOutputFolder = bool.Parse((string) key.GetValue("Use Specific Output Folder", EngineSettings.DEFAULT_USE_SPECIFIC_OUTPUT_FOLDER));
+						break;
+
+					case EngineSettingsType.OutputFolder:
+						EngineSettings.SetOutputFolder((string) key.GetValue("Output Folder", EngineSettings.DEFAULT_OUTPUT_FOLDER));
 						break;
 
 					case EngineSettingsType.RootPaths:
@@ -121,6 +131,14 @@ namespace UnpakkDaemon.DataAccess
 
 					case EngineSettingsType.SleepTime:
 						key.SetValue("Sleep Time", EngineSettings.SleepTime.ToString());
+						break;
+
+					case EngineSettingsType.UseSpecificOutputFolder:
+						key.SetValue("Use Specific Output Folder", EngineSettings.UseSpecificOutputFolder);
+						break;
+
+					case EngineSettingsType.OutputFolder:
+						key.SetValue("Output Folder", EngineSettings.OutputFolder);
 						break;
 
 					case EngineSettingsType.RootPaths:

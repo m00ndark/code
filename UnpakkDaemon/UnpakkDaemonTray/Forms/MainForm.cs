@@ -158,16 +158,22 @@ namespace UnpakkDaemonTray.Forms
 			{
 				_settingsWorker = new SettingsWorker();
 				_settingsWorker.ApplicationDataFolderUpdated += SettingsWorker_ApplicationDataFolderUpdated;
+				_settingsWorker.OutputFolderUpdated += SettingsWorker_OutputFolderUpdated;
+				_settingsWorker.UseSpecificOutputFolderUpdated += SettingsWorker_UseSpecificOutputFolderUpdated;
 				_settingsWorker.SleepTimeUpdated += SettingsWorker_SleepTimeUpdated;
 				_settingsWorker.RootPathListUpdated += SettingsWorker_RootPathListUpdated;
 				_settingsWorker.Initialize();
 			}
 			else if (_settingsWorker != null)
 			{
-				if (_settingsWorker.SetSleepTime(textBoxSleepTime.Text))
+				if (_settingsWorker.SetApplicationDataFolder(textBoxApplicationDataFolder.Text)
+					&& _settingsWorker.SetSleepTime(textBoxSleepTime.Text)
+					&& (!EngineSettings.UseSpecificOutputFolder || _settingsWorker.SetOutputFolder(textBoxOutputFolder.Text)))
 				{
 					_settingsWorker.Save();
 					_settingsWorker.ApplicationDataFolderUpdated -= SettingsWorker_ApplicationDataFolderUpdated;
+					_settingsWorker.OutputFolderUpdated -= SettingsWorker_OutputFolderUpdated;
+					_settingsWorker.UseSpecificOutputFolderUpdated -= SettingsWorker_UseSpecificOutputFolderUpdated;
 					_settingsWorker.SleepTimeUpdated -= SettingsWorker_SleepTimeUpdated;
 					_settingsWorker.RootPathListUpdated -= SettingsWorker_RootPathListUpdated;
 					_settingsWorker = null;
@@ -268,7 +274,18 @@ namespace UnpakkDaemonTray.Forms
 
 		private void buttonBrowseApplicationDataFolder_Click(object sender, EventArgs e)
 		{
-			_settingsWorker.SetApplicationDataFolder();
+			_settingsWorker.BrowseApplicationDataFolder();
+		}
+
+		private void checkBoxUseSpecificOutputFolder_CheckedChanged(object sender, EventArgs e)
+		{
+			if (!_discardEvents)
+				_settingsWorker.ToggleUseSpecificOutputFolder();
+		}
+
+		private void buttonBrowseOutputFolder_Click(object sender, EventArgs e)
+		{
+			_settingsWorker.BrowseOutputFolder();
 		}
 
 		private void checkBoxStartTrayAppWithWindows_CheckedChanged(object sender, EventArgs e)
@@ -417,6 +434,48 @@ namespace UnpakkDaemonTray.Forms
 				else
 				{
 					textBoxApplicationDataFolder.Text = e.Value;
+				}
+			}
+			catch (Exception ex)
+			{
+				FormUtilities.ShowError(this, ex);
+			}
+		}
+
+		private void SettingsWorker_UseSpecificOutputFolderUpdated(object sender, BooleanEventArgs e)
+		{
+			try
+			{
+				if (InvokeRequired)
+				{
+					Invoke(new EventHandler<BooleanEventArgs>(SettingsWorker_UseSpecificOutputFolderUpdated), new object[] { sender, e });
+				}
+				else
+				{
+					_discardEvents = true;
+					checkBoxUseSpecificOutputFolder.Checked = e.Value;
+					_discardEvents = false;
+					textBoxOutputFolder.Enabled = e.Value;
+					buttonBrowseOutputFolder.Enabled = e.Value;
+				}
+			}
+			catch (Exception ex)
+			{
+				FormUtilities.ShowError(this, ex);
+			}
+		}
+
+		private void SettingsWorker_OutputFolderUpdated(object sender, StringEventArgs e)
+		{
+			try
+			{
+				if (InvokeRequired)
+				{
+					Invoke(new EventHandler<StringEventArgs>(SettingsWorker_OutputFolderUpdated), new object[] { sender, e });
+				}
+				else
+				{
+					textBoxOutputFolder.Text = e.Value;
 				}
 			}
 			catch (Exception ex)
