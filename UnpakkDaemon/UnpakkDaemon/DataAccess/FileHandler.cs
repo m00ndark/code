@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -7,6 +8,8 @@ namespace UnpakkDaemon.DataAccess
 {
 	public static class FileHandler
 	{
+		#region File
+
 		public static bool FileExists(string filePath)
 		{
 			return File.Exists(filePath);
@@ -20,17 +23,6 @@ namespace UnpakkDaemon.DataAccess
 		public static long FileSize(string filePath)
 		{
 			return new FileInfo(filePath).Length;
-		}
-
-		public static bool DirectoryExists(string path)
-		{
-			return Directory.Exists(path);
-		}
-
-		public static void MakeDirectory(string path)
-		{
-			if (!DirectoryExists(path))
-				Directory.CreateDirectory(path);
 		}
 
 		public static long GetTotalFileSize(IEnumerable<string> filePaths)
@@ -49,6 +41,37 @@ namespace UnpakkDaemon.DataAccess
 				writer.WriteLine(text);
 		}
 
+		#endregion
+
+		#region Directory
+
+		public static bool DirectoryExists(string path)
+		{
+			return Directory.Exists(path);
+		}
+
+		public static void MakeDirectory(string path)
+		{
+			if (!DirectoryExists(path))
+				Directory.CreateDirectory(path);
+		}
+
+		#endregion
+
+		#region Path
+
+		public static string GetDeltaPath(string path, string rootPath)
+		{
+			if (path.StartsWith(rootPath, StringComparison.CurrentCultureIgnoreCase))
+				return path.Substring(rootPath.Length).Trim(Path.DirectorySeparatorChar);
+
+			return path.Trim(Path.DirectorySeparatorChar);
+		}
+
+		#endregion
+
+		#region Serialization
+
 		public static void Serialize(string filePath, IXmlSerializable obj)
 		{
 			XmlSerializer serializer = new XmlSerializer(obj.GetType());
@@ -62,5 +85,7 @@ namespace UnpakkDaemon.DataAccess
 			using (StreamReader reader = new StreamReader(filePath))
 				return (T) serializer.Deserialize(reader);
 		}
+
+		#endregion
 	}
 }

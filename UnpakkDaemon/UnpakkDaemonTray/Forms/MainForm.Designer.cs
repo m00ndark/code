@@ -91,7 +91,7 @@
 			this.listViewRootPath = new System.Windows.Forms.ListView();
 			this.columnHeaderRootPath = new System.Windows.Forms.ColumnHeader();
 			this.columnHeaderUserName = new System.Windows.Forms.ColumnHeader();
-			this.groupBoxApplicationSettings = new System.Windows.Forms.GroupBox();
+			this.groupBoxGeneralSettings = new System.Windows.Forms.GroupBox();
 			this.checkBoxStartTrayAppWithWindows = new System.Windows.Forms.CheckBox();
 			this.buttonBrowseApplicationDataFolder = new System.Windows.Forms.Button();
 			this.labelSleepTimeMinutes = new System.Windows.Forms.Label();
@@ -129,7 +129,7 @@
 			this.panelLogFilterDaysBack.SuspendLayout();
 			this.tabPageSettings.SuspendLayout();
 			this.groupBoxScanSettings.SuspendLayout();
-			this.groupBoxApplicationSettings.SuspendLayout();
+			this.groupBoxGeneralSettings.SuspendLayout();
 			this.contextMenuStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -735,7 +735,7 @@
 			// tabPageSettings
 			// 
 			this.tabPageSettings.Controls.Add(this.groupBoxScanSettings);
-			this.tabPageSettings.Controls.Add(this.groupBoxApplicationSettings);
+			this.tabPageSettings.Controls.Add(this.groupBoxGeneralSettings);
 			this.tabPageSettings.Location = new System.Drawing.Point(4, 22);
 			this.tabPageSettings.Name = "tabPageSettings";
 			this.tabPageSettings.Padding = new System.Windows.Forms.Padding(3);
@@ -812,26 +812,26 @@
 			this.columnHeaderUserName.Text = "User Name";
 			this.columnHeaderUserName.Width = 120;
 			// 
-			// groupBoxApplicationSettings
+			// groupBoxGeneralSettings
 			// 
-			this.groupBoxApplicationSettings.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+			this.groupBoxGeneralSettings.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 							| System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBoxApplicationSettings.Controls.Add(this.buttonBrowseOutputFolder);
-			this.groupBoxApplicationSettings.Controls.Add(this.textBoxOutputFolder);
-			this.groupBoxApplicationSettings.Controls.Add(this.checkBoxUseSpecificOutputFolder);
-			this.groupBoxApplicationSettings.Controls.Add(this.checkBoxStartTrayAppWithWindows);
-			this.groupBoxApplicationSettings.Controls.Add(this.buttonBrowseApplicationDataFolder);
-			this.groupBoxApplicationSettings.Controls.Add(this.labelSleepTimeMinutes);
-			this.groupBoxApplicationSettings.Controls.Add(this.textBoxSleepTime);
-			this.groupBoxApplicationSettings.Controls.Add(this.labelSleepTime);
-			this.groupBoxApplicationSettings.Controls.Add(this.textBoxApplicationDataFolder);
-			this.groupBoxApplicationSettings.Controls.Add(this.labelApplicationDataFolder);
-			this.groupBoxApplicationSettings.Location = new System.Drawing.Point(3, 6);
-			this.groupBoxApplicationSettings.Name = "groupBoxApplicationSettings";
-			this.groupBoxApplicationSettings.Size = new System.Drawing.Size(782, 131);
-			this.groupBoxApplicationSettings.TabIndex = 2;
-			this.groupBoxApplicationSettings.TabStop = false;
-			this.groupBoxApplicationSettings.Text = "Application Settings";
+			this.groupBoxGeneralSettings.Controls.Add(this.buttonBrowseOutputFolder);
+			this.groupBoxGeneralSettings.Controls.Add(this.textBoxOutputFolder);
+			this.groupBoxGeneralSettings.Controls.Add(this.checkBoxUseSpecificOutputFolder);
+			this.groupBoxGeneralSettings.Controls.Add(this.checkBoxStartTrayAppWithWindows);
+			this.groupBoxGeneralSettings.Controls.Add(this.buttonBrowseApplicationDataFolder);
+			this.groupBoxGeneralSettings.Controls.Add(this.labelSleepTimeMinutes);
+			this.groupBoxGeneralSettings.Controls.Add(this.textBoxSleepTime);
+			this.groupBoxGeneralSettings.Controls.Add(this.labelSleepTime);
+			this.groupBoxGeneralSettings.Controls.Add(this.textBoxApplicationDataFolder);
+			this.groupBoxGeneralSettings.Controls.Add(this.labelApplicationDataFolder);
+			this.groupBoxGeneralSettings.Location = new System.Drawing.Point(3, 6);
+			this.groupBoxGeneralSettings.Name = "groupBoxGeneralSettings";
+			this.groupBoxGeneralSettings.Size = new System.Drawing.Size(782, 131);
+			this.groupBoxGeneralSettings.TabIndex = 2;
+			this.groupBoxGeneralSettings.TabStop = false;
+			this.groupBoxGeneralSettings.Text = "General Settings";
 			// 
 			// checkBoxStartTrayAppWithWindows
 			// 
@@ -1056,8 +1056,8 @@
 			this.panelLogFilterDaysBack.PerformLayout();
 			this.tabPageSettings.ResumeLayout(false);
 			this.groupBoxScanSettings.ResumeLayout(false);
-			this.groupBoxApplicationSettings.ResumeLayout(false);
-			this.groupBoxApplicationSettings.PerformLayout();
+			this.groupBoxGeneralSettings.ResumeLayout(false);
+			this.groupBoxGeneralSettings.PerformLayout();
 			this.contextMenuStrip.ResumeLayout(false);
 			this.ResumeLayout(false);
 
@@ -1076,7 +1076,7 @@
 		private System.Windows.Forms.Label labelSubProgress;
 		private System.Windows.Forms.Label labelApplicationDataFolder;
 		private System.Windows.Forms.TextBox textBoxApplicationDataFolder;
-		private System.Windows.Forms.GroupBox groupBoxApplicationSettings;
+		private System.Windows.Forms.GroupBox groupBoxGeneralSettings;
 		private System.Windows.Forms.Button buttonBrowseApplicationDataFolder;
 		private System.Windows.Forms.Label labelSleepTimeMinutes;
 		private System.Windows.Forms.TextBox textBoxSleepTime;

@@ -320,7 +320,7 @@ namespace UnpakkDaemon
 								if (_shutDown) break;
 								RaiseSubProgressEvent(string.Empty, 0);
 								RaiseProgressEvent("Processing SFV file: " + Path.GetFileName(sfvFilePaths[i]), 100 * (pathCounter / (double) totalPaths), pathCounter + 1, totalPaths);
-								ProcessSFVFile(sfvFilePaths[i]);
+								ProcessSFVFile(sfvFilePaths[i], rootPath);
 								pathCounter++;
 							}
 						}
@@ -386,7 +386,7 @@ namespace UnpakkDaemon
 			while (IsPaused && !_shutDown) Thread.Sleep(100);
 		}
 
-		private void ProcessSFVFile(string sfvFilePath)
+		private void ProcessSFVFile(string sfvFilePath, RootPath rootPath)
 		{
 			SFVFile sfvFile = null;
 			try
@@ -406,7 +406,7 @@ namespace UnpakkDaemon
 					{
 						WriteLogEntry("Validation OK, proceeding with extraction...");
 						AddRecord(record.Succeed());
-						if (ExtractRARContent(rarFilePath, record))
+						if (ExtractRARContent(rarFilePath, rootPath, record))
 						{
 							DeleteFiles(sfvFile);
 						}
@@ -444,12 +444,17 @@ namespace UnpakkDaemon
 
 		#endregion
 
-		private bool ExtractRARContent(string rarFilePath, Record record)
+		private bool ExtractRARContent(string rarFilePath, RootPath rootPath, Record record)
 		{
 			bool success = true;
 			SubRecord subRecord = null;
 			_lastRARVolume = string.Empty;
-			Unrar unrar = new Unrar(rarFilePath) { DestinationPath = Path.GetDirectoryName(rarFilePath) };
+			Unrar unrar = new Unrar(rarFilePath)
+			{
+				DestinationPath = (EngineSettings.UseSpecificOutputFolder
+					? Path.Combine(EngineSettings.OutputFolder, FileHandler.GetDeltaPath(Path.GetDirectoryName(rarFilePath), rootPath.Path))
+					: Path.GetDirectoryName(rarFilePath))
+			};
 			unrar.ExtractionProgress += unrar_ExtractionProgress;
 			unrar.MissingVolume += unrar_MissingVolume;
 			unrar.NewVolume += unrar_NewVolume;
@@ -459,7 +464,7 @@ namespace UnpakkDaemon
 				unrar.Open(Unrar.OpenMode.Extract);
 				while (success && unrar.ReadHeader())
 				{
-					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName + ", size=" + unrar.CurrentFile.UnpackedSize);
+					WriteLogEntry("Extracting file, name=" + unrar.CurrentFile.FileName + ", size=" + unrar.CurrentFile.UnpackedSize + ", path=" + unrar.DestinationPath);
 					subRecord = new SubRecord(unrar.DestinationPath, unrar.CurrentFile.FileName, unrar.CurrentFile.UnpackedSize);
 					AddSubRecord(record.ID, subRecord);
 					unrar.Extract();
@@ -472,7 +477,7 @@ namespace UnpakkDaemon
 			}
 			catch (Exception ex)
 			{
-				WriteLogEntry("An exception occurred while extracting from RAR file, path=" + rarFilePath, ex);
+				WriteLogEntry("An exception occurred while extracting from RAR file, path=" + rarFilePath + ", destination=" + unrar.DestinationPath, ex);
 				if (subRecord != null) AddSubRecord(record.ID, subRecord.Fail());
 				success = false;
 			}
