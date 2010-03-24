@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLDBViewer", "XMLDBViewer\XMLDBViewer.csproj", "{FC47FAF6-6B35-4265-B728-0D47BF8EB36B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC47FAF6-6B35-4265-B728-0D47BF8EB36B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC47FAF6-6B35-4265-B728-0D47BF8EB36B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC47FAF6-6B35-4265-B728-0D47BF8EB36B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC47FAF6-6B35-4265-B728-0D47BF8EB36B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
