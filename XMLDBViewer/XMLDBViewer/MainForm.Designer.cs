@@ -165,6 +165,7 @@
             this.dataGridViewTable.UserAddedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridView_UserAddedRow);
             this.dataGridViewTable.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseDown);
             this.dataGridViewTable.UserDeletedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridView_UserDeletedRow);
+            this.dataGridViewTable.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewTable_CellFormatting);
             this.dataGridViewTable.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView_DataError);
             // 
             // treeViewDatabase
@@ -490,6 +491,7 @@
             this.dataGridViewQuery.TabIndex = 0;
             this.dataGridViewQuery.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewQuery_CellMouseUp);
             this.dataGridViewQuery.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewQuery_CellMouseDown);
+            this.dataGridViewQuery.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewQuery_CellFormatting);
             this.dataGridViewQuery.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewQuery_DataError);
             // 
             // contextMenuStripTable
@@ -699,20 +701,20 @@
             // toolStripMenuItemMainDatabaseOpen
             // 
             this.toolStripMenuItemMainDatabaseOpen.Name = "toolStripMenuItemMainDatabaseOpen";
-            this.toolStripMenuItemMainDatabaseOpen.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemMainDatabaseOpen.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItemMainDatabaseOpen.Text = "Open...";
             this.toolStripMenuItemMainDatabaseOpen.Click += new System.EventHandler(this.toolStripMenuItemMainDatabaseOpen_Click);
             // 
             // toolStripMenuItemMainDatabaseRecent
             // 
             this.toolStripMenuItemMainDatabaseRecent.Name = "toolStripMenuItemMainDatabaseRecent";
-            this.toolStripMenuItemMainDatabaseRecent.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemMainDatabaseRecent.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItemMainDatabaseRecent.Text = "Recent";
             // 
             // toolStripMenuItemMainDatabaseClose
             // 
             this.toolStripMenuItemMainDatabaseClose.Name = "toolStripMenuItemMainDatabaseClose";
-            this.toolStripMenuItemMainDatabaseClose.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemMainDatabaseClose.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItemMainDatabaseClose.Text = "Close";
             this.toolStripMenuItemMainDatabaseClose.Click += new System.EventHandler(this.toolStripMenuItemMainDatabaseClose_Click);
             // 
@@ -721,7 +723,7 @@
             this.toolStripMenuItemMainDatabaseRootPath.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemMainDatabaseRootPathOpen});
             this.toolStripMenuItemMainDatabaseRootPath.Name = "toolStripMenuItemMainDatabaseRootPath";
-            this.toolStripMenuItemMainDatabaseRootPath.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemMainDatabaseRootPath.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItemMainDatabaseRootPath.Text = "Root Path";
             // 
             // toolStripMenuItemMainDatabaseRootPathOpen
@@ -734,7 +736,7 @@
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(123, 6);
             // 
             // toolStripMenuItemMainDatabaseRelations
             // 
@@ -742,7 +744,7 @@
             this.toolStripMenuItemMainDatabaseRelationsManage,
             this.toolStripMenuItemMainDatabaseRelationsAssociateWith});
             this.toolStripMenuItemMainDatabaseRelations.Name = "toolStripMenuItemMainDatabaseRelations";
-            this.toolStripMenuItemMainDatabaseRelations.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemMainDatabaseRelations.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItemMainDatabaseRelations.Text = "Relations";
             // 
             // toolStripMenuItemMainDatabaseRelationsManage

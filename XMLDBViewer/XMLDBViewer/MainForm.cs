@@ -447,6 +447,15 @@ namespace XMLDBViewer
 			_worker.ShowError(e.Exception);
 		}
 
+        private void dataGridViewTable_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dataGridViewTable.Columns[e.ColumnIndex].ValueType.Equals(typeof(DateTime)) && e.Value != null && e.Value is DateTime)
+            {
+                e.Value = ((DateTime) e.Value).ToString();
+                e.FormattingApplied = true;
+            }
+        }
+
 		private void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
 		{
 			_worker.TableIsModified = true;
@@ -578,6 +587,15 @@ namespace XMLDBViewer
 		{
 			_worker.ShowError(e.Exception);
 		}
+
+        private void dataGridViewQuery_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dataGridViewQuery.Columns[e.ColumnIndex].ValueType.Equals(typeof(DateTime)) && e.Value != null && e.Value is DateTime)
+            {
+                e.Value = ((DateTime) e.Value).ToString();
+                e.FormattingApplied = true;
+            }
+        }
 
 		private void dataGridViewQuery_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
 		{
