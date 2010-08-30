@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace ProcessController
+namespace ProcessController.Utilities
 {
     public static class StringUtilities
     {

@@ -17,8 +17,11 @@ namespace ProcessController.DataObjects
 
         public Application(string name, string path, string arguments) : this(name, path, arguments, null) {}
 
-        public Application(string name, string path, string arguments, string group) : this()
+        public Application(string name, string path, string arguments, string group) : this(Guid.NewGuid(), name, path, arguments, group) { }
+
+        public Application(Guid id, string name, string path, string arguments, string group) : this()
         {
+            ID = id;
             Name = name;
             Path = path;
             Arguments = arguments;
@@ -28,13 +31,20 @@ namespace ProcessController.DataObjects
         public Application(XmlReader reader) : this()
         {
             ReadXml(reader);
+            if (ID == Guid.Empty)
+                ID = Guid.NewGuid();
         }
 
+        #region Properties
+
+        public Guid ID { get; private set; }
         public string Name { get; set; }
         public string Path { get; set; }
         public string Arguments { get; set; }
         public string Group { get; set; }
         public IList<string> Sets { get; private set; }
+
+        #endregion
 
         public bool Start()
         {
@@ -93,6 +103,9 @@ namespace ProcessController.DataObjects
             {
                 switch (reader.Name)
                 {
+                    case "ID":
+                        ID = new Guid(reader.Value);
+                        break;
                     case "Name":
                         Name = reader.Value;
                         break;
@@ -129,6 +142,7 @@ namespace ProcessController.DataObjects
         public void WriteXml(XmlWriter writer)
         {
             writer.WriteStartElement("Application");
+            writer.WriteAttributeString("ID", ID.ToString());
             writer.WriteAttributeString("Name", Name);
             writer.WriteAttributeString("Path", Path);
             writer.WriteAttributeString("Arguments", Arguments);

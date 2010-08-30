@@ -53,6 +53,15 @@
             this.buttonExit = new System.Windows.Forms.Button();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStripSystemTray = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItemSystemTrayStart = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStartSingle = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStartBySet = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRestart = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRestartSingle = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRestartBySet = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStop = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStopSingle = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayStopBySet = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemSystemTrayOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSystemTrayOptionsStartWithWindows = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,18 +77,14 @@
             this.comboBoxSets = new System.Windows.Forms.ComboBox();
             this.buttonExport = new System.Windows.Forms.Button();
             this.buttonImport = new System.Windows.Forms.Button();
-            this.toolStripMenuItemSystemTrayStart = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayRestart = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStop = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStartSingle = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStartBySet = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayRestartSingle = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayRestartBySet = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStopSingle = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSystemTrayStopBySet = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSystemTrayRecent = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.buttonRemoveAll = new System.Windows.Forms.Button();
+            this.pictureBoxMoleCode = new System.Windows.Forms.PictureBox();
             this.groupBoxSelectedApplication.SuspendLayout();
             this.contextMenuStripSystemTray.SuspendLayout();
             this.contextMenuStripApplicationList.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxMoleCode)).BeginInit();
             this.SuspendLayout();
             // 
             // listViewApplications
@@ -138,6 +143,7 @@
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList.Images.SetKeyName(0, "running-16.ico");
             this.imageList.Images.SetKeyName(1, "stopped-16.ico");
+            this.imageList.Images.SetKeyName(2, "unknown-16.ico");
             // 
             // groupBoxSelectedApplication
             // 
@@ -184,11 +190,13 @@
             // 
             // labelSets
             // 
-            this.labelSets.AutoSize = true;
+            this.labelSets.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelSets.AutoEllipsis = true;
             this.labelSets.Location = new System.Drawing.Point(72, 95);
             this.labelSets.Margin = new System.Windows.Forms.Padding(3);
             this.labelSets.Name = "labelSets";
-            this.labelSets.Size = new System.Drawing.Size(0, 13);
+            this.labelSets.Size = new System.Drawing.Size(638, 13);
             this.labelSets.TabIndex = 9;
             // 
             // labelHeaderSets
@@ -298,8 +306,8 @@
             this.notifyIcon.Icon = ((System.Drawing.Icon) (resources.GetObject("notifyIcon.Icon")));
             this.notifyIcon.Text = "Process Controller";
             this.notifyIcon.Visible = true;
-            this.notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
             this.notifyIcon.MouseUp += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseUp);
+            this.notifyIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDown);
             // 
             // contextMenuStripSystemTray
             // 
@@ -307,13 +315,78 @@
             this.toolStripMenuItemSystemTrayStart,
             this.toolStripMenuItemSystemTrayRestart,
             this.toolStripMenuItemSystemTrayStop,
+            this.toolStripSeparator4,
+            this.toolStripMenuItemSystemTrayRecent,
             this.toolStripSeparator2,
             this.toolStripMenuItemSystemTrayOptions,
             this.toolStripSeparator3,
             this.toolStripMenuItemSystemTrayRestoreMinimize,
             this.toolStripMenuItemSystemTrayExit});
             this.contextMenuStripSystemTray.Name = "contextMenuStripSystemTray";
-            this.contextMenuStripSystemTray.Size = new System.Drawing.Size(119, 148);
+            this.contextMenuStripSystemTray.Size = new System.Drawing.Size(119, 176);
+            // 
+            // toolStripMenuItemSystemTrayStart
+            // 
+            this.toolStripMenuItemSystemTrayStart.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSystemTrayStartSingle,
+            this.toolStripMenuItemSystemTrayStartBySet});
+            this.toolStripMenuItemSystemTrayStart.Name = "toolStripMenuItemSystemTrayStart";
+            this.toolStripMenuItemSystemTrayStart.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayStart.Text = "Start";
+            // 
+            // toolStripMenuItemSystemTrayStartSingle
+            // 
+            this.toolStripMenuItemSystemTrayStartSingle.Name = "toolStripMenuItemSystemTrayStartSingle";
+            this.toolStripMenuItemSystemTrayStartSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStartSingle.Text = "Single";
+            // 
+            // toolStripMenuItemSystemTrayStartBySet
+            // 
+            this.toolStripMenuItemSystemTrayStartBySet.Name = "toolStripMenuItemSystemTrayStartBySet";
+            this.toolStripMenuItemSystemTrayStartBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStartBySet.Text = "By Set";
+            // 
+            // toolStripMenuItemSystemTrayRestart
+            // 
+            this.toolStripMenuItemSystemTrayRestart.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSystemTrayRestartSingle,
+            this.toolStripMenuItemSystemTrayRestartBySet});
+            this.toolStripMenuItemSystemTrayRestart.Name = "toolStripMenuItemSystemTrayRestart";
+            this.toolStripMenuItemSystemTrayRestart.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayRestart.Text = "Restart";
+            // 
+            // toolStripMenuItemSystemTrayRestartSingle
+            // 
+            this.toolStripMenuItemSystemTrayRestartSingle.Name = "toolStripMenuItemSystemTrayRestartSingle";
+            this.toolStripMenuItemSystemTrayRestartSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayRestartSingle.Text = "Single";
+            // 
+            // toolStripMenuItemSystemTrayRestartBySet
+            // 
+            this.toolStripMenuItemSystemTrayRestartBySet.Name = "toolStripMenuItemSystemTrayRestartBySet";
+            this.toolStripMenuItemSystemTrayRestartBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayRestartBySet.Text = "By Set";
+            // 
+            // toolStripMenuItemSystemTrayStop
+            // 
+            this.toolStripMenuItemSystemTrayStop.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSystemTrayStopSingle,
+            this.toolStripMenuItemSystemTrayStopBySet});
+            this.toolStripMenuItemSystemTrayStop.Name = "toolStripMenuItemSystemTrayStop";
+            this.toolStripMenuItemSystemTrayStop.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayStop.Text = "Stop";
+            // 
+            // toolStripMenuItemSystemTrayStopSingle
+            // 
+            this.toolStripMenuItemSystemTrayStopSingle.Name = "toolStripMenuItemSystemTrayStopSingle";
+            this.toolStripMenuItemSystemTrayStopSingle.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStopSingle.Text = "Single";
+            // 
+            // toolStripMenuItemSystemTrayStopBySet
+            // 
+            this.toolStripMenuItemSystemTrayStopBySet.Name = "toolStripMenuItemSystemTrayStopBySet";
+            this.toolStripMenuItemSystemTrayStopBySet.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemSystemTrayStopBySet.Text = "By Set";
             // 
             // toolStripSeparator2
             // 
@@ -413,7 +486,7 @@
             // 
             // buttonExport
             // 
-            this.buttonExport.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExport.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonExport.Location = new System.Drawing.Point(734, 211);
             this.buttonExport.Name = "buttonExport";
             this.buttonExport.Size = new System.Drawing.Size(75, 23);
@@ -424,7 +497,7 @@
             // 
             // buttonImport
             // 
-            this.buttonImport.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonImport.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonImport.Location = new System.Drawing.Point(734, 182);
             this.buttonImport.Name = "buttonImport";
             this.buttonImport.Size = new System.Drawing.Size(75, 23);
@@ -433,74 +506,46 @@
             this.buttonImport.UseVisualStyleBackColor = true;
             this.buttonImport.Click += new System.EventHandler(this.buttonImport_Click);
             // 
-            // toolStripMenuItemSystemTrayStart
+            // toolStripMenuItemSystemTrayRecent
             // 
-            this.toolStripMenuItemSystemTrayStart.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemSystemTrayStartSingle,
-            this.toolStripMenuItemSystemTrayStartBySet});
-            this.toolStripMenuItemSystemTrayStart.Name = "toolStripMenuItemSystemTrayStart";
-            this.toolStripMenuItemSystemTrayStart.Size = new System.Drawing.Size(118, 22);
-            this.toolStripMenuItemSystemTrayStart.Text = "Start";
+            this.toolStripMenuItemSystemTrayRecent.Name = "toolStripMenuItemSystemTrayRecent";
+            this.toolStripMenuItemSystemTrayRecent.Size = new System.Drawing.Size(118, 22);
+            this.toolStripMenuItemSystemTrayRecent.Text = "Recent";
             // 
-            // toolStripMenuItemSystemTrayRestart
+            // toolStripSeparator4
             // 
-            this.toolStripMenuItemSystemTrayRestart.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemSystemTrayRestartSingle,
-            this.toolStripMenuItemSystemTrayRestartBySet});
-            this.toolStripMenuItemSystemTrayRestart.Name = "toolStripMenuItemSystemTrayRestart";
-            this.toolStripMenuItemSystemTrayRestart.Size = new System.Drawing.Size(118, 22);
-            this.toolStripMenuItemSystemTrayRestart.Text = "Restart";
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(115, 6);
             // 
-            // toolStripMenuItemSystemTrayStop
+            // buttonRemoveAll
             // 
-            this.toolStripMenuItemSystemTrayStop.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemSystemTrayStopSingle,
-            this.toolStripMenuItemSystemTrayStopBySet});
-            this.toolStripMenuItemSystemTrayStop.Name = "toolStripMenuItemSystemTrayStop";
-            this.toolStripMenuItemSystemTrayStop.Size = new System.Drawing.Size(118, 22);
-            this.toolStripMenuItemSystemTrayStop.Text = "Stop";
+            this.buttonRemoveAll.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRemoveAll.Location = new System.Drawing.Point(734, 98);
+            this.buttonRemoveAll.Name = "buttonRemoveAll";
+            this.buttonRemoveAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonRemoveAll.TabIndex = 8;
+            this.buttonRemoveAll.Text = "Remove All";
+            this.buttonRemoveAll.UseVisualStyleBackColor = true;
+            this.buttonRemoveAll.Click += new System.EventHandler(this.buttonRemoveAll_Click);
             // 
-            // toolStripMenuItemSystemTrayStartSingle
+            // pictureBoxMoleCode
             // 
-            this.toolStripMenuItemSystemTrayStartSingle.Name = "toolStripMenuItemSystemTrayStartSingle";
-            this.toolStripMenuItemSystemTrayStartSingle.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItemSystemTrayStartSingle.Text = "Single";
-            // 
-            // toolStripMenuItemSystemTrayStartBySet
-            // 
-            this.toolStripMenuItemSystemTrayStartBySet.Name = "toolStripMenuItemSystemTrayStartBySet";
-            this.toolStripMenuItemSystemTrayStartBySet.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItemSystemTrayStartBySet.Text = "By Set";
-            // 
-            // toolStripMenuItemSystemTrayRestartSingle
-            // 
-            this.toolStripMenuItemSystemTrayRestartSingle.Name = "toolStripMenuItemSystemTrayRestartSingle";
-            this.toolStripMenuItemSystemTrayRestartSingle.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItemSystemTrayRestartSingle.Text = "Single";
-            // 
-            // toolStripMenuItemSystemTrayRestartBySet
-            // 
-            this.toolStripMenuItemSystemTrayRestartBySet.Name = "toolStripMenuItemSystemTrayRestartBySet";
-            this.toolStripMenuItemSystemTrayRestartBySet.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItemSystemTrayRestartBySet.Text = "By Set";
-            // 
-            // toolStripMenuItemSystemTrayStopSingle
-            // 
-            this.toolStripMenuItemSystemTrayStopSingle.Name = "toolStripMenuItemSystemTrayStopSingle";
-            this.toolStripMenuItemSystemTrayStopSingle.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItemSystemTrayStopSingle.Text = "Single";
-            // 
-            // toolStripMenuItemSystemTrayStopBySet
-            // 
-            this.toolStripMenuItemSystemTrayStopBySet.Name = "toolStripMenuItemSystemTrayStopBySet";
-            this.toolStripMenuItemSystemTrayStopBySet.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItemSystemTrayStopBySet.Text = "By Set";
+            this.pictureBoxMoleCode.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBoxMoleCode.Image = ((System.Drawing.Image) (resources.GetObject("pictureBoxMoleCode.Image")));
+            this.pictureBoxMoleCode.Location = new System.Drawing.Point(736, 259);
+            this.pictureBoxMoleCode.Name = "pictureBoxMoleCode";
+            this.pictureBoxMoleCode.Size = new System.Drawing.Size(72, 50);
+            this.pictureBoxMoleCode.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBoxMoleCode.TabIndex = 9;
+            this.pictureBoxMoleCode.TabStop = false;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(821, 370);
+            this.Controls.Add(this.pictureBoxMoleCode);
+            this.Controls.Add(this.buttonRemoveAll);
             this.Controls.Add(this.buttonExport);
             this.Controls.Add(this.buttonImport);
             this.Controls.Add(this.comboBoxSets);
@@ -511,6 +556,7 @@
             this.Controls.Add(this.listViewApplications);
             this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(550, 350);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Process Controller";
@@ -521,7 +567,9 @@
             this.groupBoxSelectedApplication.PerformLayout();
             this.contextMenuStripSystemTray.ResumeLayout(false);
             this.contextMenuStripApplicationList.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxMoleCode)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -574,6 +622,10 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStop;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStopSingle;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayStopBySet;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSystemTrayRecent;
+        private System.Windows.Forms.Button buttonRemoveAll;
+        private System.Windows.Forms.PictureBox pictureBoxMoleCode;
     }
 }
 

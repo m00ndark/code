@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Windows.Forms;
 using ProcessController.DataAccess;
 using ProcessController.DataObjects;
+using ProcessController.Utilities;
 using Application = ProcessController.DataObjects.Application;
-using Timer=System.Windows.Forms.Timer;
+using Timer = System.Windows.Forms.Timer;
 
 namespace ProcessController
 {
@@ -15,8 +16,9 @@ namespace ProcessController
     {
         private bool _closing;
         private bool _discardEvents;
-        private bool _discardNextMouseClick;
         private bool _selectingApplicationBySet;
+        private ControlRecentApplicationsForm _controlRecentApplicationsForm;
+        private DateTime _controlRecentApplicationsFormClosedAt;
         private readonly Configuration _config;
         private readonly Timer _timer;
 
@@ -26,9 +28,11 @@ namespace ProcessController
             Text += " (build " + GetBuildTag() + ")";
             _closing = false;
             _discardEvents = false;
-            _discardNextMouseClick = false;
             _selectingApplicationBySet = false;
+            _controlRecentApplicationsForm = null;
+            _controlRecentApplicationsFormClosedAt = DateTime.MinValue;
             _config = RegistryHandler.LoadConfiguration();
+            ApplicationControl.Configuration = _config;
             _timer = new Timer() { Interval = 500 };
             _timer.Tick += _timer_Tick;
             _timer.Start();
@@ -87,7 +91,7 @@ namespace ProcessController
                 }
                 else
                 {
-                    _config.WindowVisible = Visible;
+                    _config.WindowVisible = (Opacity == 1);
                     RegistryHandler.SaveConfiguration(_config);
                 }
             }
@@ -112,33 +116,43 @@ namespace ProcessController
 
         #endregion
 
+        #region Control recent applications form
+
+        private void _controlRecentApplicationsForm_Closed(object sender, EventArgs e)
+        {
+            _controlRecentApplicationsFormClosedAt = DateTime.Now;
+            _controlRecentApplicationsForm.Closed -= _controlRecentApplicationsForm_Closed;
+            _controlRecentApplicationsForm = null;
+        }
+
+        #endregion
+
         #region System tray icon
 
-        private void notifyIcon_DoubleClick(object sender, EventArgs e)
+        private void notifyIcon_MouseDown(object sender, MouseEventArgs e)
         {
-            try
+            if (e.Button == MouseButtons.Left)
             {
-                _discardNextMouseClick = true;
-                if (Visible)
-                    Minimize();
-                else
-                    Restore();
-            }
-            catch (Exception ex)
-            {
-                FormUtilities.ShowError(this, ex);
+                if (_controlRecentApplicationsForm != null)
+                {
+                    _controlRecentApplicationsFormClosedAt = DateTime.Now;
+                    _controlRecentApplicationsForm.Closed -= _controlRecentApplicationsForm_Closed;
+                    _controlRecentApplicationsForm = null;
+                }
             }
         }
 
         private void notifyIcon_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && !_discardNextMouseClick)
+            if (e.Button == MouseButtons.Left)
             {
-                // ShowContextMenu method is private.. have to use reflection to call it
-                MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-                mi.Invoke(notifyIcon, null);
+                if (_controlRecentApplicationsForm == null && _controlRecentApplicationsFormClosedAt.AddMilliseconds(500) < DateTime.Now)
+                {
+                    _controlRecentApplicationsForm = new ControlRecentApplicationsForm(_config.RecentUsages, Restore);
+                    _controlRecentApplicationsForm.Closed += _controlRecentApplicationsForm_Closed;
+                    _controlRecentApplicationsForm.Show();
+                }
             }
-            _discardNextMouseClick = false;
         }
 
         #endregion
@@ -150,7 +164,7 @@ namespace ProcessController
             try
             {
                 ToolStripItem item = (ToolStripItem) sender;
-                StartApplicationsBySet((string) item.Tag);
+                ApplicationControl.StartApplicationsBySet((string) item.Tag);
             }
             catch (Exception ex)
             {
@@ -163,7 +177,7 @@ namespace ProcessController
             try
             {
                 ToolStripItem item = (ToolStripItem) sender;
-                RestartApplicationsBySet((string) item.Tag);
+                ApplicationControl.RestartApplicationsBySet((string) item.Tag);
             }
             catch (Exception ex)
             {
@@ -176,7 +190,7 @@ namespace ProcessController
             try
             {
                 ToolStripItem item = (ToolStripItem) sender;
-                StopApplicationsBySet((string) item.Tag);
+                ApplicationControl.StopApplicationsBySet((string) item.Tag);
             }
             catch (Exception ex)
             {
@@ -189,7 +203,7 @@ namespace ProcessController
             try
             {
                 ToolStripItem item = (ToolStripItem) sender;
-                StartApplication((Application) item.Tag);
+                ApplicationControl.StartApplication((Application) item.Tag);
             }
             catch (Exception ex)
             {
@@ -202,7 +216,7 @@ namespace ProcessController
             try
             {
                 ToolStripItem item = (ToolStripItem) sender;
-                RestartApplication((Application) item.Tag);
+                ApplicationControl.RestartApplication((Application) item.Tag);
             }
             catch (Exception ex)
             {
@@ -215,7 +229,58 @@ namespace ProcessController
             try
             {
                 ToolStripItem item = (ToolStripItem) sender;
-                StopApplication((Application) item.Tag);
+                ApplicationControl.StopApplication((Application) item.Tag);
+            }
+            catch (Exception ex)
+            {
+                FormUtilities.ShowError(this, ex);
+            }
+        }
+
+        private void StartRecent_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ToolStripItem item = (ToolStripItem) sender;
+                Application application = ApplicationControl.GetApplicationByID((string) item.Tag);
+                if (application != null)
+                    ApplicationControl.StartApplication(application);
+                else
+                    ApplicationControl.StartApplicationsBySet((string) item.Tag);
+            }
+            catch (Exception ex)
+            {
+                FormUtilities.ShowError(this, ex);
+            }
+        }
+
+        private void RestartRecent_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ToolStripItem item = (ToolStripItem) sender;
+                Application application = ApplicationControl.GetApplicationByID((string) item.Tag);
+                if (application != null)
+                    ApplicationControl.RestartApplication(application);
+                else
+                    ApplicationControl.RestartApplicationsBySet((string) item.Tag);
+            }
+            catch (Exception ex)
+            {
+                FormUtilities.ShowError(this, ex);
+            }
+        }
+
+        private void StopRecent_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ToolStripItem item = (ToolStripItem) sender;
+                Application application = ApplicationControl.GetApplicationByID((string) item.Tag);
+                if (application != null)
+                    ApplicationControl.StopApplication(application);
+                else
+                    ApplicationControl.StopApplicationsBySet((string) item.Tag);
             }
             catch (Exception ex)
             {
@@ -239,7 +304,7 @@ namespace ProcessController
         {
             try
             {
-                if (Visible)
+                if (Opacity == 1)
                     Minimize();
                 else
                     Restore();
@@ -273,7 +338,7 @@ namespace ProcessController
                 IEnumerable<Application> stoppedApplications =
                     listViewApplications.SelectedItems.Cast<ListViewItem>().Select(x => (Application) x.Tag).Where(application => !application.IsRunning);
                 if (stoppedApplications.Count() > 0)
-                    StartApplications(stoppedApplications);
+                    ApplicationControl.StartApplications(stoppedApplications);
             }
             catch (Exception ex)
             {
@@ -288,7 +353,7 @@ namespace ProcessController
                 IEnumerable<Application> runningApplications =
                     listViewApplications.SelectedItems.Cast<ListViewItem>().Select(x => (Application) x.Tag).Where(application => application.IsRunning);
                 if (runningApplications.Count() > 0)
-                    StopApplications(runningApplications);
+                    ApplicationControl.StopApplications(runningApplications);
             }
             catch (Exception ex)
             {
@@ -433,6 +498,18 @@ namespace ProcessController
             }
         }
 
+        private void buttonRemoveAll_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                RemoveAllApplications();
+            }
+            catch (Exception ex)
+            {
+                FormUtilities.ShowError(this, ex);
+            }
+        }
+
         private void buttonImport_Click(object sender, EventArgs e)
         {
             try
@@ -508,79 +585,31 @@ namespace ProcessController
                 _discardEvents = true;
                 foreach (ListViewItem item in listViewApplications.SelectedItems)
                 {
-                    _config.Applications.Remove((Application) item.Tag);
+                    Application application = (Application) item.Tag;
+                    _config.Applications.Remove(application);
+                    _config.RecentUsages.Where(recent => (recent.ID == application.ID.ToString()))
+                        .ToList().ForEach(recent => _config.RecentUsages.Remove(recent));
                     listViewApplications.Items.Remove(item);
                 }
+                _config.RecentUsages.Where(recent => (ApplicationControl.GetApplicationByID(recent.ID) == null && !_config.Sets.Contains(recent.ID)))
+                    .ToList().ForEach(recent => _config.RecentUsages.Remove(recent));
                 RegistryHandler.SaveConfiguration(_config);
                 _discardEvents = false;
                 UpdateSetList();
+                UpdateSelectedApplicationInfo();
                 EnableControls(true);
             }
         }
 
-        private static void StartApplication(Application application)
+        private void RemoveAllApplications()
         {
-            StartApplication(application, false);
-        }
-
-        private static void StartApplication(Application application, bool waitUntilStopped)
-        {
-            if (waitUntilStopped)
-            {
-                DateTime timeout = DateTime.Now.AddSeconds(30);
-                while (DateTime.Now < timeout && application.IsRunning)
-                {
-                    Thread.Sleep(100);
-                    System.Windows.Forms.Application.DoEvents();
-                }
-            }
-            application.Start();
-        }
-
-        private static void StartApplications(IEnumerable<Application> applications)
-        {
-            foreach (Application application in applications)
-                StartApplication(application);
-        }
-
-        private void StartApplicationsBySet(string set)
-        {
-            StartApplicationsBySet(set, false);
-        }
-
-        private void StartApplicationsBySet(string set, bool waitUntilStopped)
-        {
-            foreach (Application application in _config.Applications.Where(app => (app.Sets.Contains(set))))
-                StartApplication(application, waitUntilStopped);
-        }
-
-        private static void RestartApplication(Application application)
-        {
-            StopApplication(application);
-            StartApplication(application, true);
-        }
-
-        private void RestartApplicationsBySet(string set)
-        {
-            StopApplicationsBySet(set);
-            StartApplicationsBySet(set, true);
-        }
-
-        private static void StopApplication(Application application)
-        {
-            application.Stop();
-        }
-
-        private static void StopApplications(IEnumerable<Application> applications)
-        {
-            foreach (Application application in applications)
-                StopApplication(application);
-        }
-
-        private void StopApplicationsBySet(string set)
-        {
-            foreach (Application application in _config.Applications.Where(app => (app.Sets.Contains(set))))
-                StopApplication(application);
+            listViewApplications.Items.Clear();
+            _config.Applications.Clear();
+            _config.RecentUsages.Clear();
+            RegistryHandler.SaveConfiguration(_config);
+            UpdateSetList();
+            UpdateSelectedApplicationInfo();
+            EnableControls(true);
         }
 
         private void ImportApplications()
@@ -593,12 +622,14 @@ namespace ProcessController
             {
                 Configuration importedConfig = FileHandler.Deserialize<Configuration>(openFileDialog.FileName);
                 foreach (Application application in importedConfig.Applications)
-                {
                     _config.Applications.Add(application);
-                }
+                foreach (RecentUsage recentUsage in importedConfig.RecentUsages)
+                    _config.RecentUsages.Add(recentUsage);
                 RegistryHandler.SaveConfiguration(_config);
                 FillApplicationList();
-                FormUtilities.ShowInformation(this, "Successfully imported " + importedConfig.Applications.Count + " applications.");
+                EnableControls(true);
+                FormUtilities.ShowInformation(this, "Successfully imported " + importedConfig.Applications.Count
+                    + " applications and " + _config.RecentUsages.Count + " recent usages.");
             }
         }
 
@@ -611,7 +642,8 @@ namespace ProcessController
             if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
             {
                 FileHandler.Serialize(saveFileDialog.FileName, _config);
-                FormUtilities.ShowInformation(this, "Successfully exported " + _config.Applications.Count + " applications to" + Environment.NewLine + saveFileDialog.FileName);
+                FormUtilities.ShowInformation(this, "Successfully exported " + _config.Applications.Count + " applications and "
+                    + _config.RecentUsages.Count + " recent usages to" + Environment.NewLine + saveFileDialog.FileName);
             }
         }
 
@@ -635,11 +667,12 @@ namespace ProcessController
         private void Restore()
         {
             ShowInTaskbar = true;
-            Opacity = 100;
+            Opacity = 1;
             Show();
             WindowState = FormWindowState.Normal;
             Refresh();
             toolStripMenuItemSystemTrayRestoreMinimize.Text = "Minimize";
+            try { Program.SetForegroundWindow(Handle); } catch { }
         }
 
         private void Exit()
@@ -665,6 +698,7 @@ namespace ProcessController
         private void EnableControls(bool enable)
         {
             buttonRemove.Enabled = (enable && listViewApplications.SelectedItems.Count > 0);
+            buttonRemoveAll.Enabled = (enable && listViewApplications.Items.Count > 0);
         }
 
         private void UpdateSetList()
@@ -736,6 +770,7 @@ namespace ProcessController
                     item.ImageIndex = imageIndex;
             }
             UpdateSystemTrayContextMenuSingles(runningApplications, stoppedApplications);
+            UpdateSystemTrayContextMenuRecents();
         }
 
         private void UpdateSelectedApplicationInfo()
@@ -773,6 +808,92 @@ namespace ProcessController
             listViewApplications.Focus();
         }
 
+        private void UpdateSystemTrayContextMenuRecents()
+        {
+            // make sure top [max count] recent items are in correct order
+            List<RecentUsage> recentUsages = _config.RecentUsages.Take(Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT).OrderBy(recent => recent.Name).ToList();
+            foreach (RecentUsage recentUsage in recentUsages)
+            {
+                Application application = ApplicationControl.GetApplicationByID(recentUsage.ID);
+                bool applicationIsRunning = (application != null ? application.IsRunning : false);
+                Image image = imageList.Images[application != null ? (applicationIsRunning ? 0 : 1) : 2];
+                int menuIndex = toolStripMenuItemSystemTrayRecent.DropDownItems.Cast<ToolStripItem>().Select(item => item.Text).ToList().IndexOf(recentUsage.Name);
+                int correctIndex = recentUsages.IndexOf(recentUsage);
+                if (menuIndex == -1)
+                {
+                    // recent item does not exist in context menu
+                    ToolStripMenuItem recentItem = new ToolStripMenuItem(recentUsage.Name, image);
+                    toolStripMenuItemSystemTrayRecent.DropDownItems.Insert(correctIndex, recentItem);
+                    if (application == null || !applicationIsRunning)
+                    {
+                        ToolStripItem recentStartItem = new ToolStripMenuItem("Start") { Tag = recentUsage.ID };
+                        recentStartItem.Click += StartRecent_Click;
+                        recentItem.DropDownItems.Add(recentStartItem);
+                    }
+                    ToolStripItem recentRestartItem = new ToolStripMenuItem("Restart") { Tag = recentUsage.ID };
+                    recentRestartItem.Click += RestartRecent_Click;
+                    recentItem.DropDownItems.Add(recentRestartItem);
+                    if (application == null || applicationIsRunning)
+                    {
+                        ToolStripItem recentStopItem = new ToolStripMenuItem("Stop") { Tag = recentUsage.ID };
+                        recentStopItem.Click += StopRecent_Click;
+                        recentItem.DropDownItems.Add(recentStopItem);
+                    }
+                }
+                else
+                {
+                    // recent item exist in context menu, verify position and status
+                    ToolStripMenuItem recentItem = (ToolStripMenuItem) toolStripMenuItemSystemTrayRecent.DropDownItems[menuIndex];
+                    recentItem.Image = image;
+                    if (menuIndex != correctIndex)
+                    {
+                        toolStripMenuItemSystemTrayRecent.DropDownItems.RemoveAt(menuIndex);
+                        toolStripMenuItemSystemTrayRecent.DropDownItems.Insert(correctIndex, recentItem);
+                    }
+                    if (application != null)
+                    {
+                        ToolStripItem recentStartItem = recentItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Text == "Start"));
+                        if (applicationIsRunning && recentStartItem != null)
+                        {
+                            recentStartItem.Click -= StartRecent_Click;
+                            recentItem.DropDownItems.Remove(recentStartItem);
+                        }
+                        else if (!applicationIsRunning && recentStartItem == null)
+                        {
+                            recentStartItem = new ToolStripMenuItem("Start") { Tag = recentUsage.ID };
+                            recentStartItem.Click += StartRecent_Click;
+                            recentItem.DropDownItems.Insert(0, recentStartItem);
+                        }
+                        ToolStripItem recentStopItem = recentItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Text == "Stop"));
+                        if (!applicationIsRunning && recentStopItem != null)
+                        {
+                            recentStopItem.Click -= StopRecent_Click;
+                            recentItem.DropDownItems.Remove(recentStopItem);
+                        }
+                        else if (applicationIsRunning && recentStopItem == null)
+                        {
+                            recentStopItem = new ToolStripMenuItem("Stop") { Tag = recentUsage.ID };
+                            recentStopItem.Click += StopRecent_Click;
+                            recentItem.DropDownItems.Add(recentStopItem);
+                        }
+                    }
+                }
+            }
+            // remove items exceeding [max count]
+            for (int i = Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT; i < toolStripMenuItemSystemTrayRecent.DropDownItems.Count; i++)
+            {
+                ToolStripMenuItem recentItem = (ToolStripMenuItem) toolStripMenuItemSystemTrayRecent.DropDownItems[Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT];
+                ToolStripItem recentStartItem = recentItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Text == "Start"));
+                if (recentStartItem != null) recentStartItem.Click -= StartRecent_Click;
+                ToolStripItem recentRestartItem = recentItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Text == "Restart"));
+                if (recentRestartItem != null) recentRestartItem.Click -= RestartRecent_Click;
+                ToolStripItem recentStopItem = recentItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Text == "Stop"));
+                if (recentStopItem != null) recentStopItem.Click -= StopRecent_Click;
+                recentItem.DropDownItems.Clear();
+                toolStripMenuItemSystemTrayRecent.DropDownItems.RemoveAt(Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT);
+            }
+        }
+
         private void UpdateSystemTrayContextMenuSets()
         {
             toolStripMenuItemSystemTrayStartBySet.DropDownItems.Cast<ToolStripItem>().ToList().ForEach(item => item.Click -= StartBySet_Click);
@@ -783,9 +904,9 @@ namespace ProcessController
             toolStripMenuItemSystemTrayStopBySet.DropDownItems.Clear();
             foreach (string set in _config.Sets)
             {
-                ToolStripItem startItem = toolStripMenuItemSystemTrayStartBySet.DropDownItems.Add(set);
-                ToolStripItem restartItem = toolStripMenuItemSystemTrayRestartBySet.DropDownItems.Add(set);
-                ToolStripItem stopItem = toolStripMenuItemSystemTrayStopBySet.DropDownItems.Add(set);
+                ToolStripItem startItem = toolStripMenuItemSystemTrayStartBySet.DropDownItems.Add(set, imageList.Images[2]);
+                ToolStripItem restartItem = toolStripMenuItemSystemTrayRestartBySet.DropDownItems.Add(set, imageList.Images[2]);
+                ToolStripItem stopItem = toolStripMenuItemSystemTrayStopBySet.DropDownItems.Add(set, imageList.Images[2]);
                 startItem.Click += StartBySet_Click;
                 restartItem.Click += RestartBySet_Click;
                 stopItem.Click += StopBySet_Click;
@@ -803,154 +924,86 @@ namespace ProcessController
             IEnumerable<string> stoppedGroups = stoppedApplications.Select(app => app.Group)
                 .Where(group => (group != null)).Distinct(StringComparer.CurrentCultureIgnoreCase).OrderBy(group => group);
 
-            List<ToolStripMenuItem> groupItemsToRemove;
             // remove "start single" groups and sub items
-            groupItemsToRemove = toolStripMenuItemSystemTrayStartSingle.DropDownItems.Cast<ToolStripMenuItem>()
-                .Where(item => (item.Tag is string && !stoppedGroups.Contains((string) item.Tag))).ToList();
-            foreach (ToolStripMenuItem item in groupItemsToRemove)
-            {
-                List<ToolStripItem> itemsToRemove = item.DropDownItems.Cast<ToolStripItem>().ToList();
-                itemsToRemove.ForEach(x => { x.Click -= StartSingle_Click; item.DropDownItems.Remove(x); });
-            }
-            groupItemsToRemove.ForEach(item => toolStripMenuItemSystemTrayStartSingle.DropDownItems.Remove(item));
+            RemoveSingleGroupsAndSubItemsFromSystemTrayContextMenu(stoppedGroups, toolStripMenuItemSystemTrayStartSingle, StartSingle_Click);
             // remove "restart single" groups and sub items
-            groupItemsToRemove = toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Cast<ToolStripMenuItem>()
-                .Where(item => (item.Tag is string && !allGroups.Contains((string) item.Tag))).ToList();
-            foreach (ToolStripMenuItem item in groupItemsToRemove)
-            {
-                List<ToolStripItem> itemsToRemove = item.DropDownItems.Cast<ToolStripItem>().ToList();
-                itemsToRemove.ForEach(x => { x.Click -= RestartSingle_Click; item.DropDownItems.Remove(x); });
-            }
-            groupItemsToRemove.ForEach(item => toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Remove(item));
+            RemoveSingleGroupsAndSubItemsFromSystemTrayContextMenu(allGroups, toolStripMenuItemSystemTrayRestartSingle, RestartSingle_Click);
             // remove "stop single" groups and sub items
-            groupItemsToRemove = toolStripMenuItemSystemTrayStopSingle.DropDownItems.Cast<ToolStripMenuItem>()
-                .Where(item => (item.Tag is string && !runningGroups.Contains((string) item.Tag))).ToList();
-            foreach (ToolStripMenuItem item in groupItemsToRemove)
-            {
-                List<ToolStripItem> itemsToRemove = item.DropDownItems.Cast<ToolStripItem>().ToList();
-                itemsToRemove.ForEach(x => { x.Click -= StopSingle_Click; item.DropDownItems.Remove(x); });
-            }
-            groupItemsToRemove.ForEach(item => toolStripMenuItemSystemTrayStopSingle.DropDownItems.Remove(item));
+            RemoveSingleGroupsAndSubItemsFromSystemTrayContextMenu(runningGroups, toolStripMenuItemSystemTrayStopSingle, StopSingle_Click);
 
-
-            List<ToolStripItem> appItemsToRemove;
             // remove "start single" items (having no group or when its group should not be removed)
-            appItemsToRemove = toolStripMenuItemSystemTrayStartSingle.DropDownItems.Cast<ToolStripItem>()
-                .Where(item => (item.Tag is Application && !stoppedApplications.Contains((Application) item.Tag))).ToList();
-            appItemsToRemove.ForEach(item => { item.Click -= StartSingle_Click; });
-            appItemsToRemove.ForEach(item => toolStripMenuItemSystemTrayStartSingle.DropDownItems.Remove(item));
-            foreach (ToolStripMenuItem groupItem in toolStripMenuItemSystemTrayStartSingle.DropDownItems.Cast<ToolStripMenuItem>().Where(item => (item.Tag is string)))
-            {
-                appItemsToRemove = groupItem.DropDownItems.Cast<ToolStripItem>()
-                    .Where(item => (item.Tag is Application && !stoppedApplications.Contains((Application) item.Tag))).ToList();
-                appItemsToRemove.ForEach(item => { item.Click -= StartSingle_Click; });
-                appItemsToRemove.ForEach(item => groupItem.DropDownItems.Remove(item));
-            }
+            RemoveSingleItemsFromSystemTrayContextMenu(stoppedApplications, toolStripMenuItemSystemTrayStartSingle, StartSingle_Click);
             // remove "restart single" items (having no group or when its group should not be removed)
-            appItemsToRemove = toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Cast<ToolStripItem>()
-                .Where(item => (item.Tag is Application && !allApplications.Contains((Application) item.Tag))).ToList();
-            appItemsToRemove.ForEach(item => { item.Click -= RestartSingle_Click; });
-            appItemsToRemove.ForEach(item => toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Remove(item));
-            foreach (ToolStripMenuItem groupItem in toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Cast<ToolStripMenuItem>().Where(item => (item.Tag is string)))
-            {
-                appItemsToRemove = groupItem.DropDownItems.Cast<ToolStripItem>()
-                    .Where(item => (item.Tag is Application && !allApplications.Contains((Application) item.Tag))).ToList();
-                appItemsToRemove.ForEach(item => { item.Click -= RestartSingle_Click; });
-                appItemsToRemove.ForEach(item => groupItem.DropDownItems.Remove(item));
-            }
+            RemoveSingleItemsFromSystemTrayContextMenu(allApplications, toolStripMenuItemSystemTrayRestartSingle, RestartSingle_Click);
             // remove "stop single" items (having no group or when its group should not be removed)
-            appItemsToRemove = toolStripMenuItemSystemTrayStopSingle.DropDownItems.Cast<ToolStripItem>()
-                .Where(item => (item.Tag is Application && !runningApplications.Contains((Application) item.Tag))).ToList();
-            appItemsToRemove.ForEach(item => { item.Click -= StopSingle_Click; });
-            appItemsToRemove.ForEach(item => toolStripMenuItemSystemTrayStopSingle.DropDownItems.Remove(item));
-            foreach (ToolStripMenuItem groupItem in toolStripMenuItemSystemTrayStopSingle.DropDownItems.Cast<ToolStripMenuItem>().Where(item => (item.Tag is string)))
-            {
-                appItemsToRemove = groupItem.DropDownItems.Cast<ToolStripItem>()
-                    .Where(item => (item.Tag is Application && !runningApplications.Contains((Application) item.Tag))).ToList();
-                appItemsToRemove.ForEach(item => { item.Click -= StopSingle_Click; });
-                appItemsToRemove.ForEach(item => groupItem.DropDownItems.Remove(item));
-            }
+            RemoveSingleItemsFromSystemTrayContextMenu(runningApplications, toolStripMenuItemSystemTrayStopSingle, StopSingle_Click);
 
             // create and update "start single" items
-            foreach (Application application in stoppedApplications)
-            {
-                ToolStripMenuItem startGroupItem = null;
-                if (application.Group != null)
-                {
-                    IEnumerable<ToolStripItem> startGroupItems = toolStripMenuItemSystemTrayStartSingle.DropDownItems.Cast<ToolStripItem>().Where(item => (item.Tag is string));
-                    startGroupItem = (ToolStripMenuItem) startGroupItems.FirstOrDefault(item => (item.Tag is string && (string) item.Tag == application.Group));
-                    if (startGroupItem == null)
-                    {
-                        startGroupItem = (ToolStripMenuItem) toolStripMenuItemSystemTrayStartSingle.DropDownItems.Add(application.Group);
-                        startGroupItem.Tag = application.Group;
-                    }
-                }
-                ToolStripMenuItem parentStartItem = (application.Group != null ? startGroupItem : toolStripMenuItemSystemTrayStartSingle);
-                ToolStripItem startItem = parentStartItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Tag == application));
-                if (startItem == null)
-                {
-                    startItem = parentStartItem.DropDownItems.Add(application.Name);
-                    startItem.Click += StartSingle_Click;
-                    startItem.Tag = application;
-                }
-                else if (startItem.Text != application.Name)
-                {
-                    startItem.Text = application.Name;
-                }
-            }
+            CreateAndUpdateSingleItemsInSystemTrayContextMenu(stoppedApplications, toolStripMenuItemSystemTrayStartSingle, StartSingle_Click, imageList);
             // create and update "restart single" items
-            foreach (Application application in allApplications)
-            {
-                ToolStripMenuItem restartGroupItem = null;
-                if (application.Group != null)
-                {
-                    IEnumerable<ToolStripItem> restartGroupItems = toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Cast<ToolStripItem>().Where(item => (item.Tag is string));
-                    restartGroupItem = (ToolStripMenuItem) restartGroupItems.FirstOrDefault(item => (item.Tag is string && (string) item.Tag == application.Group));
-                    if (restartGroupItem == null)
-                    {
-                        restartGroupItem = (ToolStripMenuItem) toolStripMenuItemSystemTrayRestartSingle.DropDownItems.Add(application.Group);
-                        restartGroupItem.Tag = application.Group;
-                    }
-                }
-                ToolStripMenuItem parentRestartItem = (application.Group != null ? restartGroupItem : toolStripMenuItemSystemTrayRestartSingle);
-                ToolStripItem restartItem = parentRestartItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Tag == application));
-                if (restartItem == null)
-                {
-                    restartItem = parentRestartItem.DropDownItems.Add(application.Name);
-                    restartItem.Click += RestartSingle_Click;
-                    restartItem.Tag = application;
-                }
-                else if (restartItem.Text != application.Name)
-                {
-                    restartItem.Text = application.Name;
-                }
-            }
+            CreateAndUpdateSingleItemsInSystemTrayContextMenu(allApplications, toolStripMenuItemSystemTrayRestartSingle, RestartSingle_Click, imageList);
             // create and update "stop single" items
-            foreach (Application application in runningApplications)
+            CreateAndUpdateSingleItemsInSystemTrayContextMenu(runningApplications, toolStripMenuItemSystemTrayStopSingle, StopSingle_Click, imageList);
+        }
+
+        private static void RemoveSingleGroupsAndSubItemsFromSystemTrayContextMenu(IEnumerable<string> groups, ToolStripDropDownItem menuItem, EventHandler singleClick)
+        {
+            List<ToolStripMenuItem> groupItemsToRemove = menuItem.DropDownItems.Cast<ToolStripMenuItem>()
+                .Where(item => (item.Tag is string && !groups.Contains((string) item.Tag))).ToList();
+            foreach (ToolStripMenuItem item in groupItemsToRemove)
             {
-                ToolStripMenuItem stopGroupItem = null;
+                List<ToolStripItem> itemsToRemove = item.DropDownItems.Cast<ToolStripItem>().ToList();
+                itemsToRemove.ForEach(x => { x.Click -= singleClick; item.DropDownItems.Remove(x); });
+            }
+            groupItemsToRemove.ForEach(item => menuItem.DropDownItems.Remove(item));
+        }
+
+        private static void RemoveSingleItemsFromSystemTrayContextMenu(IEnumerable<Application> applications, ToolStripDropDownItem menuItem, EventHandler singleClick)
+        {
+            List<ToolStripItem> appItemsToRemove = menuItem.DropDownItems.Cast<ToolStripItem>()
+                .Where(item => (item.Tag is Application && !applications.Contains((Application) item.Tag))).ToList();
+            appItemsToRemove.ForEach(item => { item.Click -= singleClick; });
+            appItemsToRemove.ForEach(item => menuItem.DropDownItems.Remove(item));
+            foreach (ToolStripMenuItem groupItem in menuItem.DropDownItems.Cast<ToolStripMenuItem>().Where(item => (item.Tag is string)))
+            {
+                appItemsToRemove = groupItem.DropDownItems.Cast<ToolStripItem>()
+                    .Where(item => (item.Tag is Application && !applications.Contains((Application) item.Tag))).ToList();
+                appItemsToRemove.ForEach(item => { item.Click -= singleClick; });
+                appItemsToRemove.ForEach(item => groupItem.DropDownItems.Remove(item));
+            }
+        }
+
+        private static void CreateAndUpdateSingleItemsInSystemTrayContextMenu(IEnumerable<Application> applications, ToolStripMenuItem menuItem, EventHandler singleClick, ImageList imageList)
+        {
+            foreach (Application application in applications)
+            {
+                ToolStripMenuItem groupItem = null;
                 if (application.Group != null)
                 {
-                    IEnumerable<ToolStripItem> stopGroupItems = toolStripMenuItemSystemTrayStopSingle.DropDownItems.Cast<ToolStripItem>().Where(item => (item.Tag is string));
-                    stopGroupItem = (ToolStripMenuItem) stopGroupItems.FirstOrDefault(item => (item.Tag is string && (string) item.Tag == application.Group));
-                    if (stopGroupItem == null)
+                    IEnumerable<ToolStripItem> groupItems = menuItem.DropDownItems.Cast<ToolStripItem>().Where(item => (item.Tag is string));
+                    groupItem = (ToolStripMenuItem) groupItems.FirstOrDefault(item => (item.Tag is string && (string) item.Tag == application.Group));
+                    if (groupItem == null)
                     {
-                        stopGroupItem = (ToolStripMenuItem) toolStripMenuItemSystemTrayStopSingle.DropDownItems.Add(application.Group);
-                        stopGroupItem.Tag = application.Group;
+                        groupItem = (ToolStripMenuItem) menuItem.DropDownItems.Add(application.Group);
+                        groupItem.Tag = application.Group;
                     }
                 }
-                ToolStripMenuItem parentStopItem = (application.Group != null ? stopGroupItem : toolStripMenuItemSystemTrayStopSingle);
-                ToolStripItem stopItem = parentStopItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Tag == application));
-                if (stopItem == null)
+                ToolStripMenuItem parentItem = (application.Group != null ? groupItem : menuItem);
+                ToolStripItem appItem = parentItem.DropDownItems.Cast<ToolStripItem>().FirstOrDefault(item => (item.Tag == application));
+                if (appItem == null)
                 {
-                    stopItem = parentStopItem.DropDownItems.Add(application.Name);
-                    stopItem.Click += StopSingle_Click;
-                    stopItem.Tag = application;
+                    List<string> existingStartItemNames = parentItem.DropDownItems.Cast<ToolStripItem>().Select(item => item.Text).ToList();
+                    existingStartItemNames.Add(application.Name);
+                    int index = existingStartItemNames.OrderBy(name => name).ToList().IndexOf(application.Name);
+                    appItem = new ToolStripMenuItem(application.Name) { Tag = application };
+                    appItem.Click += singleClick;
+                    parentItem.DropDownItems.Insert(index, appItem);
                 }
-                else if (stopItem.Text != application.Name)
+                else if (appItem.Text != application.Name)
                 {
-                    stopItem.Text = application.Name;
+                    appItem.Text = application.Name;
                 }
+                appItem.Image = imageList.Images[application.IsRunning ? 0 : 1];
             }
         }
 

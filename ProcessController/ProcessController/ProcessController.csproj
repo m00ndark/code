@@ -56,7 +56,21 @@
     <Compile Include="AddApplicationForm.Designer.cs">
       <DependentUpon>AddApplicationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ApplicationControl.cs" />
+    <Compile Include="ControlRecentApplicationRow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ControlRecentApplicationRow.Designer.cs">
+      <DependentUpon>ControlRecentApplicationRow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlRecentApplicationsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlRecentApplicationsForm.Designer.cs">
+      <DependentUpon>ControlRecentApplicationsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataAccess\FileHandler.cs" />
+    <Compile Include="DataObjects\RecentUsage.cs" />
     <Compile Include="ListViewItemComparer.cs" />
     <Compile Include="NewGroupForm.cs">
       <SubType>Form</SubType>
@@ -67,7 +81,7 @@
     <Compile Include="DataAccess\RegistryHandler.cs" />
     <Compile Include="DataObjects\Application.cs" />
     <Compile Include="DataObjects\Configuration.cs" />
-    <Compile Include="FormUtilities.cs" />
+    <Compile Include="Utilities\FormUtilities.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,6 +98,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AddApplicationForm.resx">
       <DependentUpon>AddApplicationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlRecentApplicationRow.resx">
+      <DependentUpon>ControlRecentApplicationRow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlRecentApplicationsForm.resx">
+      <DependentUpon>ControlRecentApplicationsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NewGroupForm.resx">
       <DependentUpon>NewGroupForm.cs</DependentUpon>
@@ -112,12 +132,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="StringUtilities.cs" />
+    <Compile Include="Utilities\StringUtilities.cs" />
+    <Compile Include="Utilities\SystemUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\molecode-lite.png" />
+    <Content Include="Resources\popup-bg.png" />
     <Content Include="Resources\process-controller.ico" />
     <Content Include="Resources\running-16.ico" />
     <Content Include="Resources\stopped-16.ico" />
+    <Content Include="Resources\unknown-16.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

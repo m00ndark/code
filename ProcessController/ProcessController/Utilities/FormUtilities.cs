@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace ProcessController
+namespace ProcessController.Utilities
 {
     public static class FormUtilities
     {

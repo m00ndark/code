@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <Application ID="90b3054a-22f3-49b9-b02c-8ee18bdd3109" Name="CC" Path="D:\tfs\Ver9.00\Source\Publisher\CommandCenterService\bin\QVPublisherCommandCenterService.exe" Arguments="-debug" Group="QV 9">
+    <Set Name="QV 9 All" />
+    <Set Name="QV 9 All but QDS" />
+    <Set Name="QV 9 All but QMS" />
+    <Set Name="QV 9 All but QVWS" />
+    <Set Name="QV 9 CC, DSC, QDS, and QVS" />
+    <Set Name="QV 9 CC, DSC, QMS and QVS" />
+  </Application>
+  <Application ID="38ad5cb1-6007-492a-9283-e0cb4512ad8d" Name="DSC" Path="D:\tfs\Ver9.00\Source\Publisher\DSC\bin\QVDirectoryServiceConnector.exe" Arguments="-debug" Group="QV 9">
+    <Set Name="QV 9 All" />
+    <Set Name="QV 9 All but CC" />
+    <Set Name="QV 9 All but QDS" />
+    <Set Name="QV 9 All but QMS" />
+    <Set Name="QV 9 All but QVWS" />
+    <Set Name="QV 9 CC, DSC, QDS, and QVS" />
+    <Set Name="QV 9 CC, DSC, QMS and QVS" />
+    <Set Name="QV 9 DSC and QVS" />
+    <Set Name="QV 9 DSC, QDS and QVS" />
+    <Set Name="QV 9 DSC, QDS, QMS and QVS" />
+    <Set Name="QV 9 DSC, QMS and QVS" />
+  </Application>
+  <Application ID="72bc9887-6e3e-4e2d-8b10-f8461a6dc682" Name="QDS" Path="D:\tfs\Ver9.00\Source\Publisher\XS\bin\QlikviewDistributionService.exe" Arguments="-debug" Group="QV 9">
+    <Set Name="QV 9 All" />
+    <Set Name="QV 9 All but CC" />
+    <Set Name="QV 9 All but QMS" />
+    <Set Name="QV 9 All but QVWS" />
+    <Set Name="QV 9 CC, DSC, QDS, and QVS" />
+    <Set Name="QV 9 DSC, QDS and QVS" />
+    <Set Name="QV 9 DSC, QDS, QMS and QVS" />
+  </Application>
+  <Application ID="32073e2b-a291-489a-bfc2-2b0908957407" Name="QMS" Path="D:\tfs\Ver9.00\Source\QvBackstage\Qlikview Management Service\bin\Debug\Qlikview Management Service.exe" Arguments="-debug" Group="QV 9">
+    <Set Name="QV 9 All" />
+    <Set Name="QV 9 All but CC" />
+    <Set Name="QV 9 All but QDS" />
+    <Set Name="QV 9 All but QVWS" />
+    <Set Name="QV 9 CC, DSC, QMS and QVS" />
+    <Set Name="QV 9 DSC, QDS, QMS and QVS" />
+    <Set Name="QV 9 DSC, QMS and QVS" />
+  </Application>
+  <Application ID="41e528ae-17d2-442a-8ced-91dfcea71c15" Name="QVS" Path="D:\tfs\Ver9.00\Source\QlikView\x64\Server Debug\QVS.exe" Arguments="-debug" Group="QV 9">
+    <Set Name="QV 9 All" />
+    <Set Name="QV 9 All but CC" />
+    <Set Name="QV 9 All but QDS" />
+    <Set Name="QV 9 All but QMS" />
+    <Set Name="QV 9 All but QVWS" />
+    <Set Name="QV 9 CC, DSC, QDS, and QVS" />
+    <Set Name="QV 9 CC, DSC, QMS and QVS" />
+    <Set Name="QV 9 DSC and QVS" />
+    <Set Name="QV 9 DSC, QDS and QVS" />
+    <Set Name="QV 9 DSC, QDS, QMS and QVS" />
+    <Set Name="QV 9 DSC, QMS and QVS" />
+  </Application>
+  <Application ID="b7d40e57-3325-47a7-aff1-43c4a829dc77" Name="QVWS" Path="D:\tfs\Ver9.00\Source\QvWebServer\QvWebServer\bin\Debug\QvWebServer.exe" Arguments="-debug" Group="QV 9">
+    <Set Name="QV 9 All" />
+    <Set Name="QV 9 All but CC" />
+    <Set Name="QV 9 All but QDS" />
+    <Set Name="QV 9 All but QMS" />
+  </Application>
+  <Application ID="6afd4a5f-8e8f-4e1a-ba2b-5c398c71276a" Name="DSC" Path="D:\tfs\CentralLine\Source\ServerComponents\QVDirectoryServiceConnector\DSC\bin\x86\Debug\QVDirectoryServiceConnector.exe" Arguments="-debug" Group="QV 10">
+    <Set Name="QV 10 All" />
+    <Set Name="QV 10 All but QVWS" />
+    <Set Name="QV 10 DSC, QDS and QVS" />
+    <Set Name="QV 10 DSC and QVS" />
+  </Application>
+  <Application ID="1890dfa4-9e5f-49af-8135-f6878697560d" Name="QDS" Path="D:\tfs\CentralLine\Source\ServerComponents\QVDistributionService\QDS\bin\x86\Debug\QVDistributionService.exe" Arguments="-debug" Group="QV 10">
+    <Set Name="QV 10 All" />
+    <Set Name="QV 10 All but QVWS" />
+    <Set Name="QV 10 DSC, QDS and QVS" />
+  </Application>
+  <Application ID="8515c289-c604-4da0-8707-c4a84b565c2a" Name="QMS" Path="D:\tfs\CentralLine\Source\ServerComponents\QVManagementService\QMSFrontend\QMS\bin\x86\Debug\QVManagementService.exe" Arguments="-debug -desktop" Group="QV 10">
+    <Set Name="QV 10 All" />
+    <Set Name="QV 10 All but QVWS" />
+  </Application>
+  <Application ID="98d17203-32e8-4746-a7da-ca8c5e35b4e3" Name="QVS" Path="D:\tfs\CentralLine\Source\qlikview\x64\Server Debug\QVS.exe" Arguments="-debug" Group="QV 10">
+    <Set Name="QV 10 All" />
+    <Set Name="QV 10 All but QVWS" />
+    <Set Name="QV 10 DSC and QVS" />
+    <Set Name="QV 10 DSC, QDS and QVS" />
+  </Application>
+  <Application ID="f515f151-3cf0-47d7-9b1f-2c4a73ae5870" Name="QVWS" Path="D:\tfs\CentralLine\Source\ServerComponents\QVWebServer\QVWebServer\bin\x86\Debug\QVWebServer.exe" Arguments="-debug" Group="QV 10">
+    <Set Name="QV 10 All" />
+  </Application>
+  <RecentUsage ID="1890dfa4-9e5f-49af-8135-f6878697560d" Count="6" />
+  <RecentUsage ID="98d17203-32e8-4746-a7da-ca8c5e35b4e3" Count="5" />
+  <RecentUsage ID="6afd4a5f-8e8f-4e1a-ba2b-5c398c71276a" Count="3" />
+  <RecentUsage ID="QV 9 DSC, QDS, QMS and QVS" Count="1" />
+</Configuration>
