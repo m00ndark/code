@@ -10,7 +10,7 @@ namespace ProcessController.DataObjects
 {
     public class Configuration : IXmlSerializable
     {
-        public const int MAX_VISIBLE_RECENT_USAGE_COUNT = 10;
+        public const int MAX_VISIBLE_RECENT_USAGE_COUNT = 20;
 
         public Configuration()
         {

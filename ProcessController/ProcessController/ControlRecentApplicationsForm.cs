@@ -75,14 +75,14 @@ namespace ProcessController
             bool isWindowsSeven = SystemUtilities.OSIsWindowsSeven();
 
             ControlRecentApplicationRow row = null;
-            foreach (RecentUsage recentUsage in RecentUsages.Take(Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT).OrderBy(recent => recent.Name))
+            foreach (RecentUsage recentUsage in RecentUsages.Take(Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT).OrderBy(recent => (recent.ID == recent.Name)).ThenBy(recent => recent.Name))
             {
                 row = new ControlRecentApplicationRow(imageList, recentUsage.ID) { Width = flowLayoutPanel.Width };
                 flowLayoutPanel.Controls.Add(row);
             }
 
             if (row != null)
-                MinimumSize = new Size(MinimumSize.Width, Math.Max(34 + 43 + (isWindowsSeven ? 0 : -16) + RecentUsages.Count * row.Height, 100));
+                MinimumSize = new Size(MinimumSize.Width, Math.Max(34 + 43 + (isWindowsSeven ? 0 : -16) + Math.Min(RecentUsages.Count, Configuration.MAX_VISIBLE_RECENT_USAGE_COUNT) * row.Height, 100));
             else
                 labelNonAvailable.Visible = true;
 

@@ -38,7 +38,7 @@ namespace ProcessController
             StartApplication(application, false);
         }
 
-        public static void StartApplication(Application application, bool waitUntilStopped)
+        private static void StartApplication(Application application, bool waitUntilStopped)
         {
             if (waitUntilStopped)
             {
@@ -80,7 +80,6 @@ namespace ProcessController
         public static void RestartApplication(Application application)
         {
             StopApplication(application);
-            if (Configuration != null) Configuration.AddRecentUsage(application.ID.ToString());
             StartApplication(application, true);
         }
 
@@ -96,6 +95,7 @@ namespace ProcessController
 
         public static void StopApplication(Application application)
         {
+            if (Configuration != null) Configuration.AddRecentUsage(application.ID.ToString());
             application.Stop();
         }
 
