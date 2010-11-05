@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{71F304CF-B17E-4D43-BE28-204E0F31A1F8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MediaGalleryExplorerCore</RootNamespace>
+    <AssemblyName>MediaGalleryExplorerCore</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataAccess\CryptoServiceHandler.cs" />
+    <Compile Include="DataAccess\FileSystemHandler.cs" />
+    <Compile Include="DataAccess\ImageFileHelper.cs" />
+    <Compile Include="DataAccess\RegistryHandler.cs" />
+    <Compile Include="DataObjects\FileSystemEntry.cs" />
+    <Compile Include="DataObjects\GallerySource.cs" />
+    <Compile Include="DataObjects\GalleryVersion.cs" />
+    <Compile Include="DataObjects\ImageFile.cs" />
+    <Compile Include="DataObjects\MediaCodec.cs" />
+    <Compile Include="DataObjects\MediaFile.cs" />
+    <Compile Include="DataObjects\MediaFolder.cs" />
+    <Compile Include="DataObjects\Properties\FileSystemEntryProperties.cs" />
+    <Compile Include="DataObjects\Properties\ImageFileProperties.cs" />
+    <Compile Include="DataObjects\Properties\MediaCodecProperties.cs" />
+    <Compile Include="DataObjects\Properties\MediaCodecPropertiesConverter.cs" />
+    <Compile Include="DataObjects\Properties\MediaFileProperties.cs" />
+    <Compile Include="DataObjects\Properties\MediaFolderProperties.cs" />
+    <Compile Include="DataObjects\Properties\VideoFileProperties.cs" />
+    <Compile Include="DataObjects\Serialization\ISerializable.cs" />
+    <Compile Include="DataObjects\Serialization\ObjectSerializer.cs" />
+    <Compile Include="DataObjects\VideoFile.cs" />
+    <Compile Include="EventArguments\MediaFileEventArgs.cs" />
+    <Compile Include="EventArguments\MediaFolderEventArgs.cs" />
+    <Compile Include="EventArguments\MessageEventArgs.cs" />
+    <Compile Include="EventArguments\OperationTypeEventArgs.cs" />
+    <Compile Include="EventArguments\SourceListEventArgs.cs" />
+    <Compile Include="EventArguments\StringEventArgs.cs" />
+    <Compile Include="ObjectPool.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Workers\CommonWorker.cs" />
+    <Compile Include="Workers\MainWorker.cs" />
+    <Compile Include="Workers\SettingsWorker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Presets\vtm_preset.vtm" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
