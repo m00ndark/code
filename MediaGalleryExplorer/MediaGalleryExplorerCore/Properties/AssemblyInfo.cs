@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Media Gallery Explorer UI")]
+[assembly: AssemblyTitle("Media Gallery Explorer Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MoleCode")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5a574b4c-acf8-4348-ac23-a9c94475a752")]
+[assembly: Guid("29f0f147-8a2c-4893-8b86-0ff1a6ad3cf1")]
 
 // Version information for an assembly consists of the following four values:
 //
