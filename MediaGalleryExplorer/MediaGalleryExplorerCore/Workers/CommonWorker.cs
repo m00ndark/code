@@ -1,12 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.EventArguments;
 
 namespace MediaGalleryExplorerCore.Workers
 {
 	public class CommonWorker
 	{
-		public delegate object EventHandler<TEventArgs>(Object sender, TEventArgs e) where TEventArgs : EventArgs;
+		#region Providing file system information
+
+		public static IDictionary<string, int> GetAvailableEncryptionAlgorithms()
+		{
+			return FileSystemHandler.GetEncryptionAlgorithms();
+		}
+
+		#endregion
+
+		#region Show messages
+
+		public delegate object EventHandler<in TEventArgs>(Object sender, TEventArgs e) where TEventArgs : EventArgs;
 
 		public static event EventHandler<MessageEventArgs> ShowMessage;
 
@@ -37,5 +50,7 @@ namespace MediaGalleryExplorerCore.Workers
 
 			return DialogResult.None;
 		}
+
+		#endregion
 	}
 }

@@ -35,12 +35,12 @@
 			this.toolStripMenuItemGalleryOpen = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemGalleryClose = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.statusStrip = new System.Windows.Forms.StatusStrip();
-			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.toolStripMenuItemSource = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemGalleryAddSource = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemSource = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemSourceScan = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemSourceRescan = new System.Windows.Forms.ToolStripMenuItem();
+			this.statusStrip = new System.Windows.Forms.StatusStrip();
+			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.menuStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -51,6 +51,7 @@
             this.toolStripMenuItemSource});
 			this.menuStrip.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip.Name = "menuStrip";
+			this.menuStrip.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
 			this.menuStrip.Size = new System.Drawing.Size(1084, 24);
 			this.menuStrip.TabIndex = 0;
 			this.menuStrip.Text = "menuStrip";
@@ -71,7 +72,8 @@
 			// 
 			this.toolStripMenuItemGalleryNew.Name = "toolStripMenuItemGalleryNew";
 			this.toolStripMenuItemGalleryNew.Size = new System.Drawing.Size(152, 22);
-			this.toolStripMenuItemGalleryNew.Text = "New";
+			this.toolStripMenuItemGalleryNew.Text = "New...";
+			this.toolStripMenuItemGalleryNew.Click += new System.EventHandler(this.toolStripMenuItemGalleryNew_Click);
 			// 
 			// toolStripMenuItemGalleryOpen
 			// 
@@ -90,10 +92,38 @@
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
 			this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
 			// 
+			// toolStripMenuItemGalleryAddSource
+			// 
+			this.toolStripMenuItemGalleryAddSource.Name = "toolStripMenuItemGalleryAddSource";
+			this.toolStripMenuItemGalleryAddSource.Size = new System.Drawing.Size(152, 22);
+			this.toolStripMenuItemGalleryAddSource.Text = "Add Source...";
+			// 
+			// toolStripMenuItemSource
+			// 
+			this.toolStripMenuItemSource.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemSourceScan,
+            this.toolStripMenuItemSourceRescan});
+			this.toolStripMenuItemSource.Name = "toolStripMenuItemSource";
+			this.toolStripMenuItemSource.Size = new System.Drawing.Size(55, 20);
+			this.toolStripMenuItemSource.Text = "Source";
+			// 
+			// toolStripMenuItemSourceScan
+			// 
+			this.toolStripMenuItemSourceScan.Name = "toolStripMenuItemSourceScan";
+			this.toolStripMenuItemSourceScan.Size = new System.Drawing.Size(116, 22);
+			this.toolStripMenuItemSourceScan.Text = "Scan";
+			// 
+			// toolStripMenuItemSourceRescan
+			// 
+			this.toolStripMenuItemSourceRescan.Name = "toolStripMenuItemSourceRescan";
+			this.toolStripMenuItemSourceRescan.Size = new System.Drawing.Size(116, 22);
+			this.toolStripMenuItemSourceRescan.Text = "Re-scan";
+			// 
 			// statusStrip
 			// 
 			this.statusStrip.Location = new System.Drawing.Point(0, 690);
 			this.statusStrip.Name = "statusStrip";
+			this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
 			this.statusStrip.Size = new System.Drawing.Size(1084, 22);
 			this.statusStrip.TabIndex = 1;
 			this.statusStrip.Text = "statusStrip";
@@ -110,41 +140,15 @@
 			this.tabControl1.Size = new System.Drawing.Size(1075, 660);
 			this.tabControl1.TabIndex = 2;
 			// 
-			// toolStripMenuItemSource
-			// 
-			this.toolStripMenuItemSource.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemSourceScan,
-            this.toolStripMenuItemSourceRescan});
-			this.toolStripMenuItemSource.Name = "toolStripMenuItemSource";
-			this.toolStripMenuItemSource.Size = new System.Drawing.Size(55, 20);
-			this.toolStripMenuItemSource.Text = "Source";
-			// 
-			// toolStripMenuItemGalleryAddSource
-			// 
-			this.toolStripMenuItemGalleryAddSource.Name = "toolStripMenuItemGalleryAddSource";
-			this.toolStripMenuItemGalleryAddSource.Size = new System.Drawing.Size(152, 22);
-			this.toolStripMenuItemGalleryAddSource.Text = "Add Source...";
-			// 
-			// toolStripMenuItemSourceScan
-			// 
-			this.toolStripMenuItemSourceScan.Name = "toolStripMenuItemSourceScan";
-			this.toolStripMenuItemSourceScan.Size = new System.Drawing.Size(152, 22);
-			this.toolStripMenuItemSourceScan.Text = "Scan";
-			// 
-			// toolStripMenuItemSourceRescan
-			// 
-			this.toolStripMenuItemSourceRescan.Name = "toolStripMenuItemSourceRescan";
-			this.toolStripMenuItemSourceRescan.Size = new System.Drawing.Size(152, 22);
-			this.toolStripMenuItemSourceRescan.Text = "Re-scan";
-			// 
 			// MainForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1084, 712);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.statusStrip);
 			this.Controls.Add(this.menuStrip);
+			this.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip;
 			this.Name = "MainForm";

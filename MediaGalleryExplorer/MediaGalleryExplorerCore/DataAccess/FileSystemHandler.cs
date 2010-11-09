@@ -98,6 +98,18 @@ namespace MediaGalleryExplorerCore.DataAccess
 			}
 		}
 
+		public static IDictionary<string, int> GetEncryptionAlgorithms()
+		{
+			IDictionary<string, int> encryptionAlgorithms = new Dictionary<string, int>()
+				{
+					{ "None", (int) EncryptionAlgorithm.None },
+					{ "Zip 2.0", (int) EncryptionAlgorithm.PkzipWeak },
+					{ "WinZip AES 128-bit", (int) EncryptionAlgorithm.WinZipAes128 },
+					{ "WinZip AES 256-bit", (int) EncryptionAlgorithm.WinZipAes256 }
+				};
+			return encryptionAlgorithms;
+		}
+
 		#endregion
 
 		#region Scanning

@@ -8,5 +8,11 @@ namespace MediaGalleryExplorerUI.Forms
 		{
 			InitializeComponent();
 		}
+
+		private void toolStripMenuItemGalleryNew_Click(object sender, System.EventArgs e)
+		{
+			NewGalleryForm newGalleryForm = new NewGalleryForm();
+			newGalleryForm.ShowDialog(this);
+		}
 	}
 }
