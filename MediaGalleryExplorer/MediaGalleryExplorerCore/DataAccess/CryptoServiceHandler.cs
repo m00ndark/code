@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MediaGallery.DataAccess
+namespace MediaGalleryExplorerCore.DataAccess
 {
 	public static class CryptoServiceHandler
 	{

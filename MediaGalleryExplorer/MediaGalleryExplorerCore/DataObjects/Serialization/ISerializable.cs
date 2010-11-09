@@ -1,4 +1,4 @@
-﻿namespace MediaGallery.DataObjects.Serialization
+﻿namespace MediaGalleryExplorerCore.DataObjects.Serialization
 {
 	public interface ISerializable
 	{

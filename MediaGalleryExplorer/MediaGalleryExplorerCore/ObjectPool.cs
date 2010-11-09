@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using MediaGallery.DataObjects;
+using MediaGalleryExplorerCore.DataObjects;
 
-namespace MediaGallery
+namespace MediaGalleryExplorerCore
 {
 	public static class ObjectPool
 	{

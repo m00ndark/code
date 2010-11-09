@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace MediaGallery.DataObjects.Serialization
+namespace MediaGalleryExplorerCore.DataObjects.Serialization
 {
 	public class ObjectSerializer
 	{

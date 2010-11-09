@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using MediaGallery.DataAccess;
-using MediaGallery.DataObjects.Serialization;
+using MediaGalleryExplorerCore.DataAccess;
+using MediaGalleryExplorerCore.DataObjects.Serialization;
 
-namespace MediaGallery.DataObjects
+namespace MediaGalleryExplorerCore.DataObjects
 {
 	public class FileSystemEntry : ISerializable
 	{

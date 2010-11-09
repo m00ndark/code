@@ -6,11 +6,11 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using Ionic.Zip;
-using MediaGallery.DataObjects;
-using MediaGallery.DataObjects.Serialization;
-using MediaGallery.EventArguments;
+using MediaGalleryExplorerCore.DataObjects;
+using MediaGalleryExplorerCore.DataObjects.Serialization;
+using MediaGalleryExplorerCore.EventArguments;
 
-namespace MediaGallery.DataAccess
+namespace MediaGalleryExplorerCore.DataAccess
 {
 	public static class FileSystemHandler
 	{

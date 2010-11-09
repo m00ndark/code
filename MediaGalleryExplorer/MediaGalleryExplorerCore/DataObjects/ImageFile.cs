@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using MediaGallery.DataObjects.Serialization;
+using MediaGalleryExplorerCore.DataObjects.Serialization;
 
-namespace MediaGallery.DataObjects
+namespace MediaGalleryExplorerCore.DataObjects
 {
 	public class ImageFile : MediaFile
 	{

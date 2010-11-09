@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MediaGallery.DataObjects;
+using MediaGalleryExplorerCore.DataObjects;
 using Microsoft.Win32;
 
-namespace MediaGallery.DataAccess
+namespace MediaGalleryExplorerCore.DataAccess
 {
 	public enum SettingsType
 	{

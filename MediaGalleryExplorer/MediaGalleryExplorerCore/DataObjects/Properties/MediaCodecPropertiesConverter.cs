@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 
-namespace MediaGallery.DataObjects.Properties
+namespace MediaGalleryExplorerCore.DataObjects.Properties
 {
 	public class MediaCodecPropertiesConverter : ExpandableObjectConverter
 	{

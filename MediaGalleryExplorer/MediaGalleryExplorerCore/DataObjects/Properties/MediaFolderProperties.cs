@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace MediaGallery.DataObjects.Properties
+namespace MediaGalleryExplorerCore.DataObjects.Properties
 {
 	public class MediaFolderProperties : FileSystemEntryProperties
 	{

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using MediaGallery.DataObjects;
+using MediaGalleryExplorerCore.DataObjects;
 
-namespace MediaGallery.EventArguments
+namespace MediaGalleryExplorerCore.EventArguments
 {
 	public class SourceListEventArgs : EventArgs
 	{

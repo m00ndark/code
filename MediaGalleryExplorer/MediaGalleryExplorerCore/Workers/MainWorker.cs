@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using MediaGallery.DataAccess;
-using MediaGallery.DataObjects;
-using MediaGallery.EventArguments;
+using MediaGalleryExplorerCore.DataAccess;
+using MediaGalleryExplorerCore.DataObjects;
+using MediaGalleryExplorerCore.EventArguments;
 
-namespace MediaGallery.Workers
+namespace MediaGalleryExplorerCore.Workers
 {
 	public class MainWorker
 	{

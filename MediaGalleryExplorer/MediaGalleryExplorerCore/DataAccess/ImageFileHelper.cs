@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 
-namespace MediaGallery.DataAccess
+namespace MediaGalleryExplorerCore.DataAccess
 {
 	public static class ImageFileHelper
 	{

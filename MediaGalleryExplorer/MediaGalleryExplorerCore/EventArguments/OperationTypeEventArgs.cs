@@ -1,7 +1,7 @@
 ﻿using System;
-using MediaGallery.Workers;
+using MediaGalleryExplorerCore.Workers;
 
-namespace MediaGallery.EventArguments
+namespace MediaGalleryExplorerCore.EventArguments
 {
 	public class OperationTypeEventArgs : EventArgs
 	{

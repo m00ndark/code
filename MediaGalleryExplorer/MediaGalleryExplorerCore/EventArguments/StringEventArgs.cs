@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MediaGallery.EventArguments
+namespace MediaGalleryExplorerCore.EventArguments
 {
 	public class StringEventArgs : EventArgs
 	{

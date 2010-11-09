@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 
-namespace MediaGallery.DataObjects.Properties
+namespace MediaGalleryExplorerCore.DataObjects.Properties
 {
 	[TypeConverter(typeof(MediaCodecPropertiesConverter))]
 	public class MediaCodecProperties

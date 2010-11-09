@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using MediaGallery.DataAccess;
-using MediaGallery.DataObjects;
-using MediaGallery.EventArguments;
+using MediaGalleryExplorerCore.DataAccess;
+using MediaGalleryExplorerCore.DataObjects;
+using MediaGalleryExplorerCore.EventArguments;
 
-namespace MediaGallery.Workers
+namespace MediaGalleryExplorerCore.Workers
 {
 	public class SettingsWorker
 	{

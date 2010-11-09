@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using MediaGallery.DataAccess;
-using MediaGallery.DataObjects.Serialization;
+using MediaGalleryExplorerCore.DataAccess;
+using MediaGalleryExplorerCore.DataObjects.Serialization;
 
-namespace MediaGallery.DataObjects
+namespace MediaGalleryExplorerCore.DataObjects
 {
 	public class GallerySource : IComparable, ISerializable
 	{

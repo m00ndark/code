@@ -1,7 +1,7 @@
 ﻿using System;
-using MediaGallery.DataObjects;
+using MediaGalleryExplorerCore.DataObjects;
 
-namespace MediaGallery.EventArguments
+namespace MediaGalleryExplorerCore.EventArguments
 {
 	public class MediaFolderEventArgs : EventArgs
 	{
