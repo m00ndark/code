@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
+using ISerializable = MediaGalleryExplorerCore.DataObjects.Serialization.ISerializable;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects")]
 	public class MediaCodec : ISerializable
 	{
 		#region Enumeration
@@ -30,9 +33,9 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		public string ID { get; private set; }
-		public CodecType Type { get; private set; }
-		public string Name { get; private set; }
+		[DataMember] public string ID { get; private set; }
+		[DataMember] public CodecType Type { get; private set; }
+		[DataMember] public string Name { get; private set; }
 
 		#endregion
 
@@ -76,6 +79,11 @@ namespace MediaGalleryExplorerCore.DataObjects
 		{
 			MediaCodec codec = (obj as MediaCodec);
 			return (codec != null && codec.Type == Type && codec.Name.Equals(Name, StringComparison.CurrentCultureIgnoreCase));
+		}
+
+		public override int GetHashCode()
+		{
+			return (Type + Name.ToLower()).GetHashCode();
 		}
 
 		public static CodecType TranslateCodecType(TagLib.MediaTypes types)

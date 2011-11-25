@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class VideoFile : MediaFile
 	{
 		private const int SERIALIZED_VALUES = 4;
@@ -22,10 +24,13 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		public override string ThumbnailName { get; set; }
-		public override string PreviewName { get; set; }
-		public TimeSpan Duration { get; set; }
-		public List<MediaCodec> Codecs { get; private set; }
+		[DataMember] private string Thumbnail { get; set; }
+		[DataMember] private string Preview { get; set; }
+		[DataMember] public TimeSpan Duration { get; set; }
+		[DataMember] public List<MediaCodec> Codecs { get; private set; }
+
+		public override string ThumbnailName { get { return Thumbnail; } set { Thumbnail = value; } }
+		public override string PreviewName { get { return Preview; } set { Preview = value; } }
 
 		#endregion
 

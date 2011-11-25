@@ -5,11 +5,11 @@ namespace MediaGalleryExplorerCore.EventArguments
 {
 	public class OperationTypeEventArgs : EventArgs
 	{
-		public OperationTypeEventArgs(MainWorker.OperationType operationType) : base()
+		public OperationTypeEventArgs(GalleryWorker.OperationType operationType) : base()
 		{
 			OperationType = operationType;
 		}
 
-		public MainWorker.OperationType OperationType { get; set; }
+		public GalleryWorker.OperationType OperationType { get; set; }
 	}
 }

@@ -1,9 +1,12 @@
 ﻿using System.IO;
+using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
+using ISerializable = MediaGalleryExplorerCore.DataObjects.Serialization.ISerializable;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class FileSystemEntry : ISerializable
 	{
 		protected FileSystemEntry(string name, string relativePath, MediaFolder parent, GallerySource source)
@@ -18,11 +21,11 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		public string ID { get; private set; }
-		public string Name { get; private set; }
-		public string RelativePath { get; private set; }
-		public GallerySource Source { get; private set; }
-		public MediaFolder Parent { get; private set; }
+		[DataMember] public string ID { get; private set; }
+		[DataMember] public string Name { get; private set; }
+		[DataMember] public string RelativePath { get; private set; }
+		[DataMember] public GallerySource Source { get; private set; }
+		[DataMember] public MediaFolder Parent { get; protected set; }
 
 		public bool IsFolder
 		{
@@ -31,7 +34,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		public string RelativePathName
 		{
-			get { return (RelativePath != null ? Path.Combine(RelativePath, Name) : Name); }
+			get { return (RelativePath != null ? Path.Combine(RelativePath, Name) : string.Empty); }
 		}
 
 		#endregion
@@ -65,13 +68,13 @@ namespace MediaGalleryExplorerCore.DataObjects
 			RelativePath = relativePath;
 			Parent = parent;
 			Source = source;
-			if (!string.IsNullOrEmpty(RelativePathName) && Source != null)
+			if (!(string.IsNullOrEmpty(RelativePathName) && string.IsNullOrEmpty(Name)) && Source != null)
 				CreateID();
 		}
 
 		private void CreateID()
 		{
-			ID = CryptoServiceHandler.GenerateHash(Source.ID + ":" + RelativePathName);
+			ID = CryptoServiceHandler.GenerateHash(Source.ID + ":" + (string.IsNullOrEmpty(RelativePathName) ? Name : RelativePathName));
 		}
 
 		public void SetParent(MediaFolder parent)
@@ -89,7 +92,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		public bool Exists()
 		{
-			string fullPathName = Path.Combine(Source.Path, RelativePathName);
+			string fullPathName = Path.Combine(Source.RootedPath, RelativePathName);
 			return (IsFolder ? Directory.Exists(fullPathName) : File.Exists(fullPathName));
 		}
 	}

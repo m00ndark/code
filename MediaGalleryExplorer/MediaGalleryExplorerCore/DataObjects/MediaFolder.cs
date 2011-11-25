@@ -1,30 +1,67 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class MediaFolder : FileSystemEntry
 	{
 		private const int SERIALIZED_VALUES = 2;
 
+		private int _imageCount = 0;
+		private int _videoCount = 0;
+
 		public MediaFolder(string name, string relativePath, MediaFolder parent, GallerySource source)
 			: base(name, relativePath, parent, source)
 		{
-			Initialize();
+			Initialize(false);
 		}
 
 		public MediaFolder(GallerySource source) : base(source)
 		{
-			Initialize();
+			Initialize(false);
+		}
+
+		public MediaFolder(MediaFolder parent) : base(null)
+		{
+			Parent = parent;
+			Initialize(true);
 		}
 
 		#region Properties
 
-		public List<MediaFile> Files { get; private set; }
-		public List<MediaFolder> SubFolders { get; private set; }
-		public int ImageCount { get; private set; }
-		public int VideoCount { get; private set; }
+		public bool IsDummy { get; private set; }
+		[DataMember] public List<MediaFile> Files { get; private set; }
+		[DataMember] public List<MediaFolder> SubFolders { get; private set; }
+
+		[DataMember]
+		public int ImageCount
+		{
+			get { return _imageCount; }
+			private set
+			{
+				int increment = (value - _imageCount);
+				_imageCount = value;
+				IncreaseTotalImageCount(increment, true);
+			}
+		}
+
+		[DataMember]
+		public int VideoCount
+		{
+			get { return _videoCount; }
+			private set
+			{
+				int increment = (value - _videoCount);
+				_videoCount = value;
+				IncreaseTotalVideoCount(increment, true);
+			}
+		}
+
+		//[DataMember] public int ImageCount { get; private set; }
+		//[DataMember] public int VideoCount { get; private set; }
 		public int TotalImageCount { get; private set; }
 		public int TotalVideoCount { get; private set; }
 
@@ -116,8 +153,9 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#endregion
 
-		private void Initialize()
+		private void Initialize(bool isDummy)
 		{
+			IsDummy = isDummy;
 			TotalImageCount = 0;
 			TotalVideoCount = 0;
 			ImageCount = 0;

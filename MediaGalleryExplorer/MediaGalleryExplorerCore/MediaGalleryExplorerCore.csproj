@@ -38,6 +38,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -54,6 +56,7 @@
     <Compile Include="DataAccess\ImageFileHelper.cs" />
     <Compile Include="DataAccess\RegistryHandler.cs" />
     <Compile Include="DataObjects\FileSystemEntry.cs" />
+    <Compile Include="DataObjects\Gallery.cs" />
     <Compile Include="DataObjects\GallerySource.cs" />
     <Compile Include="DataObjects\GalleryVersion.cs" />
     <Compile Include="DataObjects\ImageFile.cs" />
@@ -70,6 +73,7 @@
     <Compile Include="DataObjects\Serialization\ISerializable.cs" />
     <Compile Include="DataObjects\Serialization\ObjectSerializer.cs" />
     <Compile Include="DataObjects\VideoFile.cs" />
+    <Compile Include="EventArguments\BooleanEventArgs.cs" />
     <Compile Include="EventArguments\MediaFileEventArgs.cs" />
     <Compile Include="EventArguments\MediaFolderEventArgs.cs" />
     <Compile Include="EventArguments\MessageEventArgs.cs" />
@@ -79,7 +83,7 @@
     <Compile Include="ObjectPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Workers\CommonWorker.cs" />
-    <Compile Include="Workers\MainWorker.cs" />
+    <Compile Include="Workers\GalleryWorker.cs" />
     <Compile Include="Workers\SettingsWorker.cs" />
   </ItemGroup>
   <ItemGroup>

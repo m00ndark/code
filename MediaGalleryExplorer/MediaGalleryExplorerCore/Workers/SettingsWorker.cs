@@ -64,7 +64,7 @@ namespace MediaGalleryExplorerCore.Workers
 
 		public void Initialize()
 		{
-			RaiseDatabaseLocationUpdatedEvent(ObjectPool.DatabaseLocation);
+			//RaiseDatabaseLocationUpdatedEvent(ObjectPool.DatabaseLocation);
 			RaiseWorkingDirectoryUpdatedEvent(ObjectPool.WorkingDirectory);
 			RaiseVideoThumbnailsMakerUpdatedEvent(ObjectPool.VideoThumbnailsMakerPath);
 			RaiseVideoThumbnailsMakerPresetUpdatedEvent(ObjectPool.VideoThumbnailsMakerPresetPath);
@@ -78,22 +78,22 @@ namespace MediaGalleryExplorerCore.Workers
 
 		public void SetDatabaseLocation()
 		{
-			try
-			{
-				FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-				folderBrowserDialog.Description = "Please select a database root folder...";
-				folderBrowserDialog.SelectedPath = ObjectPool.CompleteDatabaseLocation;
-				if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-				{
-					ObjectPool.SetDatabaseLocation(folderBrowserDialog.SelectedPath);
-					RegistryHandler.SaveSettings(SettingsType.DatabaseLocation);
-					RaiseDatabaseLocationUpdatedEvent(ObjectPool.DatabaseLocation);
-				}
-			}
-			catch (Exception ex)
-			{
-				CommonWorker.ShowError(ex);
-			}
+			//try
+			//{
+			//   FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+			//   folderBrowserDialog.Description = "Please select a database root folder...";
+			//   folderBrowserDialog.SelectedPath = ObjectPool.CompleteDatabaseLocation;
+			//   if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+			//   {
+			//      ObjectPool.SetDatabaseLocation(folderBrowserDialog.SelectedPath);
+			//      RegistryHandler.SaveSettings(SettingsType.DatabaseLocation);
+			//      RaiseDatabaseLocationUpdatedEvent(ObjectPool.DatabaseLocation);
+			//   }
+			//}
+			//catch (Exception ex)
+			//{
+			//   CommonWorker.ShowError(ex);
+			//}
 		}
 
 		public void SetWorkingDirectory()
@@ -164,37 +164,37 @@ namespace MediaGalleryExplorerCore.Workers
 
 		public void AddSource()
 		{
-			try
-			{
-				FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-				folderBrowserDialog.Description = "Please select a source root folder...";
-				folderBrowserDialog.SelectedPath = ObjectPool.LastBrowsedPath;
-				if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-				{
-					ObjectPool.AddSource(new GallerySource(folderBrowserDialog.SelectedPath));
-					RegistryHandler.SaveSettings(SettingsType.GallerySource);
-					RaiseSourceListUpdatedEvent(ObjectPool.Sources);
-				}
-				ObjectPool.LastBrowsedPath = folderBrowserDialog.SelectedPath;
-			}
-			catch (Exception ex)
-			{
-				CommonWorker.ShowError(ex);
-			}
+			//try
+			//{
+			//   FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+			//   folderBrowserDialog.Description = "Please select a source root folder...";
+			//   folderBrowserDialog.SelectedPath = ObjectPool.LastBrowsedPath;
+			//   if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+			//   {
+			//      ObjectPool.AddSource(new GallerySource(folderBrowserDialog.SelectedPath));
+			//      RegistryHandler.SaveSettings(SettingsType.GallerySource);
+			//      RaiseSourceListUpdatedEvent(ObjectPool.Sources);
+			//   }
+			//   ObjectPool.LastBrowsedPath = folderBrowserDialog.SelectedPath;
+			//}
+			//catch (Exception ex)
+			//{
+			//   CommonWorker.ShowError(ex);
+			//}
 		}
 
 		public void RemoveSource(GallerySource source)
 		{
-			try
-			{
-				ObjectPool.RemoveSource(source);
-				RegistryHandler.SaveSettings(SettingsType.GallerySource);
-				RaiseSourceListUpdatedEvent(ObjectPool.Sources);
-			}
-			catch (Exception ex)
-			{
-				CommonWorker.ShowError(ex);
-			}
+			//try
+			//{
+			//   ObjectPool.RemoveSource(source);
+			//   RegistryHandler.SaveSettings(SettingsType.GallerySource);
+			//   RaiseSourceListUpdatedEvent(ObjectPool.Sources);
+			//}
+			//catch (Exception ex)
+			//{
+			//   CommonWorker.ShowError(ex);
+			//}
 		}
 
 		#endregion

@@ -5,6 +5,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Management;
+using System.Runtime.Serialization;
+using System.Xml;
 using Ionic.Zip;
 using MediaGalleryExplorerCore.DataObjects;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
@@ -16,24 +19,49 @@ namespace MediaGalleryExplorerCore.DataAccess
 	{
 		#region Nested classes
 
-		private class ScanState
+		private class DatabaseState
 		{
-			public ScanState()
+			public DatabaseState()
 			{
-				Source = null;
-				DatabaseImageEntries = new Dictionary<ZipEntry, MediaFile>();
+				GalleryEntry = null;
+				ImageEntries = new Dictionary<ZipEntry, MediaFile>();
 			}
 
-			public GallerySource Source { get; set; }
-			public IDictionary<ZipEntry, MediaFile> DatabaseImageEntries { get; private set; }
+			#region Properties
+
+			public Tuple<ZipEntry, Gallery> GalleryEntry { get; set; }
+			public IDictionary<ZipEntry, MediaFile> ImageEntries { get; private set; }
+
+			#endregion
+
+			public void Clear()
+			{
+				GalleryEntry = null;
+				ImageEntries.Clear();
+			}
 		}
 
 		#endregion
 
 		private const string DATABASE_FILE_EXTENSION = ".mgdb";
 		private const string METAFILE_FILE_EXTENSION = ".meta";
+		private static readonly string GALLERY_FILE_NAME = "gallery" + METAFILE_FILE_EXTENSION;
 
-		private static readonly ScanState _scanState = new ScanState();
+		private static readonly List<Type> _serializableDataObjectTypes = new List<Type>()
+			{
+				typeof(Gallery),
+				typeof(GalleryVersion),
+				typeof(GallerySource),
+				typeof(MediaCodec),
+				typeof(FileSystemEntry),
+				typeof(MediaFolder),
+				typeof(MediaFile),
+				typeof(ImageFile),
+				typeof(VideoFile)
+			};
+
+		private static readonly object _galleryAccessLock = new object();
+		private static readonly DatabaseState _databaseState = new DatabaseState();
 		private static readonly EncoderParameters _encoderParameters = new EncoderParameters(1);
 		private static ImageCodecInfo _imageCodecInfo = null;
 
@@ -82,20 +110,23 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		public static void PrepareDirectories()
 		{
-			Directory.CreateDirectory(ObjectPool.CompleteDatabaseLocation);
 			Directory.CreateDirectory(ObjectPool.CompleteWorkingDirectory);
 		}
 
 		public static void ClearWorkingDirectory()
 		{
-			foreach (string directory in Directory.GetDirectories(ObjectPool.CompleteWorkingDirectory))
+			try
 			{
-				Directory.Delete(directory, true);
+				foreach (string directory in Directory.GetDirectories(ObjectPool.CompleteWorkingDirectory))
+				{
+					Directory.Delete(directory, true);
+				}
+				foreach (string file in Directory.GetFiles(ObjectPool.CompleteWorkingDirectory))
+				{
+					File.Delete(file);
+				}
 			}
-			foreach (string file in Directory.GetFiles(ObjectPool.CompleteWorkingDirectory))
-			{
-				File.Delete(file);
-			}
+			catch { ; }
 		}
 
 		public static IDictionary<string, int> GetEncryptionAlgorithms()
@@ -110,73 +141,94 @@ namespace MediaGalleryExplorerCore.DataAccess
 			return encryptionAlgorithms;
 		}
 
+		public static bool PathNameIsValid(string filePath, bool checkFileExists = false)
+		{
+			// filePath should be a valid existing path with a valid file name
+
+			try
+			{
+				if (Directory.Exists(filePath))
+					return false;
+
+				if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+					return false;
+
+				if (File.Exists(filePath))
+					return true;
+
+				return !Path.GetFileName(filePath).Any(ch => Path.GetInvalidFileNameChars().Contains(ch));
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		public static void GetVolumeInfo(string path, out string volumeLetter, out string volumeName, out string volumeSerial)
+		{
+			if (!Path.IsPathRooted(path))
+				throw new ArgumentException("Path is not rooted", "path");
+
+			if (path.StartsWith(@"\\"))
+				throw new ArgumentException("Path is a network path", "path");
+
+			string pathRoot = Path.GetPathRoot(path);
+
+			if (pathRoot == null)
+				throw new Exception("Unable to extract path root from <" + path + ">");
+
+			string pathRootName = pathRoot.Substring(0, 2).ToUpper();
+
+			ManagementObjectSearcher searcher = new ManagementObjectSearcher("select Name, VolumeSerialNumber, VolumeName from Win32_LogicalDisk where Name = '" + pathRootName + "'");
+			ManagementObjectCollection mgmtObjCollection = searcher.Get();
+
+			if (mgmtObjCollection.Count == 0)
+				throw new Exception("Could not find volume with path root name <" + pathRootName + ">");
+
+			ManagementObject mgmtObj = mgmtObjCollection.Cast<ManagementObject>().First();
+			volumeLetter = mgmtObj.Properties["Name"].Value.ToString();
+			volumeName = mgmtObj.Properties["VolumeName"].Value.ToString();
+			volumeSerial = mgmtObj.Properties["VolumeSerialNumber"].Value.ToString();
+		}
+
+		public static string GetVolumeLetter(string volumeSerial)
+		{
+			ManagementObjectSearcher searcher = new ManagementObjectSearcher("select Name from Win32_LogicalDisk where VolumeSerialNumber = '" + volumeSerial + "'");
+			ManagementObjectCollection mgmtObjCollection = searcher.Get();
+
+			if (mgmtObjCollection.Count == 0)
+				throw new Exception("Could not find volume with serial number <" + volumeSerial + ">");
+
+			ManagementObject mgmtObj = mgmtObjCollection.Cast<ManagementObject>().First();
+			return mgmtObj.Properties["Name"].Value.ToString();
+		}
+
 		#endregion
 
 		#region Scanning
 
-		public static void ScanFolders(GallerySource source, bool reScan)
+		public static void ScanFolders(Gallery gallery, GallerySource source, bool reScan)
 		{
-			ZipFile sourceDatabase = null;
-			string sourceDatabasePath = null;
-			string sourceDatabaseBackupPath = null;
-			bool deleteBackup = true;
 			try
 			{
-				ClearWorkingDirectory();
-				_scanState.Source = source;
-				_scanState.DatabaseImageEntries.Clear();
-				int folderCount = 0, fileCount = 0;
-				sourceDatabasePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, Path.ChangeExtension(source.ID, DATABASE_FILE_EXTENSION));
-				if (File.Exists(sourceDatabasePath))
+				//lock (_galleryAccessLock)
 				{
-					RaiseStatusUpdatedEvent("Backing up existing source database...");
-					sourceDatabaseBackupPath = sourceDatabasePath + ".backup";
-					if (File.Exists(sourceDatabaseBackupPath))
-						File.Delete(sourceDatabaseBackupPath);
-					if (reScan)
-						File.Move(sourceDatabasePath, sourceDatabaseBackupPath);
-					else
-						File.Copy(sourceDatabasePath, sourceDatabaseBackupPath);
-				}
-				sourceDatabase = new ZipFile(sourceDatabasePath);
-				source.RootFolder = new MediaFolder(source.Path, string.Empty, null, source);
-				ScanSubFolder(source.RootFolder, source, sourceDatabase, reScan, ref folderCount, ref fileCount, 0);
-				source.ScanDate = DateTime.Now;
-				sourceDatabase.UpdateEntry(Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION), string.Empty, Stream.Null);
-				sourceDatabase.SaveProgress += SourceDatabase_SaveProgress;
-				sourceDatabase.Save();
-				sourceDatabase.SaveProgress -= SourceDatabase_SaveProgress;
-				sourceDatabase.Dispose();
-				RegistryHandler.SaveSettings(SettingsType.GallerySource);
-			}
-			catch
-			{
-				try
-				{
-					if (sourceDatabasePath != null && sourceDatabaseBackupPath != null && File.Exists(sourceDatabaseBackupPath))
+					ClearWorkingDirectory();
+					_databaseState.Clear();
+					int folderCount = 0, fileCount = 0;
+					using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
 					{
-						deleteBackup = false;
-						if (sourceDatabase != null) sourceDatabase.Dispose();
-						if (File.Exists(sourceDatabasePath)) File.Delete(sourceDatabasePath);
-						File.Move(sourceDatabaseBackupPath, sourceDatabasePath);
-						deleteBackup = true;
+						ScanSubFolder(source.RootFolder, source, galleryDatabase, reScan, ref folderCount, ref fileCount, 0);
+						source.ScanDate = DateTime.Now;
+						CreateGalleryEntry(galleryDatabase, gallery);
+						SaveGalleryDatabase(galleryDatabase);
 					}
 				}
-				catch {}
-				throw;
+				//RegistryHandler.SaveSettings(SettingsType.GallerySource);
 			}
 			finally
 			{
-				try
-				{
-					if (deleteBackup && sourceDatabaseBackupPath != null && File.Exists(sourceDatabaseBackupPath))
-					{
-						File.Delete(sourceDatabaseBackupPath);
-					}
-					ClearWorkingDirectory();
-					_scanState.DatabaseImageEntries.Clear();
-				}
-				catch {}
+				ClearWorkingDirectory();
 			}
 		}
 
@@ -185,9 +237,12 @@ namespace MediaGalleryExplorerCore.DataAccess
 			if (e.EventType == ZipProgressEventType.Saving_BeforeWriteEntry && e.CurrentEntry.Source == ZipEntrySource.Stream &&
 				  e.CurrentEntry.InputStream == Stream.Null)
 			{
-				e.CurrentEntry.InputStream = _scanState.DatabaseImageEntries.ContainsKey(e.CurrentEntry)
-					? GetDatabaseImageStream(_scanState.DatabaseImageEntries[e.CurrentEntry], e.CurrentEntry.FileName)
-					: GetMetaDatabaseStream(_scanState.Source);
+				if (_databaseState.ImageEntries.ContainsKey(e.CurrentEntry))
+					e.CurrentEntry.InputStream = GetDatabaseImageStream(_databaseState.ImageEntries[e.CurrentEntry], e.CurrentEntry.FileName);
+				else if (_databaseState.GalleryEntry.Item1 == e.CurrentEntry)
+					e.CurrentEntry.InputStream = GetGalleryMetadataStream(_databaseState.GalleryEntry.Item2);
+				else
+					e.Cancel = true;
 			}
 			else if (e.EventType == ZipProgressEventType.Saving_AfterWriteEntry && e.CurrentEntry.InputStreamWasJitProvided)
 			{
@@ -234,7 +289,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		private static void GetFiles(MediaFolder parent, GallerySource source, ZipFile sourceDatabase, bool reScan)
 		{
-			List<string> files = Directory.GetFiles(Path.Combine(source.Path, parent.RelativePathName)).ToList();
+			List<string> files = Directory.GetFiles(Path.Combine(source.RootedPath, parent.RelativePathName)).ToList();
 			files.Sort();
 			foreach (string file in files)
 			{
@@ -242,7 +297,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 				{
 					string extension = Path.GetExtension(file).ToLower();
 					string fileName = Path.GetFileName(file);
-					string relativePath = RemoveAbsolutePath(Path.GetDirectoryName(file), source.Path);
+					string relativePath = RemoveAbsolutePath(Path.GetDirectoryName(file), source.RootedPath);
 					FileInfo fileInfo = new FileInfo(file);
 					if (MediaFile.IMAGE_FILE_EXTENSIONS.Contains(extension))
 					{
@@ -250,13 +305,16 @@ namespace MediaGalleryExplorerCore.DataAccess
 						{
 							ImageFile imageFile = new ImageFile(fileName, relativePath, parent, source)
 								{
-									FileSize = fileInfo.Length
+									FileSize = fileInfo.Length,
+									ThumbnailName = fileName + ".tn.jpg"
 								};
 							try
 							{
 								imageFile.Size = ImageFileHelper.GetDimensions(file);
 							}
 							catch {}
+							int existingIndex = parent.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
+							if (existingIndex != -1) parent.Files.RemoveAt(existingIndex);
 							parent.Files.Add(imageFile);
 							parent.IncreaseImageCount();
 							AddDatabaseImageEntry(imageFile, sourceDatabase, reScan);
@@ -286,6 +344,8 @@ namespace MediaGalleryExplorerCore.DataAccess
 							}
 						}
 						catch {}
+						int existingIndex = parent.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
+						if (existingIndex != -1) parent.Files.RemoveAt(existingIndex);
 						parent.Files.Add(videoFile);
 						parent.IncreaseVideoCount();
 						AddDatabaseImageEntry(videoFile, sourceDatabase, reScan);
@@ -297,13 +357,15 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		private static void GetFolders(MediaFolder parent, GallerySource source)
 		{
-			List<string> directories = Directory.GetDirectories(Path.Combine(source.Path, parent.RelativePathName)).ToList();
+			List<string> directories = Directory.GetDirectories(Path.Combine(source.RootedPath, parent.RelativePathName)).ToList();
 			directories.Sort();
 			foreach (string directory in directories)
 			{
 				string path = directory.TrimEnd(Path.PathSeparator);
 				string folderName = Path.GetFileName(path);
-				string relativePath = RemoveAbsolutePath(Path.GetDirectoryName(path), source.Path);
+				string relativePath = RemoveAbsolutePath(Path.GetDirectoryName(path), source.RootedPath);
+				int existingIndex = parent.SubFolders.FindIndex(mediaFile => mediaFile.Name == folderName);
+				if (existingIndex != -1) parent.SubFolders.RemoveAt(existingIndex);
 				parent.SubFolders.Add(new MediaFolder(folderName, relativePath, parent, source));
 			}
 		}
@@ -319,14 +381,14 @@ namespace MediaGalleryExplorerCore.DataAccess
 					.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase)))
 				{
 					zipEntry = sourceDatabase.UpdateEntry(mediaFile.PreviewName, path, Stream.Null);
-					_scanState.DatabaseImageEntries.Add(zipEntry, mediaFile);
+					_databaseState.ImageEntries.Add(zipEntry, mediaFile);
 				}
 			}
 			if (reScan || !sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.ThumbnailName)
 				.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase)))
 			{
 				zipEntry = sourceDatabase.UpdateEntry(mediaFile.ThumbnailName, path, Stream.Null);
-				_scanState.DatabaseImageEntries.Add(zipEntry, mediaFile);
+				_databaseState.ImageEntries.Add(zipEntry, mediaFile);
 			}
 		}
 
@@ -364,9 +426,9 @@ namespace MediaGalleryExplorerCore.DataAccess
 				Image image = null;
 				bool makeThumbnail = true;
 				const double maxThumbnailSize = 200.0;
-				string filePathName = Path.Combine(mediaFile.Source.Path, mediaFile.RelativePathName);
+				string filePathName = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
 				RaiseStatusUpdatedEvent("Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named \""
-					+ mediaFile.Name + "\" in " + Path.Combine(mediaFile.Source.Path, mediaFile.Parent.RelativePathName));
+					+ mediaFile.Name + "\" in " + Path.Combine(mediaFile.Source.RootedPath, mediaFile.Parent.RelativePathName));
 				if (mediaFile is ImageFile)
 				{
 					ImageFile imageFile = (mediaFile as ImageFile);
@@ -397,7 +459,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 							makeThumbnail = (Path.GetFileName(relativeFilePathName) == videoFile.ThumbnailName);
 						}
 					}
-					catch { }
+					catch { ; }
 				}
 				if (image != null)
 				{
@@ -414,23 +476,23 @@ namespace MediaGalleryExplorerCore.DataAccess
 					memoryStream.Position = 0;
 				}
 			}
-			catch { }
+			catch { ; }
 			return memoryStream;
 		}
 
-		public static void LoadThumbnails(MediaFolder folder)
+		public static void LoadThumbnails(Gallery gallery, MediaFolder folder)
 		{
-			string databaseFileName = Path.ChangeExtension(folder.Source.ID, DATABASE_FILE_EXTENSION);
-			string databaseFilePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, databaseFileName);
-			if (File.Exists(databaseFilePath))
+			lock (_galleryAccessLock)
 			{
-				using (ZipFile sourceDatabase = ZipFile.Read(databaseFilePath))
+				if (!File.Exists(gallery.FilePath)) return;
+
+				using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
 				{
 					foreach (MediaFile mediaFile in folder.Files)
 					{
 						MemoryStream memoryStream = new MemoryStream();
 						string thumbnailPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativeThumbnailPathName);
-						ZipEntry zipEntry = sourceDatabase[thumbnailPathName];
+						ZipEntry zipEntry = galleryDatabase[thumbnailPathName];
 						if (zipEntry != null)
 						{
 							zipEntry.Extract(memoryStream);
@@ -450,19 +512,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 		#endregion
 
 		#region Source database
-
-		public static Stream GetMetaDatabaseStream(GallerySource source)
-		{
-			MemoryStream memoryStream = new MemoryStream();
-			StreamWriter writer = new StreamWriter(memoryStream);
-
-			writer.WriteLine(GalleryVersion.Instance.Serialize());
-			SerializeSource(writer, source);
-
-			writer.Flush();
-			memoryStream.Position = 0;
-			return memoryStream;
-		}
 
 		private static void SerializeSource(StreamWriter writer, GallerySource source)
 		{
@@ -484,41 +533,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 			foreach (MediaFolder subFolder in folder.SubFolders)
 			{
 				SerializeSubFolders(writer, subFolder);
-			}
-		}
-
-		public static void LoadMetaDatabases(List<GallerySource> sources)
-		{
-			foreach (GallerySource source in sources)
-			{
-				try
-				{
-					RaiseStatusUpdatedEvent("Loading source (" + source.Path + ")...");
-					string databaseFileName = Path.ChangeExtension(source.ID, DATABASE_FILE_EXTENSION);
-					string databaseFilePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, databaseFileName);
-					if (File.Exists(databaseFilePath))
-					{
-						using (ZipFile sourceDatabase = ZipFile.Read(databaseFilePath))
-						{
-							MemoryStream memoryStream = new MemoryStream();
-							ZipEntry zipEntry = sourceDatabase[Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION)];
-							zipEntry.Extract(memoryStream);
-							memoryStream.Position = 0;
-							StreamReader reader = new StreamReader(memoryStream);
-
-							string objectPrefix;
-							string[] deserializedObject = ObjectSerializer.Deserialize(reader.ReadLine(), out objectPrefix);
-							if (objectPrefix != "GV") throw new Exception("Failed to deserialize source database; gallery version missing");
-							GalleryVersion version = new GalleryVersion(deserializedObject);
-
-							DeserializeSource(reader, source);
-
-							reader.Close();
-							memoryStream.Close();
-						}
-					}
-				}
-				catch { }
 			}
 		}
 
@@ -551,7 +565,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 				catch { }
 				if (fileSystemEntries.Count % 100 == 0)
 				{
-					RaiseStatusUpdatedEvent("Loading source (" + source.Path + ")... " + (100 * (double) fileSystemEntries.Count / (source.ImageCount + source.VideoCount)).ToString("0.0") + "%");
+					RaiseStatusUpdatedEvent("Loading source (" + source.RootedPath + ")... " + (100 * (double) fileSystemEntries.Count / (source.ImageCount + source.VideoCount)).ToString("0.0") + "%");
 				}
 				serializedObject = reader.ReadLine();
 			}
@@ -604,32 +618,227 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		public static void OpenMediaFile(MediaFile mediaFile, bool preview)
 		{
-			string filePath = string.Empty;
-			if (mediaFile is ImageFile || !preview)
+			//string filePath = string.Empty;
+			//if (mediaFile is ImageFile || !preview)
+			//{
+			//   filePath = Path.Combine(mediaFile.Source.Path, mediaFile.RelativePathName);
+			//}
+			//else if (mediaFile is VideoFile)
+			//{
+			//   ClearWorkingDirectory();
+			//   string databaseFileName = Path.ChangeExtension(mediaFile.Source.ID, DATABASE_FILE_EXTENSION);
+			//   string databaseFilePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, databaseFileName);
+			//   if (File.Exists(databaseFilePath))
+			//   {
+			//      using (ZipFile sourceDatabase = ZipFile.Read(databaseFilePath))
+			//      {
+			//         string relativePreviewPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePreviewPathName);
+			//         ZipEntry zipEntry = sourceDatabase[relativePreviewPathName];
+			//         zipEntry.Extract(ObjectPool.CompleteWorkingDirectory, ExtractExistingFileAction.OverwriteSilently);
+			//         filePath = Path.Combine(ObjectPool.CompleteWorkingDirectory, relativePreviewPathName);
+			//      }
+			//   }
+			//}
+			//if (File.Exists(filePath))
+			//{
+			//   Process process = new Process() { StartInfo = { FileName = filePath, Verb = "Open" } };
+			//   process.Start();
+			//}
+		}
+
+		#endregion
+
+		#region Gallery database
+
+		public static void LoadGallery(ref Gallery gallery)
+		{
+			lock (_galleryAccessLock)
 			{
-				filePath = Path.Combine(mediaFile.Source.Path, mediaFile.RelativePathName);
-			}
-			else if (mediaFile is VideoFile)
-			{
-				ClearWorkingDirectory();
-				string databaseFileName = Path.ChangeExtension(mediaFile.Source.ID, DATABASE_FILE_EXTENSION);
-				string databaseFilePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, databaseFileName);
-				if (File.Exists(databaseFilePath))
+				using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
 				{
-					using (ZipFile sourceDatabase = ZipFile.Read(databaseFilePath))
-					{
-						string relativePreviewPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePreviewPathName);
-						ZipEntry zipEntry = sourceDatabase[relativePreviewPathName];
-						zipEntry.Extract(ObjectPool.CompleteWorkingDirectory, ExtractExistingFileAction.OverwriteSilently);
-						filePath = Path.Combine(ObjectPool.CompleteWorkingDirectory, relativePreviewPathName);
-					}
+					RaiseStatusUpdatedEvent("Loading gallery (" + gallery.FilePath + ")...");
+					MemoryStream memoryStream = new MemoryStream();
+					ZipEntry zipEntry = galleryDatabase[GALLERY_FILE_NAME];
+					zipEntry.Extract(memoryStream);
+					memoryStream.Position = 0;
+					XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(memoryStream, new XmlDictionaryReaderQuotas());
+					DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
+					gallery = (Gallery) serializer.ReadObject(reader, true);
+					reader.Close();
+					memoryStream.Close();
 				}
 			}
-			if (File.Exists(filePath))
+			gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
+
+
+			//try
+			//{
+			//   if (File.Exists(gallery.FilePath))
+			//   {
+			//      using (ZipFile sourceDatabase = ZipFile.Read(gallery.FilePath))
+			//      {
+			//         foreach (GallerySource source in gallery.Sources)
+			//         {
+			//            RaiseStatusUpdatedEvent("Loading source (" + source.DisplayPath + ")...");
+			//            MemoryStream memoryStream = new MemoryStream();
+			//            ZipEntry zipEntry = sourceDatabase[Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION)];
+			//            zipEntry.Extract(memoryStream);
+			//            memoryStream.Position = 0;
+			//            StreamReader reader = new StreamReader(memoryStream);
+
+			//            string objectPrefix;
+			//            string[] deserializedObject = ObjectSerializer.Deserialize(reader.ReadLine(), out objectPrefix);
+			//            if (objectPrefix != "GV")
+			//               throw new Exception("Failed to deserialize source database; gallery version missing");
+			//            GalleryVersion version = new GalleryVersion(deserializedObject);
+
+			//            DeserializeSource(reader, source);
+
+			//            reader.Close();
+			//            memoryStream.Close();
+			//         }
+			//      }
+			//   }
+			//}
+			//catch
+			//{
+			//}
+		}
+
+		public static void SaveGallery(Gallery gallery)
+		{
+			//lock (_galleryAccessLock)
 			{
-				Process process = new Process() { StartInfo = { FileName = filePath, Verb = "Open" } };
-				process.Start();
+				_databaseState.Clear();
+				using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
+				{
+					CreateGalleryEntry(galleryDatabase, gallery);
+					//foreach (GallerySource source in gallery.Sources)
+					//{
+					//   ZipEntry sourceEntry = galleryDatabase.UpdateEntry(Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION), string.Empty, Stream.Null);
+					//   _databaseState.SourceEntries.Add(sourceEntry, source);
+					//   RaiseMediaFolderAddedEvent(source.RootFolder);
+					//}
+					SaveGalleryDatabase(galleryDatabase);
+				}
 			}
+			gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
+		}
+
+		public static Stream GetGalleryMetadataStream(Gallery gallery)
+		{
+			MemoryStream memoryStream = new MemoryStream();
+			XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
+			DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
+			serializer.WriteObject(writer, gallery);
+			writer.Flush();
+			memoryStream.Position = 0;
+			return memoryStream;
+
+
+			//MemoryStream memoryStream = new MemoryStream();
+			//StreamWriter writer = new StreamWriter(memoryStream);
+
+			//writer.WriteLine(GalleryVersion.Instance.Serialize());
+			//SerializeSource(writer, source);
+
+			//writer.Flush();
+			//memoryStream.Position = 0;
+			//return memoryStream;
+		}
+
+		private static void CreateGalleryEntry(ZipFile galleryDatabase, Gallery gallery)
+		{
+			ZipEntry galleryEntry = galleryDatabase.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Stream.Null);
+			_databaseState.GalleryEntry = new Tuple<ZipEntry, Gallery>(galleryEntry, gallery);
+		}
+
+		private static ZipFile OpenGalleryDatabase(Gallery gallery, bool writing)
+		{
+			ZipFile galleryDatabase = null;
+			if (writing)
+			{
+				string galleryDatabaseBackupPath = null;
+				bool deleteBackup = true;
+				try
+				{
+					if (File.Exists(gallery.FilePath))
+					{
+						RaiseStatusUpdatedEvent("Backing up existing source database...");
+						galleryDatabaseBackupPath = gallery.FilePath + ".backup";
+						if (File.Exists(galleryDatabaseBackupPath))
+							File.Delete(galleryDatabaseBackupPath);
+						File.Copy(gallery.FilePath, galleryDatabaseBackupPath);
+					}
+					galleryDatabase = new ZipFile(gallery.FilePath) { Encryption = (EncryptionAlgorithm) gallery.EncryptionAlgorithm };
+					if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
+					{
+						galleryDatabase.Password = gallery.Password;
+					}
+				}
+				catch
+				{
+					try
+					{
+						if (galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
+						{
+							deleteBackup = false;
+							CloseGalleryDatabase(galleryDatabase);
+							if (File.Exists(gallery.FilePath))
+								File.Delete(gallery.FilePath);
+							File.Move(galleryDatabaseBackupPath, gallery.FilePath);
+							deleteBackup = true;
+						}
+						else
+							CloseGalleryDatabase(galleryDatabase);
+					}
+					catch { ; }
+					throw;
+				}
+				finally
+				{
+					try
+					{
+						if (deleteBackup && galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
+							File.Delete(galleryDatabaseBackupPath);
+						_databaseState.Clear();
+					}
+					catch { ; }
+				}
+			}
+			else
+			{
+				try
+				{
+					if (File.Exists(gallery.FilePath))
+					{
+						galleryDatabase = ZipFile.Read(gallery.FilePath);
+						if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
+							galleryDatabase.Password = gallery.Password;
+					}
+				}
+				catch { ; }
+			}
+			return galleryDatabase;
+		}
+
+		private static void SaveGalleryDatabase(ZipFile galleryDatabase)
+		{
+			if (galleryDatabase == null)
+				throw new ArgumentNullException("galleryDatabase");
+
+			lock (_galleryAccessLock)
+			{
+				galleryDatabase.SaveProgress += SourceDatabase_SaveProgress;
+				galleryDatabase.Save();
+				galleryDatabase.SaveProgress -= SourceDatabase_SaveProgress;
+			}
+		}
+
+		private static void CloseGalleryDatabase(ZipFile galleryDatabase)
+		{
+			if (galleryDatabase != null)
+				galleryDatabase.Dispose();
 		}
 
 		#endregion

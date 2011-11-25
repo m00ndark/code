@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
+using ISerializable = MediaGalleryExplorerCore.DataObjects.Serialization.ISerializable;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class GallerySource : IComparable, ISerializable
 	{
 		public GallerySource(string path)
@@ -20,13 +23,26 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		public string ID { get; private set; }
-		public string Path { get; set; }
-		public int ImageCount { get; set; }
-		public int VideoCount { get; set; }
-		public MediaFolder RootFolder { get; set; }
-		public DateTime ScanDate { get; set; }
-		public List<MediaCodec> Codecs { get; private set; }
+		[DataMember] public string ID { get; private set; }
+		[DataMember] public string Path { get; set; }
+		[DataMember] public string VolumeLetter { get; set; }
+		[DataMember] public string VolumeName { get; set; }
+		[DataMember] public string VolumeSerial { get; set; }
+		[DataMember] public int ImageCount { get; set; }
+		[DataMember] public int VideoCount { get; set; }
+		[DataMember] public MediaFolder RootFolder { get; set; }
+		[DataMember] public DateTime ScanDate { get; set; }
+		[DataMember] public List<MediaCodec> Codecs { get; private set; }
+
+		public string RootedPath
+		{
+			get { return VolumeLetter + Path; }
+		}
+
+		public string DisplayPath
+		{
+			get { return "[" + VolumeName + "]" + Path; }
+		}
 
 		public string ScanDateStr
 		{
@@ -45,7 +61,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		public virtual string Serialize(bool withPrefix)
 		{
-			return ObjectSerializer.Serialize((withPrefix ? this : null), Path, RootFolder.ID, ScanDateStr, ImageCount.ToString(), VideoCount.ToString());
+			return ObjectSerializer.Serialize((withPrefix ? this : null), VolumeSerial, VolumeName, VolumeLetter, Path, RootFolder.ID, ScanDateStr, ImageCount.ToString(), VideoCount.ToString());
 		}
 
 		public string LoadFromDeserialized(string[] deserialized)
@@ -59,10 +75,15 @@ namespace MediaGalleryExplorerCore.DataObjects
 		private void Initialize(string path)
 		{
 			ID = null;
-			Path = path;
+			string volumeLetter, volumeName, volumeSerial;
+			FileSystemHandler.GetVolumeInfo(path, out volumeLetter, out volumeName, out volumeSerial);
+			VolumeLetter = volumeLetter;
+			VolumeName = volumeName;
+			VolumeSerial = volumeSerial;
+			Path = path.Substring(2);
 			ImageCount = 0;
 			VideoCount = 0;
-			RootFolder = null;
+			RootFolder = new MediaFolder(Path, null, null, this);
 			ScanDate = DateTime.MinValue;
 			Codecs = new List<MediaCodec>();
 			CreateID();
@@ -70,7 +91,12 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		private void CreateID()
 		{
-			ID = CryptoServiceHandler.GenerateHash(Path);
+			ID = CryptoServiceHandler.GenerateHash(GetIDBase());
+		}
+
+		private string GetIDBase()
+		{
+			return VolumeSerial + ":" + Path;
 		}
 
 		#region Equality
@@ -78,12 +104,12 @@ namespace MediaGalleryExplorerCore.DataObjects
 		public override bool Equals(object obj)
 		{
 			GallerySource source = obj as GallerySource;
-			return (source != null && source.Path.Equals(Path, StringComparison.CurrentCultureIgnoreCase));
+			return (source != null && source.GetIDBase().Equals(GetIDBase(), StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		public override int GetHashCode()
 		{
-			return Path.ToLower().GetHashCode();
+			return GetIDBase().ToLower().GetHashCode();
 		}
 
 		#endregion
@@ -94,7 +120,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 		{
 			GallerySource source = obj as GallerySource;
 			if (source == null) return -1;
-			return Path.CompareTo(source.Path);
+			return GetIDBase().CompareTo(source.GetIDBase());
 		}
 
 		#endregion

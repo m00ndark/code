@@ -15,6 +15,11 @@ namespace MediaGalleryExplorerCore.Workers
 			return FileSystemHandler.GetEncryptionAlgorithms();
 		}
 
+		public static bool PathNameIsValid(string filePath)
+		{
+			return FileSystemHandler.PathNameIsValid(filePath);
+		}
+
 		#endregion
 
 		#region Show messages

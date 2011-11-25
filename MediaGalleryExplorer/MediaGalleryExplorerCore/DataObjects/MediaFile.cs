@@ -2,10 +2,12 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataObjects.Serialization;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public abstract class MediaFile : FileSystemEntry
 	{
 		private const int SERIALIZED_VALUES = 3;
@@ -25,21 +27,12 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		public long FileSize { get; set; }
-		public Size Size { get; set; }
+		[DataMember] public long FileSize { get; set; }
+		[DataMember] public Size Size { get; set; }
 		public Image ThumbnailImage { get; set; }
 
-		public virtual string ThumbnailName
-		{
-			get { return Name; }
-			set { throw new Exception("Set accessor of MediaFile.ThumbnailName property should not be used."); }
-		}
-
-		public virtual string PreviewName
-		{
-			get { return Name; }
-			set { throw new Exception("Set accessor of MediaFile.PreviewName property should not be used."); }
-		}
+		public abstract string ThumbnailName { get; set; }
+		public abstract string PreviewName { get; set; }
 
 		public string RelativeThumbnailPathName
 		{

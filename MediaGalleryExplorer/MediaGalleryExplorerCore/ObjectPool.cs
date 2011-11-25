@@ -14,12 +14,10 @@ namespace MediaGalleryExplorerCore
 
 		// runtime objects
 		public static string LastBrowsedPath { get; set; }
-		public static string CompleteDatabaseLocation { get { return ReplacePathIdentifier(DatabaseLocation); } }
 		public static string CompleteWorkingDirectory { get { return ReplacePathIdentifier(WorkingDirectory); } }
 		public static string CompleteVideoThumbnailsMakerPresetPath { get { return ReplacePathIdentifier(VideoThumbnailsMakerPresetPath); } }
 
 		// persistant objects
-		public static string DatabaseLocation { get; private set; }
 		public static string WorkingDirectory { get; private set; }
 		public static string VideoThumbnailsMakerPath { get; private set; }
 		public static string VideoThumbnailsMakerPresetPath { get; private set; }
@@ -29,16 +27,10 @@ namespace MediaGalleryExplorerCore
 
 		public static void Initialize()
 		{
-			DatabaseLocation = string.Empty;
 			WorkingDirectory = string.Empty;
 			VideoThumbnailsMakerPath = string.Empty;
 			VideoThumbnailsMakerPresetPath = string.Empty;
 			Sources = new List<GallerySource>();
-		}
-
-		public static void SetDatabaseLocation(string path)
-		{
-			DatabaseLocation = ReplaceWithPathIdentifier(path);
 		}
 
 		public static void SetWorkingDirectory(string path)
@@ -54,20 +46,6 @@ namespace MediaGalleryExplorerCore
 		public static void SetVideoThumbnailsMakerPresetPath(string path)
 		{
 			VideoThumbnailsMakerPresetPath = ReplaceWithPathIdentifier(path);
-		}
-
-		public static void AddSource(GallerySource source)
-		{
-			if (!Sources.Contains(source))
-			{
-				Sources.Add(source);
-				Sources.Sort();
-			}
-		}
-
-		public static void RemoveSource(GallerySource source)
-		{
-			Sources.Remove(source);
 		}
 
 		#region Helpers

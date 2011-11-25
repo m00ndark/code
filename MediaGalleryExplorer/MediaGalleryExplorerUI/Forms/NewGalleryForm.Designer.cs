@@ -60,6 +60,7 @@
 			this.textBoxFilePath.Name = "textBoxFilePath";
 			this.textBoxFilePath.Size = new System.Drawing.Size(368, 23);
 			this.textBoxFilePath.TabIndex = 1;
+			this.textBoxFilePath.TextChanged += new System.EventHandler(this.TextBoxFilePath_TextChanged);
 			// 
 			// textBoxName
 			// 
@@ -69,6 +70,7 @@
 			this.textBoxName.Name = "textBoxName";
 			this.textBoxName.Size = new System.Drawing.Size(368, 23);
 			this.textBoxName.TabIndex = 3;
+			this.textBoxName.TextChanged += new System.EventHandler(this.TextBoxName_TextChanged);
 			// 
 			// labelName
 			// 
@@ -89,6 +91,7 @@
 			this.comboBoxEncryption.Name = "comboBoxEncryption";
 			this.comboBoxEncryption.Size = new System.Drawing.Size(368, 23);
 			this.comboBoxEncryption.TabIndex = 4;
+			this.comboBoxEncryption.SelectedIndexChanged += new System.EventHandler(this.ComboBoxEncryption_SelectedIndexChanged);
 			// 
 			// labelEncryption
 			// 
@@ -108,6 +111,7 @@
 			this.textBoxPassword.PasswordChar = '*';
 			this.textBoxPassword.Size = new System.Drawing.Size(368, 23);
 			this.textBoxPassword.TabIndex = 7;
+			this.textBoxPassword.TextChanged += new System.EventHandler(this.TextBoxPassword_TextChanged);
 			// 
 			// labelPassword
 			// 
@@ -127,10 +131,13 @@
 			this.buttonBrowseFilePath.TabIndex = 8;
 			this.buttonBrowseFilePath.Text = "...";
 			this.buttonBrowseFilePath.UseVisualStyleBackColor = true;
+			this.buttonBrowseFilePath.Click += new System.EventHandler(this.ButtonBrowseFilePath_Click);
 			// 
 			// buttonOK
 			// 
 			this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.buttonOK.Enabled = false;
 			this.buttonOK.Location = new System.Drawing.Point(161, 0);
 			this.buttonOK.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
 			this.buttonOK.Name = "buttonOK";
@@ -141,6 +148,7 @@
 			// 
 			// buttonCancel
 			// 
+			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.buttonCancel.Location = new System.Drawing.Point(242, 0);
 			this.buttonCancel.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
 			this.buttonCancel.Name = "buttonCancel";

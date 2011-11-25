@@ -19,6 +19,7 @@ namespace MediaGalleryExplorerCore.DataObjects.Serialization
 		private static string ObjectPrefix(object obj)
 		{
 			string prefix = "??";
+			if (obj is Gallery) prefix = "GA";
 			if (obj is GalleryVersion) prefix = "GV";
 			if (obj is GallerySource) prefix = "GS";
 			if (obj is MediaFolder) prefix = "FO";

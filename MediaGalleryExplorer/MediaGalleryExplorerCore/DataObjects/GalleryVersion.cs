@@ -7,7 +7,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 	public class GalleryVersion : ISerializable
 	{
 		private static GalleryVersion _instance = null;
-		private static readonly object _padlock = new object();
+		private static readonly object _lock = new object();
 
 		private GalleryVersion()
 		{
@@ -75,7 +75,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 			{
 				if (_instance == null)
 				{
-					lock (_padlock)
+					lock (_lock)
 					{
 						if (_instance == null)
 						{

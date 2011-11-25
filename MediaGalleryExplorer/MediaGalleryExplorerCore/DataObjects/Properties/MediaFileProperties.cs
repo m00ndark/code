@@ -44,7 +44,7 @@ namespace MediaGalleryExplorerCore.DataObjects.Properties
 		[ReadOnly(true)]
 		[Category("Source")]
 		[DisplayName("Root Path")]
-		public string BrowsableRootPath { get { return MediaFile.Source.Path; } }
+		public string BrowsableRootPath { get { return MediaFile.Source.DisplayPath; } }
 
 		[ReadOnly(true)]
 		[Category("Source")]

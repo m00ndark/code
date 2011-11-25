@@ -1,34 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects;
 using MediaGalleryExplorerCore.EventArguments;
 
 namespace MediaGalleryExplorerCore.Workers
 {
-	public class MainWorker
+	public class GalleryWorker
 	{
 		#region Enumeration
 
 		public enum OperationType
 		{
 			ScanSource,
-			LoadSources,
+			LoadGallery,
 			LoadThumbnails
 		}
 
 		#endregion
 
+		private readonly HashSet<MediaFolder> _expandedFolders;
+
+		public event EventHandler<EventArgs> GalleryLoaded;
 		public event EventHandler<StringEventArgs> StatusUpdated;
-		public event EventHandler<SourceListEventArgs> SourceListUpdated;
 		public event EventHandler<MediaFolderEventArgs> TreeNodeAdded;
 		public event EventHandler<MediaFolderEventArgs> TreeNodeRemoved;
 		public event EventHandler<MediaFileEventArgs> ThumbnailAvailable;
 		public event EventHandler<OperationTypeEventArgs> DatabaseOperationCompleted;
 
-		public MainWorker()
+		public GalleryWorker(Gallery gallery)
 		{
+			_expandedFolders = new HashSet<MediaFolder>();
+			Gallery = gallery;
 			SelectedFile = null;
 			FileSystemHandler.StatusUpdated += FileSystemHandler_StatusUpdated;
 			FileSystemHandler.MediaFolderAdded += FileSystemHandler_MediaFolderAdded;
@@ -38,25 +44,26 @@ namespace MediaGalleryExplorerCore.Workers
 
 		#region Properties
 
+		public Gallery Gallery { get; private set; }
 		public MediaFile SelectedFile { get; set; }
 
 		#endregion
 
 		#region Event raisers
 
+		private void RaiseGalleryLoadedEvent()
+		{
+			if (GalleryLoaded != null)
+			{
+				GalleryLoaded(this, new EventArgs());
+			}
+		}
+
 		private void RaiseStatusUpdatedEvent(string status)
 		{
 			if (StatusUpdated != null)
 			{
 				StatusUpdated(this, new StringEventArgs(status));
-			}
-		}
-
-		private void RaiseSourceListUpdatedEvent(List<GallerySource> sources)
-		{
-			if (SourceListUpdated != null)
-			{
-				SourceListUpdated(this, new SourceListEventArgs(sources));
 			}
 		}
 
@@ -103,7 +110,19 @@ namespace MediaGalleryExplorerCore.Workers
 
 		private void FileSystemHandler_MediaFolderAdded(object sender, MediaFolderEventArgs e)
 		{
-			RaiseTreeNodeAddedEvent(e.Folder);
+			lock (_expandedFolders)
+			{
+				if (e.Folder.Parent == null || _expandedFolders.Contains(e.Folder.Parent))
+				{
+					RaiseTreeNodeAddedEvent(e.Folder);
+					if (e.Folder.SubFolders.Count > 0)
+						RaiseTreeNodeAddedEvent(new MediaFolder(e.Folder));
+				}
+				else if (_expandedFolders.Contains(e.Folder.Parent.Parent) && e.Folder.Parent.SubFolders.Count == 1)
+				{
+					RaiseTreeNodeAddedEvent(new MediaFolder(e.Folder.Parent));
+				}
+			}
 		}
 
 		private void FileSystemHandler_MediaFolderRemoved(object sender, MediaFolderEventArgs e)
@@ -120,27 +139,23 @@ namespace MediaGalleryExplorerCore.Workers
 
 		#region Operations
 
-		#region Initialize
+		#region Loading gallery
 
-		public void Initialize()
+		public void LoadGallery()
 		{
-			ObjectPool.Initialize();
-			RegistryHandler.LoadSettings();
-			RaiseSourceListUpdatedEvent(ObjectPool.Sources);
+			new Thread(LoadGalleryThread).Start();
 		}
 
-		public void LoadSources()
-		{
-			new Thread(LoadSourcesThread).Start();
-		}
-
-		private void LoadSourcesThread()
+		private void LoadGalleryThread()
 		{
 			try
 			{
-				RaiseStatusUpdatedEvent("Loading sources...");
-				FileSystemHandler.LoadMetaDatabases(ObjectPool.Sources);
-				RaiseDatabaseOperationCompletedEvent(OperationType.LoadSources);
+				RaiseStatusUpdatedEvent("Loading gallery...");
+				Gallery gallery = Gallery;
+				FileSystemHandler.LoadGallery(ref gallery);
+				Gallery = gallery;
+				RaiseGalleryLoadedEvent();
+				RaiseDatabaseOperationCompletedEvent(OperationType.LoadGallery);
 			}
 			catch (Exception ex)
 			{
@@ -159,6 +174,24 @@ namespace MediaGalleryExplorerCore.Workers
 
 		#endregion
 
+		#region Add source
+
+		public void AddSource()
+		{
+			FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog() { Description = "Please select a source root folder..." };
+			if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+			{
+				GallerySource source = new GallerySource(folderBrowserDialog.SelectedPath);
+				if (!Gallery.Sources.Any(s => s.Equals(source)))
+				{
+					Gallery.AddSource(new GallerySource(folderBrowserDialog.SelectedPath));
+					FileSystemHandler.SaveGallery(Gallery);
+				}
+			}
+		}
+
+		#endregion
+
 		#region Scan source
 
 		public void ScanSource(GallerySource source, bool reScan)
@@ -166,21 +199,16 @@ namespace MediaGalleryExplorerCore.Workers
 			new Thread(ScanSourceThread).Start(new object[] { source, reScan });
 		}
 
-		private void ScanSourceThread(object data)
+		private void ScanSourceThread(object inParam)
 		{
 			try
 			{
-				object[] parameters = data as object[];
-				if (parameters != null && parameters.Length == 2)
-				{
-					GallerySource source = (parameters[0] as GallerySource);
-					if (source != null && parameters[1] is bool)
-					{
-						FileSystemHandler.PrepareDirectories();
-						FileSystemHandler.InitializeImageProcessor(90L);
-						FileSystemHandler.ScanFolders(source, (bool) parameters[1]);
-					}
-				}
+				object[] inParams = (object[]) inParam;
+				GallerySource source = (GallerySource) inParams[0];
+				bool reScan = (bool) inParams[1];
+				FileSystemHandler.PrepareDirectories();
+				FileSystemHandler.InitializeImageProcessor(90L);
+				FileSystemHandler.ScanFolders(Gallery, source, reScan);
 				RaiseDatabaseOperationCompletedEvent(OperationType.ScanSource);
 			}
 			catch (Exception ex)
@@ -206,7 +234,7 @@ namespace MediaGalleryExplorerCore.Workers
 				MediaFolder folder = (data as MediaFolder);
 				if	(folder != null)
 				{
-					FileSystemHandler.LoadThumbnails(folder);
+					FileSystemHandler.LoadThumbnails(Gallery, folder);
 				}
 				RaiseDatabaseOperationCompletedEvent(OperationType.LoadThumbnails);
 			}
@@ -231,6 +259,25 @@ namespace MediaGalleryExplorerCore.Workers
 		}
 
 		#endregion
+
+		public void FolderExpanded(MediaFolder folder)
+		{
+			lock (_expandedFolders)
+			{
+				if (!_expandedFolders.Contains(folder))
+				{
+					_expandedFolders.Add(folder);
+					folder.SubFolders.ForEach(RaiseTreeNodeAddedEvent);
+					folder.SubFolders.Where(subFolder => subFolder.SubFolders.Count > 0).ToList()
+						.ForEach(subFolder => RaiseTreeNodeAddedEvent(new MediaFolder(subFolder)));
+				}
+			}
+		}
+
+		public void FolderCollapsed(MediaFolder folder)
+		{
+			//_expandedFolders.Remove(folder);
+		}
 
 		#endregion
 	}
