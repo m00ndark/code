@@ -70,13 +70,14 @@ namespace MediaGalleryExplorerCore.DataObjects
 			ID = CryptoServiceHandler.GenerateHash(FilePath);
 		}
 
-		public void AddSource(GallerySource source)
+		public bool AddSource(GallerySource source)
 		{
-			if (!Sources.Contains(source))
-			{
-				Sources.Add(source);
-				Sources.Sort();
-			}
+			if (Sources.Contains(source))
+				return false;
+
+			Sources.Add(source);
+			Sources.Sort();
+			return true;
 		}
 
 		public void RemoveSource(GallerySource source)

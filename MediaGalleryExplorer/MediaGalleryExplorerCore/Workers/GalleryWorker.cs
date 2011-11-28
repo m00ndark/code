@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects;
 using MediaGalleryExplorerCore.EventArguments;
@@ -22,6 +26,21 @@ namespace MediaGalleryExplorerCore.Workers
 
 		#endregion
 
+		private const string GALLERY_FILE_NAME = "gallery.meta";
+
+		private static readonly List<Type> _serializableDataObjectTypes = new List<Type>()
+			{
+				typeof(Gallery),
+				typeof(GalleryVersion),
+				typeof(GallerySource),
+				typeof(MediaCodec),
+				typeof(FileSystemEntry),
+				typeof(MediaFolder),
+				typeof(MediaFile),
+				typeof(ImageFile),
+				typeof(VideoFile)
+			};
+
 		private readonly HashSet<MediaFolder> _expandedFolders;
 
 		public event EventHandler<EventArgs> GalleryLoaded;
@@ -37,9 +56,6 @@ namespace MediaGalleryExplorerCore.Workers
 			Gallery = gallery;
 			SelectedFile = null;
 			FileSystemHandler.StatusUpdated += FileSystemHandler_StatusUpdated;
-			FileSystemHandler.MediaFolderAdded += FileSystemHandler_MediaFolderAdded;
-			FileSystemHandler.MediaFolderRemoved += FileSystemHandler_MediaFolderRemoved;
-			FileSystemHandler.MediaFileUpdated += FileSystemHandler_MediaFileUpdated;
 		}
 
 		#region Properties
@@ -108,33 +124,6 @@ namespace MediaGalleryExplorerCore.Workers
 			RaiseStatusUpdatedEvent(e.Value);
 		}
 
-		private void FileSystemHandler_MediaFolderAdded(object sender, MediaFolderEventArgs e)
-		{
-			lock (_expandedFolders)
-			{
-				if (e.Folder.Parent == null || _expandedFolders.Contains(e.Folder.Parent))
-				{
-					RaiseTreeNodeAddedEvent(e.Folder);
-					if (e.Folder.SubFolders.Count > 0)
-						RaiseTreeNodeAddedEvent(new MediaFolder(e.Folder));
-				}
-				else if (_expandedFolders.Contains(e.Folder.Parent.Parent) && e.Folder.Parent.SubFolders.Count == 1)
-				{
-					RaiseTreeNodeAddedEvent(new MediaFolder(e.Folder.Parent));
-				}
-			}
-		}
-
-		private void FileSystemHandler_MediaFolderRemoved(object sender, MediaFolderEventArgs e)
-		{
-			RaiseTreeNodeRemovedEvent(e.Folder);
-		}
-
-		private void FileSystemHandler_MediaFileUpdated(object sender, MediaFileEventArgs e)
-		{
-			RaiseThumbnailAvailableEvent(e.File);
-		}
-
 		#endregion
 
 		#region Operations
@@ -150,11 +139,19 @@ namespace MediaGalleryExplorerCore.Workers
 		{
 			try
 			{
-				RaiseStatusUpdatedEvent("Loading gallery...");
-				Gallery gallery = Gallery;
-				FileSystemHandler.LoadGallery(ref gallery);
-				Gallery = gallery;
+				RaiseStatusUpdatedEvent("Loading gallery (" + Gallery.FilePath + ")...");
+				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, false))
+				{
+					using (Stream stream = database.ExtractEntry(GALLERY_FILE_NAME))
+					{
+						XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(stream, new XmlDictionaryReaderQuotas());
+						DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
+						Gallery = (Gallery) serializer.ReadObject(reader, true);
+						reader.Close();
+					}
+				}
 				RaiseGalleryLoadedEvent();
+				Gallery.Sources.ForEach(source => FolderAdded(source.RootFolder));
 				RaiseDatabaseOperationCompletedEvent(OperationType.LoadGallery);
 			}
 			catch (Exception ex)
@@ -182,10 +179,15 @@ namespace MediaGalleryExplorerCore.Workers
 			if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
 			{
 				GallerySource source = new GallerySource(folderBrowserDialog.SelectedPath);
-				if (!Gallery.Sources.Any(s => s.Equals(source)))
+				if (Gallery.AddSource(source))
 				{
-					Gallery.AddSource(new GallerySource(folderBrowserDialog.SelectedPath));
-					FileSystemHandler.SaveGallery(Gallery);
+					using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, true))
+					{
+						database.RegisterStreamProvider<Gallery>(GalleryMetadataStreamProvider);
+						database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery);
+						database.Save();
+					}
+					FolderAdded(source.RootFolder);
 				}
 			}
 		}
@@ -231,10 +233,24 @@ namespace MediaGalleryExplorerCore.Workers
 			try
 			{
 				RaiseStatusUpdatedEvent("Loading thumbnails...");
-				MediaFolder folder = (data as MediaFolder);
-				if	(folder != null)
+				MediaFolder folder = (MediaFolder) data;
+				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, false))
 				{
-					FileSystemHandler.LoadThumbnails(Gallery, folder);
+					foreach (MediaFile mediaFile in folder.Files)
+					{
+						bool thumbnailLoaded = false;
+						string thumbnailPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativeThumbnailPathName);
+						using (Stream stream = database.ExtractEntry(thumbnailPathName))
+						{
+							if (stream != null && stream.Length > 0)
+							{
+								mediaFile.ThumbnailImage = Image.FromStream(stream);
+								thumbnailLoaded = true;
+							}
+						}
+						if (thumbnailLoaded)
+							FileUpdated(mediaFile);
+					}
 				}
 				RaiseDatabaseOperationCompletedEvent(OperationType.LoadThumbnails);
 			}
@@ -246,19 +262,51 @@ namespace MediaGalleryExplorerCore.Workers
 
 		#endregion
 
-		#region File actions
+		#region File changes
 
-		public void OpenMediaFile(MediaFile mediaFile)
+		private void FileUpdated(MediaFile file)
 		{
-			OpenMediaFile(mediaFile, false);
+			RaiseThumbnailAvailableEvent(file);
 		}
 
-		public void OpenMediaFile(MediaFile mediaFile, bool preview)
+		#endregion
+
+		#region File actions
+
+		public void OpenMediaFile(MediaFile mediaFile, bool preview = false)
 		{
 			FileSystemHandler.OpenMediaFile(mediaFile, preview);
 		}
 
 		#endregion
+
+		#region Folder changes
+
+		private void FolderAdded(MediaFolder folder)
+		{
+			lock (_expandedFolders)
+			{
+				if (folder.Parent == null || _expandedFolders.Contains(folder.Parent))
+				{
+					RaiseTreeNodeAddedEvent(folder);
+					if (folder.SubFolders.Count > 0)
+						RaiseTreeNodeAddedEvent(new MediaFolder(folder));
+				}
+				else if (_expandedFolders.Contains(folder.Parent.Parent) && folder.Parent.SubFolders.Count == 1)
+				{
+					RaiseTreeNodeAddedEvent(new MediaFolder(folder.Parent));
+				}
+			}
+		}
+
+		private void FolderRemoved(MediaFolder folder)
+		{
+			RaiseTreeNodeRemovedEvent(folder);
+		}
+
+		#endregion
+
+		#region Folder actions
 
 		public void FolderExpanded(MediaFolder folder)
 		{
@@ -278,6 +326,25 @@ namespace MediaGalleryExplorerCore.Workers
 		{
 			//_expandedFolders.Remove(folder);
 		}
+
+		#endregion
+
+		#endregion
+
+		#region Stream providers
+
+		public static Stream GalleryMetadataStreamProvider(Gallery gallery, string fileName)
+		{
+			MemoryStream memoryStream = new MemoryStream();
+			XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
+			DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
+			serializer.WriteObject(writer, gallery);
+			//writer.Flush();
+			writer.Close();
+			memoryStream.Position = 0;
+			return memoryStream;
+		}
+
 
 		#endregion
 	}

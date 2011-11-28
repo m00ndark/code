@@ -669,58 +669,15 @@ namespace MediaGalleryExplorerCore.DataAccess
 				}
 			}
 			gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
-
-
-			//try
-			//{
-			//   if (File.Exists(gallery.FilePath))
-			//   {
-			//      using (ZipFile sourceDatabase = ZipFile.Read(gallery.FilePath))
-			//      {
-			//         foreach (GallerySource source in gallery.Sources)
-			//         {
-			//            RaiseStatusUpdatedEvent("Loading source (" + source.DisplayPath + ")...");
-			//            MemoryStream memoryStream = new MemoryStream();
-			//            ZipEntry zipEntry = sourceDatabase[Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION)];
-			//            zipEntry.Extract(memoryStream);
-			//            memoryStream.Position = 0;
-			//            StreamReader reader = new StreamReader(memoryStream);
-
-			//            string objectPrefix;
-			//            string[] deserializedObject = ObjectSerializer.Deserialize(reader.ReadLine(), out objectPrefix);
-			//            if (objectPrefix != "GV")
-			//               throw new Exception("Failed to deserialize source database; gallery version missing");
-			//            GalleryVersion version = new GalleryVersion(deserializedObject);
-
-			//            DeserializeSource(reader, source);
-
-			//            reader.Close();
-			//            memoryStream.Close();
-			//         }
-			//      }
-			//   }
-			//}
-			//catch
-			//{
-			//}
 		}
 
 		public static void SaveGallery(Gallery gallery)
 		{
-			//lock (_galleryAccessLock)
+			_databaseState.Clear();
+			using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
 			{
-				_databaseState.Clear();
-				using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
-				{
-					CreateGalleryEntry(galleryDatabase, gallery);
-					//foreach (GallerySource source in gallery.Sources)
-					//{
-					//   ZipEntry sourceEntry = galleryDatabase.UpdateEntry(Path.ChangeExtension(source.ID, METAFILE_FILE_EXTENSION), string.Empty, Stream.Null);
-					//   _databaseState.SourceEntries.Add(sourceEntry, source);
-					//   RaiseMediaFolderAddedEvent(source.RootFolder);
-					//}
-					SaveGalleryDatabase(galleryDatabase);
-				}
+				CreateGalleryEntry(galleryDatabase, gallery);
+				SaveGalleryDatabase(galleryDatabase);
 			}
 			gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
 		}
@@ -734,17 +691,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 			writer.Flush();
 			memoryStream.Position = 0;
 			return memoryStream;
-
-
-			//MemoryStream memoryStream = new MemoryStream();
-			//StreamWriter writer = new StreamWriter(memoryStream);
-
-			//writer.WriteLine(GalleryVersion.Instance.Serialize());
-			//SerializeSource(writer, source);
-
-			//writer.Flush();
-			//memoryStream.Position = 0;
-			//return memoryStream;
 		}
 
 		private static void CreateGalleryEntry(ZipFile galleryDatabase, Gallery gallery)
