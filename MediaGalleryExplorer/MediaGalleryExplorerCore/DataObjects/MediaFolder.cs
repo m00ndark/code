@@ -69,6 +69,14 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Image/video count incrementation
 
+		public void ResetCounters()
+		{
+			ImageCount = 0;
+			TotalImageCount = 0;
+			VideoCount = 0;
+			TotalVideoCount = 0;
+		}
+
 		public void IncreaseImageCount()
 		{
 			IncreaseImageCount(1);
@@ -82,7 +90,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 		private void IncreaseImageCount(int increment, bool updateSource)
 		{
 			ImageCount += increment;
-			IncreaseTotalImageCount(increment, updateSource);
+			//IncreaseTotalImageCount(increment, updateSource);
 		}
 
 		public void IncreaseVideoCount()
@@ -98,7 +106,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 		private void IncreaseVideoCount(int increment, bool updateSource)
 		{
 			VideoCount += increment;
-			IncreaseTotalVideoCount(increment, updateSource);
+			//IncreaseTotalVideoCount(increment, updateSource);
 		}
 
 		public void IncreaseTotalImageCount(int increment)

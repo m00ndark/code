@@ -207,23 +207,27 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		#region Scanning
 
-		public static void ScanFolders(Gallery gallery, GallerySource source, bool reScan)
+		public static void ScanFolders(GalleryDatabase galleryDatabase, GallerySource source, bool reScan)
 		{
 			try
 			{
-				//lock (_galleryAccessLock)
-				{
-					ClearWorkingDirectory();
-					_databaseState.Clear();
-					int folderCount = 0, fileCount = 0;
-					using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
-					{
-						ScanSubFolder(source.RootFolder, source, galleryDatabase, reScan, ref folderCount, ref fileCount, 0);
-						source.ScanDate = DateTime.Now;
-						CreateGalleryEntry(galleryDatabase, gallery);
-						SaveGalleryDatabase(galleryDatabase);
-					}
-				}
+				ClearWorkingDirectory();
+				//_databaseState.Clear();
+				int folderCount = 0, fileCount = 0;
+				source.RootFolder.ResetCounters();
+
+				ScanSubFolder(galleryDatabase, source, source.RootFolder, reScan, ref folderCount, ref fileCount, 0);
+
+				//ClearWorkingDirectory();
+				//_databaseState.Clear();
+				//int folderCount = 0, fileCount = 0;
+				//using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
+				//{
+				//   ScanSubFolder(source.RootFolder, source, galleryDatabase, reScan, ref folderCount, ref fileCount, 0);
+				//   source.ScanDate = DateTime.Now;
+				//   CreateGalleryEntry(galleryDatabase, gallery);
+				//   SaveGalleryDatabase(galleryDatabase);
+				//}
 				//RegistryHandler.SaveSettings(SettingsType.GallerySource);
 			}
 			finally
@@ -232,33 +236,33 @@ namespace MediaGalleryExplorerCore.DataAccess
 			}
 		}
 
-		private static void SourceDatabase_SaveProgress(object sender, SaveProgressEventArgs e)
-		{
-			if (e.EventType == ZipProgressEventType.Saving_BeforeWriteEntry && e.CurrentEntry.Source == ZipEntrySource.Stream &&
-				  e.CurrentEntry.InputStream == Stream.Null)
-			{
-				if (_databaseState.ImageEntries.ContainsKey(e.CurrentEntry))
-					e.CurrentEntry.InputStream = GetDatabaseImageStream(_databaseState.ImageEntries[e.CurrentEntry], e.CurrentEntry.FileName);
-				else if (_databaseState.GalleryEntry.Item1 == e.CurrentEntry)
-					e.CurrentEntry.InputStream = GetGalleryMetadataStream(_databaseState.GalleryEntry.Item2);
-				else
-					e.Cancel = true;
-			}
-			else if (e.EventType == ZipProgressEventType.Saving_AfterWriteEntry && e.CurrentEntry.InputStreamWasJitProvided)
-			{
-				e.CurrentEntry.InputStream.Close();
-			}
-		}
+		//private static void SourceDatabase_SaveProgress(object sender, SaveProgressEventArgs e)
+		//{
+		//   if (e.EventType == ZipProgressEventType.Saving_BeforeWriteEntry && e.CurrentEntry.Source == ZipEntrySource.Stream &&
+		//        e.CurrentEntry.InputStream == Stream.Null)
+		//   {
+		//      if (_databaseState.ImageEntries.ContainsKey(e.CurrentEntry))
+		//         e.CurrentEntry.InputStream = GetDatabaseImageStream(_databaseState.ImageEntries[e.CurrentEntry], e.CurrentEntry.FileName);
+		//      else if (_databaseState.GalleryEntry.Item1 == e.CurrentEntry)
+		//         e.CurrentEntry.InputStream = GetGalleryMetadataStream(_databaseState.GalleryEntry.Item2);
+		//      else
+		//         e.Cancel = true;
+		//   }
+		//   else if (e.EventType == ZipProgressEventType.Saving_AfterWriteEntry && e.CurrentEntry.InputStreamWasJitProvided)
+		//   {
+		//      e.CurrentEntry.InputStream.Close();
+		//   }
+		//}
 
-		private static bool ScanSubFolder(MediaFolder folder, GallerySource source, ZipFile sourceDatabase,
+		private static bool ScanSubFolder(GalleryDatabase galleryDatabase, GallerySource source, MediaFolder folder,
 			bool reScan, ref int folderCount, ref int fileCount, int depth)
 		{
 			try
 			{
 				folderCount++;
 				RaiseStatusUpdatedEvent("Scanning folder #" + folderCount + " at depth " + depth + ", found " + fileCount + " files...");
-				GetFolders(folder, source);
-				GetFiles(folder, source, sourceDatabase, reScan);
+				GetFolders(source, folder);
+				GetFiles(galleryDatabase, source, folder, reScan);
 
 				if (folder.SubFolders.Count == 0 && folder.Files.Count == 0)
 					return false;
@@ -269,7 +273,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 				List<MediaFolder> emptyFolders = new List<MediaFolder>();
 				foreach (MediaFolder subFolder in folder.SubFolders)
 				{
-					if (!ScanSubFolder(subFolder, source, sourceDatabase, reScan, ref folderCount, ref fileCount, depth))
+					if (!ScanSubFolder(galleryDatabase, source, subFolder, reScan, ref folderCount, ref fileCount, depth))
 						emptyFolders.Add(subFolder);
 				}
 				foreach (MediaFolder emptyFolder in emptyFolders)
@@ -287,9 +291,9 @@ namespace MediaGalleryExplorerCore.DataAccess
 			return true;
 		}
 
-		private static void GetFiles(MediaFolder parent, GallerySource source, ZipFile sourceDatabase, bool reScan)
+		private static void GetFiles(GalleryDatabase galleryDatabase, GallerySource source, MediaFolder parentFolder, bool reScan)
 		{
-			List<string> files = Directory.GetFiles(Path.Combine(source.RootedPath, parent.RelativePathName)).ToList();
+			List<string> files = Directory.GetFiles(Path.Combine(source.RootedPath, parentFolder.RelativePathName)).ToList();
 			files.Sort();
 			foreach (string file in files)
 			{
@@ -303,7 +307,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 					{
 						if (!files.Any(filePath => (Path.GetFileName(filePath) == Path.GetFileNameWithoutExtension(file))))
 						{
-							ImageFile imageFile = new ImageFile(fileName, relativePath, parent, source)
+							ImageFile imageFile = new ImageFile(fileName, relativePath, parentFolder, source)
 								{
 									FileSize = fileInfo.Length,
 									ThumbnailName = fileName + ".tn.jpg"
@@ -313,16 +317,16 @@ namespace MediaGalleryExplorerCore.DataAccess
 								imageFile.Size = ImageFileHelper.GetDimensions(file);
 							}
 							catch {}
-							int existingIndex = parent.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
-							if (existingIndex != -1) parent.Files.RemoveAt(existingIndex);
-							parent.Files.Add(imageFile);
-							parent.IncreaseImageCount();
-							AddDatabaseImageEntry(imageFile, sourceDatabase, reScan);
+							int existingIndex = parentFolder.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
+							if (existingIndex != -1) parentFolder.Files.RemoveAt(existingIndex);
+							parentFolder.Files.Add(imageFile);
+							parentFolder.IncreaseImageCount();
+							AddDatabaseImageEntry(galleryDatabase, imageFile, reScan);
 						}
 					}
 					else if (MediaFile.VIDEO_FILE_EXTENSIONS.Contains(extension))
 					{
-						VideoFile videoFile = new VideoFile(fileName, relativePath, parent, source)
+						VideoFile videoFile = new VideoFile(fileName, relativePath, parentFolder, source)
 							{
 								FileSize = fileInfo.Length,
 								ThumbnailName = fileName + ".tn.jpg",
@@ -344,18 +348,18 @@ namespace MediaGalleryExplorerCore.DataAccess
 							}
 						}
 						catch {}
-						int existingIndex = parent.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
-						if (existingIndex != -1) parent.Files.RemoveAt(existingIndex);
-						parent.Files.Add(videoFile);
-						parent.IncreaseVideoCount();
-						AddDatabaseImageEntry(videoFile, sourceDatabase, reScan);
+						int existingIndex = parentFolder.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
+						if (existingIndex != -1) parentFolder.Files.RemoveAt(existingIndex);
+						parentFolder.Files.Add(videoFile);
+						parentFolder.IncreaseVideoCount();
+						AddDatabaseImageEntry(galleryDatabase, videoFile, reScan);
 					}
 				}
 				catch {}
 			}
 		}
 
-		private static void GetFolders(MediaFolder parent, GallerySource source)
+		private static void GetFolders(GallerySource source, MediaFolder parent)
 		{
 			List<string> directories = Directory.GetDirectories(Path.Combine(source.RootedPath, parent.RelativePathName)).ToList();
 			directories.Sort();
@@ -370,26 +374,20 @@ namespace MediaGalleryExplorerCore.DataAccess
 			}
 		}
 
-		private static void AddDatabaseImageEntry(MediaFile mediaFile, ZipFile sourceDatabase, bool reScan)
+		private static void AddDatabaseImageEntry(GalleryDatabase galleryDatabase, MediaFile mediaFile, bool reScan)
 		{
-			ZipEntry zipEntry;
 			string path = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePath);
+
 			if (mediaFile is VideoFile)
-			{
-				// obs! hitta ett sätt att läsa upp image size utan att läsa in bilden
-				if (reScan || !sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.PreviewName)
-					.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase)))
-				{
-					zipEntry = sourceDatabase.UpdateEntry(mediaFile.PreviewName, path, Stream.Null);
-					_databaseState.ImageEntries.Add(zipEntry, mediaFile);
-				}
-			}
-			if (reScan || !sourceDatabase.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, mediaFile.ThumbnailName)
-				.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase)))
-			{
-				zipEntry = sourceDatabase.UpdateEntry(mediaFile.ThumbnailName, path, Stream.Null);
-				_databaseState.ImageEntries.Add(zipEntry, mediaFile);
-			}
+				AddDatabaseImageEntry(galleryDatabase, mediaFile, reScan, mediaFile.PreviewName, path);
+
+			AddDatabaseImageEntry(galleryDatabase, mediaFile, reScan, mediaFile.ThumbnailName, path);
+		}
+
+		private static void AddDatabaseImageEntry(GalleryDatabase galleryDatabase, MediaFile mediaFile, bool reScan, string fileName, string path)
+		{
+			if (reScan || !galleryDatabase.EntryExists(fileName, path))
+				galleryDatabase.UpdateEntry(fileName, path, mediaFile);
 		}
 
 		private static string RemoveAbsolutePath(string fullPath, string absolutePath)
@@ -410,15 +408,10 @@ namespace MediaGalleryExplorerCore.DataAccess
 		private static ImageCodecInfo GetEncoderInfo(String mimeType)
 		{
 			ImageCodecInfo[] encoders = ImageCodecInfo.GetImageEncoders();
-			for (int i = 0; i < encoders.Length; ++i)
-			{
-				if (encoders[i].MimeType == mimeType)
-					return encoders[i];
-			}
-			return null;
+			return encoders.FirstOrDefault(t => t.MimeType == mimeType);
 		}
 
-		private static Stream GetDatabaseImageStream(MediaFile mediaFile, string relativeFilePathName)
+		public static Stream MediaFileStreamProvider(MediaFile mediaFile, string fileName)
 		{
 			MemoryStream memoryStream = new MemoryStream();
 			try
@@ -456,7 +449,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 						if (File.Exists(workingPreviewPathName))
 						{
 							image = Image.FromFile(workingPreviewPathName);
-							makeThumbnail = (Path.GetFileName(relativeFilePathName) == videoFile.ThumbnailName);
+							makeThumbnail = (Path.GetFileName(fileName) == videoFile.ThumbnailName);
 						}
 					}
 					catch { ; }
@@ -480,137 +473,137 @@ namespace MediaGalleryExplorerCore.DataAccess
 			return memoryStream;
 		}
 
-		public static void LoadThumbnails(Gallery gallery, MediaFolder folder)
-		{
-			lock (_galleryAccessLock)
-			{
-				if (!File.Exists(gallery.FilePath)) return;
+		//public static void LoadThumbnails(Gallery gallery, MediaFolder folder)
+		//{
+		//   lock (_galleryAccessLock)
+		//   {
+		//      if (!File.Exists(gallery.FilePath)) return;
 
-				using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
-				{
-					foreach (MediaFile mediaFile in folder.Files)
-					{
-						MemoryStream memoryStream = new MemoryStream();
-						string thumbnailPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativeThumbnailPathName);
-						ZipEntry zipEntry = galleryDatabase[thumbnailPathName];
-						if (zipEntry != null)
-						{
-							zipEntry.Extract(memoryStream);
-							if (memoryStream.Length > 0)
-							{
-								memoryStream.Position = 0;
-								mediaFile.ThumbnailImage = Image.FromStream(memoryStream);
-								memoryStream.Close();
-								RaiseMediaFileUpdatedEvent(mediaFile);
-							}
-						}
-					}
-				}
-			}
-		}
+		//      using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
+		//      {
+		//         foreach (MediaFile mediaFile in folder.Files)
+		//         {
+		//            MemoryStream memoryStream = new MemoryStream();
+		//            string thumbnailPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativeThumbnailPathName);
+		//            ZipEntry zipEntry = galleryDatabase[thumbnailPathName];
+		//            if (zipEntry != null)
+		//            {
+		//               zipEntry.Extract(memoryStream);
+		//               if (memoryStream.Length > 0)
+		//               {
+		//                  memoryStream.Position = 0;
+		//                  mediaFile.ThumbnailImage = Image.FromStream(memoryStream);
+		//                  memoryStream.Close();
+		//                  RaiseMediaFileUpdatedEvent(mediaFile);
+		//               }
+		//            }
+		//         }
+		//      }
+		//   }
+		//}
 
 		#endregion
 
 		#region Source database
 
-		private static void SerializeSource(StreamWriter writer, GallerySource source)
-		{
-			writer.WriteLine(source.Serialize());
-			foreach (MediaCodec mediaCodec in source.Codecs)
-			{
-				writer.WriteLine(mediaCodec.Serialize());
-			}
-			SerializeSubFolders(writer, source.RootFolder);
-		}
+		//private static void SerializeSource(StreamWriter writer, GallerySource source)
+		//{
+		//   writer.WriteLine(source.Serialize());
+		//   foreach (MediaCodec mediaCodec in source.Codecs)
+		//   {
+		//      writer.WriteLine(mediaCodec.Serialize());
+		//   }
+		//   SerializeSubFolders(writer, source.RootFolder);
+		//}
 
-		private static void SerializeSubFolders(StreamWriter writer, MediaFolder folder)
-		{
-			writer.WriteLine(folder.Serialize());
-			foreach (MediaFile mediaFile in folder.Files)
-			{
-				writer.WriteLine(mediaFile.Serialize());
-			}
-			foreach (MediaFolder subFolder in folder.SubFolders)
-			{
-				SerializeSubFolders(writer, subFolder);
-			}
-		}
+		//private static void SerializeSubFolders(StreamWriter writer, MediaFolder folder)
+		//{
+		//   writer.WriteLine(folder.Serialize());
+		//   foreach (MediaFile mediaFile in folder.Files)
+		//   {
+		//      writer.WriteLine(mediaFile.Serialize());
+		//   }
+		//   foreach (MediaFolder subFolder in folder.SubFolders)
+		//   {
+		//      SerializeSubFolders(writer, subFolder);
+		//   }
+		//}
 
-		private static void DeserializeSource(StreamReader reader, GallerySource source)
-		{
-			string objectPrefix;
-			string[] deserializedObject = ObjectSerializer.Deserialize(reader.ReadLine(), out objectPrefix);
-			if (objectPrefix != "GS") throw new Exception("Failed to deserialize source database; gallery source missing");
-			string rootFolderID = source.LoadFromDeserialized(deserializedObject);
+		//private static void DeserializeSource(StreamReader reader, GallerySource source)
+		//{
+		//   string objectPrefix;
+		//   string[] deserializedObject = ObjectSerializer.Deserialize(reader.ReadLine(), out objectPrefix);
+		//   if (objectPrefix != "GS") throw new Exception("Failed to deserialize source database; gallery source missing");
+		//   string rootFolderID = source.LoadFromDeserialized(deserializedObject);
 
-			IDictionary<string, FileSystemEntry> fileSystemEntries = new Dictionary<string, FileSystemEntry>();
-			string serializedObject = reader.ReadLine();
-			while (serializedObject != null)
-			{
-				try
-				{
-					deserializedObject = ObjectSerializer.Deserialize(serializedObject, out objectPrefix);
-					switch (objectPrefix)
-					{
-						case "MC":
-							MediaCodec mediaCodec = new MediaCodec();
-							mediaCodec.LoadFromDeserialized(deserializedObject);
-							source.Codecs.Add(mediaCodec);
-							break;
-						default:
-							DeserializeSubFolders(fileSystemEntries, objectPrefix, deserializedObject, source);
-							break;
-					}
-				}
-				catch { }
-				if (fileSystemEntries.Count % 100 == 0)
-				{
-					RaiseStatusUpdatedEvent("Loading source (" + source.RootedPath + ")... " + (100 * (double) fileSystemEntries.Count / (source.ImageCount + source.VideoCount)).ToString("0.0") + "%");
-				}
-				serializedObject = reader.ReadLine();
-			}
-			if (!fileSystemEntries.ContainsKey(rootFolderID)) throw new Exception("Failed to deserialize source database; root object does not exist");
-			MediaFolder rootFolder = fileSystemEntries[rootFolderID] as MediaFolder;
-			if (rootFolder == null) throw new Exception("Failed to deserialize source database; parent root object is not a folder");
-			source.RootFolder = rootFolder;
-		}
+		//   IDictionary<string, FileSystemEntry> fileSystemEntries = new Dictionary<string, FileSystemEntry>();
+		//   string serializedObject = reader.ReadLine();
+		//   while (serializedObject != null)
+		//   {
+		//      try
+		//      {
+		//         deserializedObject = ObjectSerializer.Deserialize(serializedObject, out objectPrefix);
+		//         switch (objectPrefix)
+		//         {
+		//            case "MC":
+		//               MediaCodec mediaCodec = new MediaCodec();
+		//               mediaCodec.LoadFromDeserialized(deserializedObject);
+		//               source.Codecs.Add(mediaCodec);
+		//               break;
+		//            default:
+		//               DeserializeSubFolders(fileSystemEntries, objectPrefix, deserializedObject, source);
+		//               break;
+		//         }
+		//      }
+		//      catch { }
+		//      if (fileSystemEntries.Count % 100 == 0)
+		//      {
+		//         RaiseStatusUpdatedEvent("Loading source (" + source.RootedPath + ")... " + (100 * (double) fileSystemEntries.Count / (source.ImageCount + source.VideoCount)).ToString("0.0") + "%");
+		//      }
+		//      serializedObject = reader.ReadLine();
+		//   }
+		//   if (!fileSystemEntries.ContainsKey(rootFolderID)) throw new Exception("Failed to deserialize source database; root object does not exist");
+		//   MediaFolder rootFolder = fileSystemEntries[rootFolderID] as MediaFolder;
+		//   if (rootFolder == null) throw new Exception("Failed to deserialize source database; parent root object is not a folder");
+		//   source.RootFolder = rootFolder;
+		//}
 
-		private static void DeserializeSubFolders(IDictionary<string, FileSystemEntry> fileSystemEntries, string objectPrefix, string[] deserializedObject, GallerySource source)
-		{
-			FileSystemEntry fileSystemEntry = null;
-			switch (objectPrefix)
-			{
-				case "FO":
-					fileSystemEntry = new MediaFolder(source);
-					break;
-				case "IF":
-					fileSystemEntry = new ImageFile(source);
-					break;
-				case "VF":
-					fileSystemEntry = new VideoFile(source);
-					break;
-			}
-			if (fileSystemEntry == null) throw new Exception("Failed to deserialize file system entry of source database; invalid object type");
-			string parentID = fileSystemEntry.LoadFromDeserialized(deserializedObject);
-			if (!string.IsNullOrEmpty(parentID))
-			{
-				if (!fileSystemEntries.ContainsKey(parentID)) throw new Exception("Failed to deserialize file system entry of source database; parent object does not exist");
-				MediaFolder parentFolder = fileSystemEntries[parentID] as MediaFolder;
-				if (parentFolder == null) throw new Exception("Failed to deserialize file system entry of source database; parent object is not a folder");
-				fileSystemEntry.SetParent(parentFolder);
-				if (fileSystemEntry is MediaFolder)
-				{
-					parentFolder.SubFolders.Add((MediaFolder) fileSystemEntry);
-				}
-				else
-				{
-					parentFolder.Files.Add((MediaFile) fileSystemEntry);
-				}
-			}
-			fileSystemEntries.Add(fileSystemEntry.ID, fileSystemEntry);
-			if (fileSystemEntry is MediaFolder)
-				RaiseMediaFolderAddedEvent((MediaFolder) fileSystemEntry);
-		}
+		//private static void DeserializeSubFolders(IDictionary<string, FileSystemEntry> fileSystemEntries, string objectPrefix, string[] deserializedObject, GallerySource source)
+		//{
+		//   FileSystemEntry fileSystemEntry = null;
+		//   switch (objectPrefix)
+		//   {
+		//      case "FO":
+		//         fileSystemEntry = new MediaFolder(source);
+		//         break;
+		//      case "IF":
+		//         fileSystemEntry = new ImageFile(source);
+		//         break;
+		//      case "VF":
+		//         fileSystemEntry = new VideoFile(source);
+		//         break;
+		//   }
+		//   if (fileSystemEntry == null) throw new Exception("Failed to deserialize file system entry of source database; invalid object type");
+		//   string parentID = fileSystemEntry.LoadFromDeserialized(deserializedObject);
+		//   if (!string.IsNullOrEmpty(parentID))
+		//   {
+		//      if (!fileSystemEntries.ContainsKey(parentID)) throw new Exception("Failed to deserialize file system entry of source database; parent object does not exist");
+		//      MediaFolder parentFolder = fileSystemEntries[parentID] as MediaFolder;
+		//      if (parentFolder == null) throw new Exception("Failed to deserialize file system entry of source database; parent object is not a folder");
+		//      fileSystemEntry.SetParent(parentFolder);
+		//      if (fileSystemEntry is MediaFolder)
+		//      {
+		//         parentFolder.SubFolders.Add((MediaFolder) fileSystemEntry);
+		//      }
+		//      else
+		//      {
+		//         parentFolder.Files.Add((MediaFile) fileSystemEntry);
+		//      }
+		//   }
+		//   fileSystemEntries.Add(fileSystemEntry.ID, fileSystemEntry);
+		//   if (fileSystemEntry is MediaFolder)
+		//      RaiseMediaFolderAddedEvent((MediaFolder) fileSystemEntry);
+		//}
 
 		#endregion
 
@@ -650,142 +643,142 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		#region Gallery database
 
-		public static void LoadGallery(ref Gallery gallery)
-		{
-			lock (_galleryAccessLock)
-			{
-				using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
-				{
-					RaiseStatusUpdatedEvent("Loading gallery (" + gallery.FilePath + ")...");
-					MemoryStream memoryStream = new MemoryStream();
-					ZipEntry zipEntry = galleryDatabase[GALLERY_FILE_NAME];
-					zipEntry.Extract(memoryStream);
-					memoryStream.Position = 0;
-					XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(memoryStream, new XmlDictionaryReaderQuotas());
-					DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
-					gallery = (Gallery) serializer.ReadObject(reader, true);
-					reader.Close();
-					memoryStream.Close();
-				}
-			}
-			gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
-		}
+		//public static void LoadGallery(ref Gallery gallery)
+		//{
+		//   lock (_galleryAccessLock)
+		//   {
+		//      using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
+		//      {
+		//         RaiseStatusUpdatedEvent("Loading gallery (" + gallery.FilePath + ")...");
+		//         MemoryStream memoryStream = new MemoryStream();
+		//         ZipEntry zipEntry = galleryDatabase[GALLERY_FILE_NAME];
+		//         zipEntry.Extract(memoryStream);
+		//         memoryStream.Position = 0;
+		//         XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(memoryStream, new XmlDictionaryReaderQuotas());
+		//         DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
+		//         gallery = (Gallery) serializer.ReadObject(reader, true);
+		//         reader.Close();
+		//         memoryStream.Close();
+		//      }
+		//   }
+		//   gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
+		//}
 
-		public static void SaveGallery(Gallery gallery)
-		{
-			_databaseState.Clear();
-			using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
-			{
-				CreateGalleryEntry(galleryDatabase, gallery);
-				SaveGalleryDatabase(galleryDatabase);
-			}
-			gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
-		}
+		//public static void SaveGallery(Gallery gallery)
+		//{
+		//   _databaseState.Clear();
+		//   using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
+		//   {
+		//      CreateGalleryEntry(galleryDatabase, gallery);
+		//      SaveGalleryDatabase(galleryDatabase);
+		//   }
+		//   gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
+		//}
 
-		public static Stream GetGalleryMetadataStream(Gallery gallery)
-		{
-			MemoryStream memoryStream = new MemoryStream();
-			XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
-			DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
-			serializer.WriteObject(writer, gallery);
-			writer.Flush();
-			memoryStream.Position = 0;
-			return memoryStream;
-		}
+		//public static Stream GetGalleryMetadataStream(Gallery gallery)
+		//{
+		//   MemoryStream memoryStream = new MemoryStream();
+		//   XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
+		//   DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
+		//   serializer.WriteObject(writer, gallery);
+		//   writer.Flush();
+		//   memoryStream.Position = 0;
+		//   return memoryStream;
+		//}
 
-		private static void CreateGalleryEntry(ZipFile galleryDatabase, Gallery gallery)
-		{
-			ZipEntry galleryEntry = galleryDatabase.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Stream.Null);
-			_databaseState.GalleryEntry = new Tuple<ZipEntry, Gallery>(galleryEntry, gallery);
-		}
+		//private static void CreateGalleryEntry(ZipFile galleryDatabase, Gallery gallery)
+		//{
+		//   ZipEntry galleryEntry = galleryDatabase.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Stream.Null);
+		//   _databaseState.GalleryEntry = new Tuple<ZipEntry, Gallery>(galleryEntry, gallery);
+		//}
 
-		private static ZipFile OpenGalleryDatabase(Gallery gallery, bool writing)
-		{
-			ZipFile galleryDatabase = null;
-			if (writing)
-			{
-				string galleryDatabaseBackupPath = null;
-				bool deleteBackup = true;
-				try
-				{
-					if (File.Exists(gallery.FilePath))
-					{
-						RaiseStatusUpdatedEvent("Backing up existing source database...");
-						galleryDatabaseBackupPath = gallery.FilePath + ".backup";
-						if (File.Exists(galleryDatabaseBackupPath))
-							File.Delete(galleryDatabaseBackupPath);
-						File.Copy(gallery.FilePath, galleryDatabaseBackupPath);
-					}
-					galleryDatabase = new ZipFile(gallery.FilePath) { Encryption = (EncryptionAlgorithm) gallery.EncryptionAlgorithm };
-					if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
-					{
-						galleryDatabase.Password = gallery.Password;
-					}
-				}
-				catch
-				{
-					try
-					{
-						if (galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
-						{
-							deleteBackup = false;
-							CloseGalleryDatabase(galleryDatabase);
-							if (File.Exists(gallery.FilePath))
-								File.Delete(gallery.FilePath);
-							File.Move(galleryDatabaseBackupPath, gallery.FilePath);
-							deleteBackup = true;
-						}
-						else
-							CloseGalleryDatabase(galleryDatabase);
-					}
-					catch { ; }
-					throw;
-				}
-				finally
-				{
-					try
-					{
-						if (deleteBackup && galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
-							File.Delete(galleryDatabaseBackupPath);
-						_databaseState.Clear();
-					}
-					catch { ; }
-				}
-			}
-			else
-			{
-				try
-				{
-					if (File.Exists(gallery.FilePath))
-					{
-						galleryDatabase = ZipFile.Read(gallery.FilePath);
-						if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
-							galleryDatabase.Password = gallery.Password;
-					}
-				}
-				catch { ; }
-			}
-			return galleryDatabase;
-		}
+		//private static ZipFile OpenGalleryDatabase(Gallery gallery, bool writing)
+		//{
+		//   ZipFile galleryDatabase = null;
+		//   if (writing)
+		//   {
+		//      string galleryDatabaseBackupPath = null;
+		//      bool deleteBackup = true;
+		//      try
+		//      {
+		//         if (File.Exists(gallery.FilePath))
+		//         {
+		//            RaiseStatusUpdatedEvent("Backing up existing source database...");
+		//            galleryDatabaseBackupPath = gallery.FilePath + ".backup";
+		//            if (File.Exists(galleryDatabaseBackupPath))
+		//               File.Delete(galleryDatabaseBackupPath);
+		//            File.Copy(gallery.FilePath, galleryDatabaseBackupPath);
+		//         }
+		//         galleryDatabase = new ZipFile(gallery.FilePath) { Encryption = (EncryptionAlgorithm) gallery.EncryptionAlgorithm };
+		//         if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
+		//         {
+		//            galleryDatabase.Password = gallery.Password;
+		//         }
+		//      }
+		//      catch
+		//      {
+		//         try
+		//         {
+		//            if (galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
+		//            {
+		//               deleteBackup = false;
+		//               CloseGalleryDatabase(galleryDatabase);
+		//               if (File.Exists(gallery.FilePath))
+		//                  File.Delete(gallery.FilePath);
+		//               File.Move(galleryDatabaseBackupPath, gallery.FilePath);
+		//               deleteBackup = true;
+		//            }
+		//            else
+		//               CloseGalleryDatabase(galleryDatabase);
+		//         }
+		//         catch { ; }
+		//         throw;
+		//      }
+		//      finally
+		//      {
+		//         try
+		//         {
+		//            if (deleteBackup && galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
+		//               File.Delete(galleryDatabaseBackupPath);
+		//            _databaseState.Clear();
+		//         }
+		//         catch { ; }
+		//      }
+		//   }
+		//   else
+		//   {
+		//      try
+		//      {
+		//         if (File.Exists(gallery.FilePath))
+		//         {
+		//            galleryDatabase = ZipFile.Read(gallery.FilePath);
+		//            if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
+		//               galleryDatabase.Password = gallery.Password;
+		//         }
+		//      }
+		//      catch { ; }
+		//   }
+		//   return galleryDatabase;
+		//}
 
-		private static void SaveGalleryDatabase(ZipFile galleryDatabase)
-		{
-			if (galleryDatabase == null)
-				throw new ArgumentNullException("galleryDatabase");
+		//private static void SaveGalleryDatabase(ZipFile galleryDatabase)
+		//{
+		//   if (galleryDatabase == null)
+		//      throw new ArgumentNullException("galleryDatabase");
 
-			lock (_galleryAccessLock)
-			{
-				galleryDatabase.SaveProgress += SourceDatabase_SaveProgress;
-				galleryDatabase.Save();
-				galleryDatabase.SaveProgress -= SourceDatabase_SaveProgress;
-			}
-		}
+		//   lock (_galleryAccessLock)
+		//   {
+		//      galleryDatabase.SaveProgress += SourceDatabase_SaveProgress;
+		//      galleryDatabase.Save();
+		//      galleryDatabase.SaveProgress -= SourceDatabase_SaveProgress;
+		//   }
+		//}
 
-		private static void CloseGalleryDatabase(ZipFile galleryDatabase)
-		{
-			if (galleryDatabase != null)
-				galleryDatabase.Dispose();
-		}
+		//private static void CloseGalleryDatabase(ZipFile galleryDatabase)
+		//{
+		//   if (galleryDatabase != null)
+		//      galleryDatabase.Dispose();
+		//}
 
 		#endregion
 	}

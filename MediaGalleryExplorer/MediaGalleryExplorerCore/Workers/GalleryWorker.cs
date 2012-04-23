@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
@@ -56,6 +57,8 @@ namespace MediaGalleryExplorerCore.Workers
 			Gallery = gallery;
 			SelectedFile = null;
 			FileSystemHandler.StatusUpdated += FileSystemHandler_StatusUpdated;
+			FileSystemHandler.MediaFolderAdded += FileSystemHandler_MediaFolderAdded;
+			FileSystemHandler.MediaFolderRemoved += FileSystemHandler_MediaFolderRemoved;
 		}
 
 		#region Properties
@@ -124,6 +127,16 @@ namespace MediaGalleryExplorerCore.Workers
 			RaiseStatusUpdatedEvent(e.Value);
 		}
 
+		private void FileSystemHandler_MediaFolderAdded(object sender, MediaFolderEventArgs e)
+		{
+			FolderAdded(e.Folder);
+		}
+
+		private void FileSystemHandler_MediaFolderRemoved(object sender, MediaFolderEventArgs e)
+		{
+			FolderRemoved(e.Folder);
+		}
+
 		#endregion
 
 		#region Operations
@@ -144,7 +157,7 @@ namespace MediaGalleryExplorerCore.Workers
 				{
 					using (Stream stream = database.ExtractEntry(GALLERY_FILE_NAME))
 					{
-						XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(stream, new XmlDictionaryReaderQuotas());
+						XmlReader reader = XmlReader.Create(stream, new XmlReaderSettings() { CheckCharacters = false });
 						DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
 						Gallery = (Gallery) serializer.ReadObject(reader, true);
 						reader.Close();
@@ -198,19 +211,24 @@ namespace MediaGalleryExplorerCore.Workers
 
 		public void ScanSource(GallerySource source, bool reScan)
 		{
-			new Thread(ScanSourceThread).Start(new object[] { source, reScan });
+			new Thread(() => ScanSourceThread(source, reScan)).Start();
 		}
 
-		private void ScanSourceThread(object inParam)
+		private void ScanSourceThread(GallerySource source, bool reScan)
 		{
 			try
 			{
-				object[] inParams = (object[]) inParam;
-				GallerySource source = (GallerySource) inParams[0];
-				bool reScan = (bool) inParams[1];
 				FileSystemHandler.PrepareDirectories();
 				FileSystemHandler.InitializeImageProcessor(90L);
-				FileSystemHandler.ScanFolders(Gallery, source, reScan);
+				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, true))
+				{
+					database.RegisterStreamProvider<Gallery>(GalleryMetadataStreamProvider);
+					database.RegisterStreamProvider<MediaFile>(FileSystemHandler.MediaFileStreamProvider);
+					FileSystemHandler.ScanFolders(database, source, reScan);
+					source.ScanDate = DateTime.Now;
+					database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery);
+					database.Save();
+				}
 				RaiseDatabaseOperationCompletedEvent(OperationType.ScanSource);
 			}
 			catch (Exception ex)
@@ -225,15 +243,14 @@ namespace MediaGalleryExplorerCore.Workers
 
 		public void LoadThumbnails(MediaFolder folder)
 		{
-			new Thread(LoadThumbnailsThread).Start(folder);
+			new Thread(() => LoadThumbnailsThread(folder)).Start();
 		}
 
-		private void LoadThumbnailsThread(object data)
+		private void LoadThumbnailsThread(MediaFolder folder)
 		{
 			try
 			{
 				RaiseStatusUpdatedEvent("Loading thumbnails...");
-				MediaFolder folder = (MediaFolder) data;
 				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, false))
 				{
 					foreach (MediaFile mediaFile in folder.Files)
@@ -336,10 +353,10 @@ namespace MediaGalleryExplorerCore.Workers
 		public static Stream GalleryMetadataStreamProvider(Gallery gallery, string fileName)
 		{
 			MemoryStream memoryStream = new MemoryStream();
-			XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
+			XmlWriterSettings writerSettings = new XmlWriterSettings() { CloseOutput = false, Encoding = Encoding.UTF8, Indent = true, IndentChars = "\t", CheckCharacters = false };
+			XmlWriter writer = XmlWriter.Create(memoryStream, writerSettings);
 			DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
 			serializer.WriteObject(writer, gallery);
-			//writer.Flush();
 			writer.Close();
 			memoryStream.Position = 0;
 			return memoryStream;

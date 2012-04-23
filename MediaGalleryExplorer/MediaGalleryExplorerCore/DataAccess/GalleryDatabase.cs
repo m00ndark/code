@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using Ionic.Zip;
@@ -13,8 +14,8 @@ namespace MediaGalleryExplorerCore.DataAccess
 		private static readonly IDictionary<string, ManualResetEvent> _databasesAccessible = new Dictionary<string, ManualResetEvent>();
 		private readonly IDictionary<Type, object> _streamProviders;
 		private readonly IDictionary<ZipEntry, object> _entries;
+		private readonly bool _isWriting;
 		private ZipFile _databaseFile;
-		private bool _isWriting;
 
 		public delegate Stream StreamProvider<in T>(T dataObject, string fileName);
 
@@ -142,6 +143,17 @@ namespace MediaGalleryExplorerCore.DataAccess
 			_streamProviders[typeof(T)] = streamProvider;
 		}
 
+		private object GetStreamProvider(Type type)
+		{
+			while (type != null && !_streamProviders.ContainsKey(type))
+				type = type.BaseType;
+
+			if (type == null)
+				throw new Exception("Stream provider not found");
+
+			return _streamProviders[type];
+		}
+
 		#endregion
 
 		#region Saving
@@ -183,8 +195,9 @@ namespace MediaGalleryExplorerCore.DataAccess
 				if (_entries.ContainsKey(e.CurrentEntry))
 				{
 					object dataObject = _entries[e.CurrentEntry];
-					StreamProvider<object> streamProvider = (StreamProvider<object>) _streamProviders[dataObject.GetType()];
-					e.CurrentEntry.InputStream = streamProvider(dataObject, e.CurrentEntry.FileName);
+					object streamProvider = GetStreamProvider(dataObject.GetType());
+					MethodInfo streamProviderMethod = streamProvider.GetType().GetMethod("Invoke");
+					e.CurrentEntry.InputStream = (Stream) streamProviderMethod.Invoke(streamProvider, new object[] { dataObject, e.CurrentEntry.FileName });
 				}
 				else
 					e.Cancel = true;
@@ -206,6 +219,16 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 			ZipEntry entry = _databaseFile.UpdateEntry(fileName, path, Stream.Null);
 			_entries[entry] = dataObject;
+		}
+
+		#endregion
+
+		#region Entry existance
+
+		public bool EntryExists(string fileName, string path)
+		{
+			return _databaseFile.EntryFileNames.Any(entry => entry.Equals(Path.Combine(path, fileName)
+				.Replace(Path.DirectorySeparatorChar, '/'), StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		#endregion

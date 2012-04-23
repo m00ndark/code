@@ -81,12 +81,12 @@ namespace MediaGalleryExplorerCore.DataObjects
 			VolumeName = volumeName;
 			VolumeSerial = volumeSerial;
 			Path = path.Substring(2);
+			CreateID();
+			RootFolder = new MediaFolder(Path, null, null, this);
 			ImageCount = 0;
 			VideoCount = 0;
-			RootFolder = new MediaFolder(Path, null, null, this);
 			ScanDate = DateTime.MinValue;
 			Codecs = new List<MediaCodec>();
-			CreateID();
 		}
 
 		private void CreateID()

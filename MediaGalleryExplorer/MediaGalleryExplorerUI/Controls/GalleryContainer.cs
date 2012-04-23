@@ -359,7 +359,7 @@ namespace MediaGalleryExplorerUI.Controls
 							{
 								TreeNode parentNode = _folderCollection[e.Folder.Parent];
 								TreeNode onlyChildNode = (parentNode.Nodes.Count == 1 ? parentNode.Nodes[0] : null);
-								TreeNode node = parentNode.Nodes.Add(e.Folder.Name + " (" + e.Folder.TotalImageCount + "/" + e.Folder.TotalVideoCount + ")");
+								TreeNode node = parentNode.Nodes.Add(e.Folder.Name + " (" + e.Folder.TotalImageCount + ":" + e.Folder.TotalVideoCount + ")");
 								node.Tag = e.Folder;
 								if (!e.Folder.IsDummy)
 								{
@@ -557,7 +557,7 @@ namespace MediaGalleryExplorerUI.Controls
 			foreach (KeyValuePair<MediaFolder, TreeNode> pair in _folderCollection)
 			{
 				string name = (pair.Key.Parent == null ? pair.Key.Source.DisplayPath : pair.Key.Name);
-				pair.Value.Text = name + " (" + pair.Key.TotalImageCount + "/" + pair.Key.TotalVideoCount + ")";
+				pair.Value.Text = name + " (" + pair.Key.TotalImageCount + ":" + pair.Key.TotalVideoCount + ")";
 			}
 		}
 
