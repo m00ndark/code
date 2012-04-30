@@ -5,6 +5,7 @@ using MediaGalleryExplorerCore;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects;
 using MediaGalleryExplorerCore.EventArguments;
+using MediaGalleryExplorerCore.Workers;
 using MediaGalleryExplorerUI.Controls;
 
 namespace MediaGalleryExplorerUI.Forms
@@ -23,6 +24,7 @@ namespace MediaGalleryExplorerUI.Forms
 			toolStripMenuItemSource.Enabled = false;
 			ObjectPool.Initialize();
 			RegistryHandler.LoadSettings();
+			GalleryWorker.StatusUpdated += GalleryWorker_StatusUpdated;
 		}
 
 		private void ToolStripMenuItemGalleryNew_Click(object sender, EventArgs e)
@@ -135,6 +137,15 @@ namespace MediaGalleryExplorerUI.Forms
 			{
 				FormUtilities.ShowError(this, ex);
 			}
+		}
+
+		#endregion
+
+		#region GalleryWorker event handlers
+
+		private void GalleryWorker_StatusUpdated(object sender, StringEventArgs e)
+		{
+			GalleryContainer_StatusUpdated(sender, e);
 		}
 
 		#endregion

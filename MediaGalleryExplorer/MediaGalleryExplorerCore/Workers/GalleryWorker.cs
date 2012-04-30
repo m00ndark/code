@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -11,6 +13,7 @@ using System.Xml;
 using MediaGalleryExplorerCore.DataAccess;
 using MediaGalleryExplorerCore.DataObjects;
 using MediaGalleryExplorerCore.EventArguments;
+using Encoder = System.Drawing.Imaging.Encoder;
 
 namespace MediaGalleryExplorerCore.Workers
 {
@@ -43,19 +46,22 @@ namespace MediaGalleryExplorerCore.Workers
 			};
 
 		private readonly HashSet<MediaFolder> _expandedFolders;
+		private static EncoderParameters _encoderParameters;
+		private static ImageCodecInfo _imageCodecInfo = null;
 
 		public event EventHandler<EventArgs> GalleryLoaded;
-		public event EventHandler<StringEventArgs> StatusUpdated;
 		public event EventHandler<MediaFolderEventArgs> TreeNodeAdded;
 		public event EventHandler<MediaFolderEventArgs> TreeNodeRemoved;
 		public event EventHandler<MediaFileEventArgs> ThumbnailAvailable;
 		public event EventHandler<OperationTypeEventArgs> DatabaseOperationCompleted;
+		public static event EventHandler<StringEventArgs> StatusUpdated;
 
 		public GalleryWorker(Gallery gallery)
 		{
 			_expandedFolders = new HashSet<MediaFolder>();
 			Gallery = gallery;
 			SelectedFile = null;
+			InitializeImageProcessor(90L);
 			FileSystemHandler.StatusUpdated += FileSystemHandler_StatusUpdated;
 			FileSystemHandler.MediaFolderAdded += FileSystemHandler_MediaFolderAdded;
 			FileSystemHandler.MediaFolderRemoved += FileSystemHandler_MediaFolderRemoved;
@@ -75,14 +81,6 @@ namespace MediaGalleryExplorerCore.Workers
 			if (GalleryLoaded != null)
 			{
 				GalleryLoaded(this, new EventArgs());
-			}
-		}
-
-		private void RaiseStatusUpdatedEvent(string status)
-		{
-			if (StatusUpdated != null)
-			{
-				StatusUpdated(this, new StringEventArgs(status));
 			}
 		}
 
@@ -118,11 +116,19 @@ namespace MediaGalleryExplorerCore.Workers
 			}
 		}
 
+		private static void RaiseStatusUpdatedEvent(string status)
+		{
+			if (StatusUpdated != null)
+			{
+				StatusUpdated(null, new StringEventArgs(status));
+			}
+		}
+
 		#endregion
 
 		#region Event handlers
 
-		private void FileSystemHandler_StatusUpdated(object sender, StringEventArgs e)
+		private static void FileSystemHandler_StatusUpdated(object sender, StringEventArgs e)
 		{
 			RaiseStatusUpdatedEvent(e.Value);
 		}
@@ -135,6 +141,23 @@ namespace MediaGalleryExplorerCore.Workers
 		private void FileSystemHandler_MediaFolderRemoved(object sender, MediaFolderEventArgs e)
 		{
 			FolderRemoved(e.Folder);
+		}
+
+		#endregion
+
+		#region Initialization
+
+		public static void InitializeImageProcessor(long thumbnailQuality)
+		{
+			_encoderParameters = new EncoderParameters(1);
+			_encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, thumbnailQuality);
+			_imageCodecInfo = GetEncoderInfo("image/jpeg");
+		}
+
+		private static ImageCodecInfo GetEncoderInfo(String mimeType)
+		{
+			ImageCodecInfo[] encoders = ImageCodecInfo.GetImageEncoders();
+			return encoders.FirstOrDefault(t => t.MimeType == mimeType);
 		}
 
 		#endregion
@@ -218,12 +241,10 @@ namespace MediaGalleryExplorerCore.Workers
 		{
 			try
 			{
-				FileSystemHandler.PrepareDirectories();
-				FileSystemHandler.InitializeImageProcessor(90L);
 				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, true))
 				{
 					database.RegisterStreamProvider<Gallery>(GalleryMetadataStreamProvider);
-					database.RegisterStreamProvider<MediaFile>(FileSystemHandler.MediaFileStreamProvider);
+					database.RegisterStreamProvider<MediaFile>(MediaFileStreamProvider);
 					FileSystemHandler.ScanFolders(database, source, reScan);
 					source.ScanDate = DateTime.Now;
 					database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery);
@@ -292,7 +313,25 @@ namespace MediaGalleryExplorerCore.Workers
 
 		public void OpenMediaFile(MediaFile mediaFile, bool preview = false)
 		{
-			FileSystemHandler.OpenMediaFile(mediaFile, preview);
+			string filePath = string.Empty;
+			if (mediaFile is ImageFile || !preview)
+			{
+				filePath = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
+			}
+			else if (mediaFile is VideoFile)
+			{
+				FileSystemHandler.ClearWorkingDirectory();
+				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, false))
+				{
+					string relativePreviewPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePreviewPathName);
+					filePath = database.ExtractEntry(relativePreviewPathName, ObjectPool.CompleteWorkingDirectory);
+				}
+			}
+			if (File.Exists(filePath))
+			{
+				Process process = new Process() { StartInfo = { FileName = filePath, Verb = "Open" } };
+				process.Start();
+			}
 		}
 
 		#endregion
@@ -362,6 +401,73 @@ namespace MediaGalleryExplorerCore.Workers
 			return memoryStream;
 		}
 
+		public static Stream MediaFileStreamProvider(MediaFile mediaFile, string fileName)
+		{
+			MemoryStream memoryStream = new MemoryStream();
+			try
+			{
+				Image image = null;
+				bool makeThumbnail = true;
+				const double maxThumbnailSize = 200.0;
+				string filePathName = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
+				RaiseStatusUpdatedEvent("Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named \""
+					+ mediaFile.Name + "\" in " + Path.Combine(mediaFile.Source.RootedPath, mediaFile.Parent.RelativePathName));
+				if (mediaFile is ImageFile)
+				{
+					ImageFile imageFile = (mediaFile as ImageFile);
+					image = Image.FromFile(filePathName);
+					if (imageFile.Size.Width == 0 && imageFile.Size.Height == 0)
+						imageFile.Size = image.Size;
+				}
+				else if (mediaFile is VideoFile)
+				{
+					VideoFile videoFile = (mediaFile as VideoFile);
+					try
+					{
+						string previewPathName = Path.Combine(Path.GetDirectoryName(filePathName), videoFile.PreviewName);
+						string workingPreviewPathName = Path.Combine(ObjectPool.CompleteWorkingDirectory, videoFile.PreviewName);
+						if (!File.Exists(workingPreviewPathName))
+						{
+							Process vtmProcess = new Process()
+								{
+									StartInfo =
+										{
+											FileName = ObjectPool.VideoThumbnailsMakerPath,
+											Arguments = "\"" + ObjectPool.CompleteVideoThumbnailsMakerPresetPath + "\" \"" + filePathName + "\""
+										}
+								};
+							vtmProcess.Start();
+							if (!vtmProcess.WaitForExit(30000))
+								vtmProcess.Kill();
+							if (File.Exists(previewPathName))
+								File.Move(previewPathName, workingPreviewPathName);
+						}
+						if (File.Exists(workingPreviewPathName))
+						{
+							image = Image.FromFile(workingPreviewPathName);
+							makeThumbnail = (Path.GetFileName(fileName) == videoFile.ThumbnailName);
+						}
+					}
+					catch { ; }
+				}
+				if (image != null)
+				{
+					if (makeThumbnail)
+					{
+						double factor = Math.Min(maxThumbnailSize / image.Size.Width, maxThumbnailSize / image.Size.Height);
+						Image thumbnailImage = image.GetThumbnailImage((int) Math.Round(factor * image.Size.Width, MidpointRounding.AwayFromZero),
+							(int) Math.Round(factor * image.Size.Height, MidpointRounding.AwayFromZero), () => false, IntPtr.Zero);
+						image.Dispose();
+						image = thumbnailImage;
+					}
+					image.Save(memoryStream, _imageCodecInfo, _encoderParameters);
+					image.Dispose();
+					memoryStream.Position = 0;
+				}
+			}
+			catch { ; }
+			return memoryStream;
+		}
 
 		#endregion
 	}

@@ -99,6 +99,15 @@ namespace MediaGalleryExplorerCore.DataObjects
 			return VolumeSerial + ":" + Path;
 		}
 
+		public void UpdateVolumeLetter()
+		{
+			try
+			{
+				VolumeLetter = FileSystemHandler.GetVolumeLetter(VolumeSerial);
+			}
+			catch (Exception) { ; }
+		}
+
 		#region Equality
 
 		public override bool Equals(object obj)

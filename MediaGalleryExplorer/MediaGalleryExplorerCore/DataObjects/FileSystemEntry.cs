@@ -92,6 +92,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		public bool Exists()
 		{
+			Source.UpdateVolumeLetter();
 			string fullPathName = Path.Combine(Source.RootedPath, RelativePathName);
 			return (IsFolder ? Directory.Exists(fullPathName) : File.Exists(fullPathName));
 		}

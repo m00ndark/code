@@ -237,12 +237,22 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		public Stream ExtractEntry(string filePath)
 		{
-			MemoryStream memoryStream = new MemoryStream();
 			ZipEntry zipEntry = _databaseFile[filePath];
 			if (zipEntry == null) return null;
+			MemoryStream memoryStream = new MemoryStream();
 			zipEntry.Extract(memoryStream);
 			memoryStream.Position = 0;
 			return memoryStream;
+		}
+
+		public string ExtractEntry(string filePath, string outputFolder)
+		{
+			ZipEntry zipEntry = _databaseFile[filePath];
+			if (zipEntry == null) return null;
+			string outputFilePath = Path.Combine(outputFolder, Path.ChangeExtension(Path.GetRandomFileName(), Path.GetExtension(filePath)));
+			using (FileStream fileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
+				zipEntry.Extract(fileStream);
+			return outputFilePath;
 		}
 
 		#endregion

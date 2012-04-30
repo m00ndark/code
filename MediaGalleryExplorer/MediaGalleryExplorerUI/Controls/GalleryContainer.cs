@@ -22,7 +22,7 @@ namespace MediaGalleryExplorerUI.Controls
 		private ToolStripMenuItem _toolStripMenuItemThumbnailOpenImage;
 		private ToolStripMenuItem _toolStripMenuItemThumbnailOpenPreview;
 		private ToolStripMenuItem _toolStripMenuItemThumbnailPlayVideo;
-		private  ImageList _imageList;
+		private readonly ImageList _imageList;
 		private readonly IDictionary<MediaFolder, TreeNode> _folderCollection;
 		private readonly IDictionary<MediaFile, ThumbnailContainer> _fileCollection;
 		private readonly GalleryWorker _worker;
@@ -39,7 +39,6 @@ namespace MediaGalleryExplorerUI.Controls
 			CommonWorker.ShowMessage += CommonWorker_ShowMessage;
 			_worker = new GalleryWorker(gallery);
 			_worker.GalleryLoaded += GalleryWorker_GalleryLoaded;
-			_worker.StatusUpdated += GalleryWorker_StatusUpdated;
 			_worker.TreeNodeAdded += GalleryWorker_TreeNodeAdded;
 			_worker.TreeNodeRemoved += GalleryWorker_TreeNodeRemoved;
 			_worker.ThumbnailAvailable += GalleryWorker_ThumbnailAvailable;
@@ -260,7 +259,7 @@ namespace MediaGalleryExplorerUI.Controls
 				ThumbnailContainer thumbnailContainer = toolStripItem.Tag as ThumbnailContainer;
 				if (thumbnailContainer != null)
 				{
-					_worker.OpenMediaFile(thumbnailContainer.MediaFile);
+					OpenMediaFile(thumbnailContainer.MediaFile);
 				}
 			}
 		}
@@ -273,7 +272,7 @@ namespace MediaGalleryExplorerUI.Controls
 				ThumbnailContainer thumbnailContainer = toolStripItem.Tag as ThumbnailContainer;
 				if (thumbnailContainer != null)
 				{
-					_worker.OpenMediaFile(thumbnailContainer.MediaFile, true);
+					OpenMediaFile(thumbnailContainer.MediaFile, true);
 				}
 			}
 		}
@@ -286,7 +285,7 @@ namespace MediaGalleryExplorerUI.Controls
 				ThumbnailContainer thumbnailContainer = toolStripItem.Tag as ThumbnailContainer;
 				if (thumbnailContainer != null)
 				{
-					_worker.OpenMediaFile(thumbnailContainer.MediaFile);
+					OpenMediaFile(thumbnailContainer.MediaFile);
 				}
 			}
 		}
@@ -320,25 +319,6 @@ namespace MediaGalleryExplorerUI.Controls
 				return Invoke(new CommonWorker.EventHandler<MessageEventArgs>(CommonWorker_ShowMessage), new object[] { sender, e });
 
 			return FormUtilities.ShowMessage(ParentForm, e.Message, e.Buttons, e.Icon);
-		}
-
-		private void GalleryWorker_StatusUpdated(object sender, StringEventArgs e)
-		{
-			try
-			{
-				if (InvokeRequired)
-				{
-					Invoke(new EventHandler<StringEventArgs>(GalleryWorker_StatusUpdated), new object[] { sender, e });
-				}
-				else
-				{
-					RaiseStatusUpdatedEvent(e.Value);
-				}
-			}
-			catch (Exception ex)
-			{
-				FormUtilities.ShowError(ParentForm, ex);
-			}
 		}
 
 		private void GalleryWorker_TreeNodeAdded(object sender, MediaFolderEventArgs e)
@@ -551,6 +531,18 @@ namespace MediaGalleryExplorerUI.Controls
 		#endregion
 
 		#region Helpers
+
+		private void OpenMediaFile(MediaFile mediaFile, bool preview = false)
+		{
+			try
+			{
+				_worker.OpenMediaFile(mediaFile, preview);
+			}
+			catch (Exception ex)
+			{
+				FormUtilities.ShowError(ParentForm, ex);
+			}
+		}
 
 		private void UpdateTreeNodeFileTypeCounts()
 		{

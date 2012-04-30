@@ -108,13 +108,14 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		#region General
 
-		public static void PrepareDirectories()
+		private static void PrepareDirectories()
 		{
 			Directory.CreateDirectory(ObjectPool.CompleteWorkingDirectory);
 		}
 
 		public static void ClearWorkingDirectory()
 		{
+			PrepareDirectories();
 			try
 			{
 				foreach (string directory in Directory.GetDirectories(ObjectPool.CompleteWorkingDirectory))
@@ -411,67 +412,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 			return encoders.FirstOrDefault(t => t.MimeType == mimeType);
 		}
 
-		public static Stream MediaFileStreamProvider(MediaFile mediaFile, string fileName)
-		{
-			MemoryStream memoryStream = new MemoryStream();
-			try
-			{
-				Image image = null;
-				bool makeThumbnail = true;
-				const double maxThumbnailSize = 200.0;
-				string filePathName = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
-				RaiseStatusUpdatedEvent("Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named \""
-					+ mediaFile.Name + "\" in " + Path.Combine(mediaFile.Source.RootedPath, mediaFile.Parent.RelativePathName));
-				if (mediaFile is ImageFile)
-				{
-					ImageFile imageFile = (mediaFile as ImageFile);
-					image = Image.FromFile(filePathName);
-					if (imageFile.Size.Width == 0 && imageFile.Size.Height == 0)
-						imageFile.Size = image.Size;
-				}
-				else if (mediaFile is VideoFile)
-				{
-					VideoFile videoFile = (mediaFile as VideoFile);
-					try
-					{
-						string previewPathName = Path.Combine(Path.GetDirectoryName(filePathName), videoFile.PreviewName);
-						string workingPreviewPathName = Path.Combine(ObjectPool.CompleteWorkingDirectory, videoFile.PreviewName);
-						if (!File.Exists(workingPreviewPathName))
-						{
-							Process vtmProcess = new Process();
-							vtmProcess.StartInfo.FileName = ObjectPool.VideoThumbnailsMakerPath;
-							vtmProcess.StartInfo.Arguments = "\"" + ObjectPool.CompleteVideoThumbnailsMakerPresetPath + "\" \"" + filePathName + "\"";
-							vtmProcess.Start();
-							if (!vtmProcess.WaitForExit(30000)) vtmProcess.Kill();
-							if (File.Exists(previewPathName))
-								File.Move(previewPathName, workingPreviewPathName);
-						}
-						if (File.Exists(workingPreviewPathName))
-						{
-							image = Image.FromFile(workingPreviewPathName);
-							makeThumbnail = (Path.GetFileName(fileName) == videoFile.ThumbnailName);
-						}
-					}
-					catch { ; }
-				}
-				if (image != null)
-				{
-					if (makeThumbnail)
-					{
-						double factor = Math.Min(maxThumbnailSize / image.Size.Width, maxThumbnailSize / image.Size.Height);
-						Image thumbnailImage = image.GetThumbnailImage((int) Math.Round(factor * image.Size.Width, MidpointRounding.AwayFromZero),
-							(int) Math.Round(factor * image.Size.Height, MidpointRounding.AwayFromZero), () => false, IntPtr.Zero);
-						image.Dispose();
-						image = thumbnailImage;
-					}
-					image.Save(memoryStream, _imageCodecInfo, _encoderParameters);
-					image.Dispose();
-					memoryStream.Position = 0;
-				}
-			}
-			catch { ; }
-			return memoryStream;
-		}
 
 		//public static void LoadThumbnails(Gallery gallery, MediaFolder folder)
 		//{
@@ -614,7 +554,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 			//string filePath = string.Empty;
 			//if (mediaFile is ImageFile || !preview)
 			//{
-			//   filePath = Path.Combine(mediaFile.Source.Path, mediaFile.RelativePathName);
+			//   filePath = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
 			//}
 			//else if (mediaFile is VideoFile)
 			//{
