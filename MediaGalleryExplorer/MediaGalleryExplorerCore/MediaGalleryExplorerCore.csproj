@@ -71,8 +71,6 @@
     <Compile Include="DataObjects\Properties\MediaFileProperties.cs" />
     <Compile Include="DataObjects\Properties\MediaFolderProperties.cs" />
     <Compile Include="DataObjects\Properties\VideoFileProperties.cs" />
-    <Compile Include="DataObjects\Serialization\ISerializable.cs" />
-    <Compile Include="DataObjects\Serialization\ObjectSerializer.cs" />
     <Compile Include="DataObjects\VideoFile.cs" />
     <Compile Include="EventArguments\BooleanEventArgs.cs" />
     <Compile Include="EventArguments\MediaFileEventArgs.cs" />

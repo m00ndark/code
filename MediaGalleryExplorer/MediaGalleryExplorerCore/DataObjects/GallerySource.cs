@@ -2,23 +2,15 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataAccess;
-using MediaGalleryExplorerCore.DataObjects.Serialization;
-using ISerializable = MediaGalleryExplorerCore.DataObjects.Serialization.ISerializable;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
 	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
-	public class GallerySource : IComparable, ISerializable
+	public class GallerySource : IComparable
 	{
 		public GallerySource(string path)
 		{
 			Initialize(path);
-		}
-
-		public GallerySource(string[] deserialized)
-		{
-			Initialize(deserialized[0]);
-			ScanDateStr = deserialized[2];
 		}
 
 		#region Properties
@@ -48,26 +40,6 @@ namespace MediaGalleryExplorerCore.DataObjects
 		{
 			get { return (ScanDate == DateTime.MinValue ? string.Empty : ScanDate.ToString("yyyy-MM-dd HH:mm:ss")); }
 			set { ScanDate = DateTime.Parse(value); }
-		}
-
-		#endregion
-
-		#region Serialization
-
-		public virtual string Serialize()
-		{
-			return Serialize(true);
-		}
-
-		public virtual string Serialize(bool withPrefix)
-		{
-			return ObjectSerializer.Serialize((withPrefix ? this : null), VolumeSerial, VolumeName, VolumeLetter, Path, RootFolder.ID, ScanDateStr, ImageCount.ToString(), VideoCount.ToString());
-		}
-
-		public string LoadFromDeserialized(string[] deserialized)
-		{
-			ScanDateStr = deserialized[2];
-			return deserialized[1];
 		}
 
 		#endregion

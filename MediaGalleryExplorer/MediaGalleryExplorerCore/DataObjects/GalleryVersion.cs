@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Reflection;
-using MediaGalleryExplorerCore.DataObjects.Serialization;
+using System.Runtime.Serialization;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
-	public class GalleryVersion : ISerializable
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects")]
+	public class GalleryVersion
 	{
 		private static GalleryVersion _instance = null;
 		private static readonly object _lock = new object();
@@ -17,16 +18,10 @@ namespace MediaGalleryExplorerCore.DataObjects
 			BuildDate = buildDate;
 		}
 
-		public GalleryVersion(string[] deserialized)
-		{
-			Version = deserialized[0];
-			BuildDate = deserialized[1];
-		}
-
 		#region Properties
 
-		public string Version { get; private set; }
-		public string BuildDate { get; private set; }
+		[DataMember] public string Version { get; private set; }
+		[DataMember] public string BuildDate { get; private set; }
 
 		public string MajorVersion
 		{
@@ -35,25 +30,6 @@ namespace MediaGalleryExplorerCore.DataObjects
 				int firstDotIndex = Version.IndexOf(".");
 				return Version.Substring(0, Version.IndexOf(".", firstDotIndex + 1));
 			}
-		}
-
-		#endregion
-
-		#region Serialization
-
-		public virtual string Serialize()
-		{
-			return Serialize(true);
-		}
-
-		public virtual string Serialize(bool withPrefix)
-		{
-			return ObjectSerializer.Serialize((withPrefix ? this : null), Version, BuildDate);
-		}
-
-		public string LoadFromDeserialized(string[] deserialized)
-		{
-			throw new NotImplementedException();
 		}
 
 		#endregion

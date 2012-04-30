@@ -1,15 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using MediaGalleryExplorerCore.DataObjects.Serialization;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
 	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class MediaFolder : FileSystemEntry
 	{
-		private const int SERIALIZED_VALUES = 2;
-
 		private int _imageCount = 0;
 		private int _videoCount = 0;
 
@@ -19,12 +15,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 			Initialize(false);
 		}
 
-		public MediaFolder(GallerySource source) : base(source)
-		{
-			Initialize(false);
-		}
-
-		public MediaFolder(MediaFolder parent) : base(null)
+		public MediaFolder(MediaFolder parent) : base()
 		{
 			Parent = parent;
 			Initialize(true);
@@ -60,8 +51,6 @@ namespace MediaGalleryExplorerCore.DataObjects
 			}
 		}
 
-		//[DataMember] public int ImageCount { get; private set; }
-		//[DataMember] public int VideoCount { get; private set; }
 		public int TotalImageCount { get; private set; }
 		public int TotalVideoCount { get; private set; }
 
@@ -84,13 +73,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		public void IncreaseImageCount(int increment)
 		{
-			IncreaseImageCount(increment, true);
-		}
-
-		private void IncreaseImageCount(int increment, bool updateSource)
-		{
 			ImageCount += increment;
-			//IncreaseTotalImageCount(increment, updateSource);
 		}
 
 		public void IncreaseVideoCount()
@@ -100,13 +83,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		public void IncreaseVideoCount(int increment)
 		{
-			IncreaseVideoCount(increment, true);
-		}
-
-		private void IncreaseVideoCount(int increment, bool updateSource)
-		{
 			VideoCount += increment;
-			//IncreaseTotalVideoCount(increment, updateSource);
 		}
 
 		public void IncreaseTotalImageCount(int increment)
@@ -135,28 +112,6 @@ namespace MediaGalleryExplorerCore.DataObjects
 				Parent.IncreaseTotalVideoCount(increment, updateSource);
 			else if (updateSource && Source != null)
 				Source.VideoCount = TotalVideoCount;
-		}
-
-		#endregion
-
-		#region Serialization
-
-		public override string Serialize()
-		{
-			return Serialize(true);
-		}
-
-		public override string Serialize(bool withPrefix)
-		{
-			return ObjectSerializer.Serialize((withPrefix ? this : null), base.Serialize(false), ImageCount.ToString(), VideoCount.ToString());
-		}
-
-		public override string LoadFromDeserialized(string[] deserialized)
-		{
-			int baseItemCount = deserialized.Length - SERIALIZED_VALUES;
-			IncreaseImageCount(int.Parse(deserialized[baseItemCount + 0]), false);
-			IncreaseVideoCount(int.Parse(deserialized[baseItemCount + 1]), false);
-			return base.LoadFromDeserialized(deserialized.Take(baseItemCount).ToArray());
 		}
 
 		#endregion

@@ -1,74 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Management;
-using System.Runtime.Serialization;
-using System.Xml;
 using Ionic.Zip;
 using MediaGalleryExplorerCore.DataObjects;
-using MediaGalleryExplorerCore.DataObjects.Serialization;
 using MediaGalleryExplorerCore.EventArguments;
 
 namespace MediaGalleryExplorerCore.DataAccess
 {
 	public static class FileSystemHandler
 	{
-		#region Nested classes
-
-		private class DatabaseState
-		{
-			public DatabaseState()
-			{
-				GalleryEntry = null;
-				ImageEntries = new Dictionary<ZipEntry, MediaFile>();
-			}
-
-			#region Properties
-
-			public Tuple<ZipEntry, Gallery> GalleryEntry { get; set; }
-			public IDictionary<ZipEntry, MediaFile> ImageEntries { get; private set; }
-
-			#endregion
-
-			public void Clear()
-			{
-				GalleryEntry = null;
-				ImageEntries.Clear();
-			}
-		}
-
-		#endregion
-
-		private const string DATABASE_FILE_EXTENSION = ".mgdb";
-		private const string METAFILE_FILE_EXTENSION = ".meta";
-		private static readonly string GALLERY_FILE_NAME = "gallery" + METAFILE_FILE_EXTENSION;
-
-		private static readonly List<Type> _serializableDataObjectTypes = new List<Type>()
-			{
-				typeof(Gallery),
-				typeof(GalleryVersion),
-				typeof(GallerySource),
-				typeof(MediaCodec),
-				typeof(FileSystemEntry),
-				typeof(MediaFolder),
-				typeof(MediaFile),
-				typeof(ImageFile),
-				typeof(VideoFile)
-			};
-
-		private static readonly object _galleryAccessLock = new object();
-		private static readonly DatabaseState _databaseState = new DatabaseState();
-		private static readonly EncoderParameters _encoderParameters = new EncoderParameters(1);
-		private static ImageCodecInfo _imageCodecInfo = null;
-
 		public static event EventHandler<StringEventArgs> StatusUpdated;
 		public static event EventHandler<MediaFolderEventArgs> MediaFolderAdded;
 		public static event EventHandler<MediaFolderEventArgs> MediaFolderRemoved;
-		public static event EventHandler<MediaFileEventArgs> MediaFileUpdated;
 
 		#region Event raisers
 
@@ -93,14 +39,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 			if (MediaFolderRemoved != null)
 			{
 				MediaFolderRemoved(null, new MediaFolderEventArgs(folder));
-			}
-		}
-
-		private static void RaiseMediaFileUpdatedEvent(MediaFile file)
-		{
-			if (MediaFileUpdated != null)
-			{
-				MediaFileUpdated(null, new MediaFileEventArgs(file));
 			}
 		}
 
@@ -213,47 +151,15 @@ namespace MediaGalleryExplorerCore.DataAccess
 			try
 			{
 				ClearWorkingDirectory();
-				//_databaseState.Clear();
 				int folderCount = 0, fileCount = 0;
 				source.RootFolder.ResetCounters();
-
 				ScanSubFolder(galleryDatabase, source, source.RootFolder, reScan, ref folderCount, ref fileCount, 0);
-
-				//ClearWorkingDirectory();
-				//_databaseState.Clear();
-				//int folderCount = 0, fileCount = 0;
-				//using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
-				//{
-				//   ScanSubFolder(source.RootFolder, source, galleryDatabase, reScan, ref folderCount, ref fileCount, 0);
-				//   source.ScanDate = DateTime.Now;
-				//   CreateGalleryEntry(galleryDatabase, gallery);
-				//   SaveGalleryDatabase(galleryDatabase);
-				//}
-				//RegistryHandler.SaveSettings(SettingsType.GallerySource);
 			}
 			finally
 			{
 				ClearWorkingDirectory();
 			}
 		}
-
-		//private static void SourceDatabase_SaveProgress(object sender, SaveProgressEventArgs e)
-		//{
-		//   if (e.EventType == ZipProgressEventType.Saving_BeforeWriteEntry && e.CurrentEntry.Source == ZipEntrySource.Stream &&
-		//        e.CurrentEntry.InputStream == Stream.Null)
-		//   {
-		//      if (_databaseState.ImageEntries.ContainsKey(e.CurrentEntry))
-		//         e.CurrentEntry.InputStream = GetDatabaseImageStream(_databaseState.ImageEntries[e.CurrentEntry], e.CurrentEntry.FileName);
-		//      else if (_databaseState.GalleryEntry.Item1 == e.CurrentEntry)
-		//         e.CurrentEntry.InputStream = GetGalleryMetadataStream(_databaseState.GalleryEntry.Item2);
-		//      else
-		//         e.Cancel = true;
-		//   }
-		//   else if (e.EventType == ZipProgressEventType.Saving_AfterWriteEntry && e.CurrentEntry.InputStreamWasJitProvided)
-		//   {
-		//      e.CurrentEntry.InputStream.Close();
-		//   }
-		//}
 
 		private static bool ScanSubFolder(GalleryDatabase galleryDatabase, GallerySource source, MediaFolder folder,
 			bool reScan, ref int folderCount, ref int fileCount, int depth)
@@ -395,330 +301,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 		{
 			return fullPath.Replace(absolutePath, string.Empty).Trim("\\".ToCharArray());
 		}
-
-		#endregion
-
-		#region Thumbnails
-
-		public static void InitializeImageProcessor(long thumbnailQuality)
-		{
-			_encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, thumbnailQuality);
-			_imageCodecInfo = GetEncoderInfo("image/jpeg");
-		}
-
-		private static ImageCodecInfo GetEncoderInfo(String mimeType)
-		{
-			ImageCodecInfo[] encoders = ImageCodecInfo.GetImageEncoders();
-			return encoders.FirstOrDefault(t => t.MimeType == mimeType);
-		}
-
-
-		//public static void LoadThumbnails(Gallery gallery, MediaFolder folder)
-		//{
-		//   lock (_galleryAccessLock)
-		//   {
-		//      if (!File.Exists(gallery.FilePath)) return;
-
-		//      using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
-		//      {
-		//         foreach (MediaFile mediaFile in folder.Files)
-		//         {
-		//            MemoryStream memoryStream = new MemoryStream();
-		//            string thumbnailPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativeThumbnailPathName);
-		//            ZipEntry zipEntry = galleryDatabase[thumbnailPathName];
-		//            if (zipEntry != null)
-		//            {
-		//               zipEntry.Extract(memoryStream);
-		//               if (memoryStream.Length > 0)
-		//               {
-		//                  memoryStream.Position = 0;
-		//                  mediaFile.ThumbnailImage = Image.FromStream(memoryStream);
-		//                  memoryStream.Close();
-		//                  RaiseMediaFileUpdatedEvent(mediaFile);
-		//               }
-		//            }
-		//         }
-		//      }
-		//   }
-		//}
-
-		#endregion
-
-		#region Source database
-
-		//private static void SerializeSource(StreamWriter writer, GallerySource source)
-		//{
-		//   writer.WriteLine(source.Serialize());
-		//   foreach (MediaCodec mediaCodec in source.Codecs)
-		//   {
-		//      writer.WriteLine(mediaCodec.Serialize());
-		//   }
-		//   SerializeSubFolders(writer, source.RootFolder);
-		//}
-
-		//private static void SerializeSubFolders(StreamWriter writer, MediaFolder folder)
-		//{
-		//   writer.WriteLine(folder.Serialize());
-		//   foreach (MediaFile mediaFile in folder.Files)
-		//   {
-		//      writer.WriteLine(mediaFile.Serialize());
-		//   }
-		//   foreach (MediaFolder subFolder in folder.SubFolders)
-		//   {
-		//      SerializeSubFolders(writer, subFolder);
-		//   }
-		//}
-
-		//private static void DeserializeSource(StreamReader reader, GallerySource source)
-		//{
-		//   string objectPrefix;
-		//   string[] deserializedObject = ObjectSerializer.Deserialize(reader.ReadLine(), out objectPrefix);
-		//   if (objectPrefix != "GS") throw new Exception("Failed to deserialize source database; gallery source missing");
-		//   string rootFolderID = source.LoadFromDeserialized(deserializedObject);
-
-		//   IDictionary<string, FileSystemEntry> fileSystemEntries = new Dictionary<string, FileSystemEntry>();
-		//   string serializedObject = reader.ReadLine();
-		//   while (serializedObject != null)
-		//   {
-		//      try
-		//      {
-		//         deserializedObject = ObjectSerializer.Deserialize(serializedObject, out objectPrefix);
-		//         switch (objectPrefix)
-		//         {
-		//            case "MC":
-		//               MediaCodec mediaCodec = new MediaCodec();
-		//               mediaCodec.LoadFromDeserialized(deserializedObject);
-		//               source.Codecs.Add(mediaCodec);
-		//               break;
-		//            default:
-		//               DeserializeSubFolders(fileSystemEntries, objectPrefix, deserializedObject, source);
-		//               break;
-		//         }
-		//      }
-		//      catch { }
-		//      if (fileSystemEntries.Count % 100 == 0)
-		//      {
-		//         RaiseStatusUpdatedEvent("Loading source (" + source.RootedPath + ")... " + (100 * (double) fileSystemEntries.Count / (source.ImageCount + source.VideoCount)).ToString("0.0") + "%");
-		//      }
-		//      serializedObject = reader.ReadLine();
-		//   }
-		//   if (!fileSystemEntries.ContainsKey(rootFolderID)) throw new Exception("Failed to deserialize source database; root object does not exist");
-		//   MediaFolder rootFolder = fileSystemEntries[rootFolderID] as MediaFolder;
-		//   if (rootFolder == null) throw new Exception("Failed to deserialize source database; parent root object is not a folder");
-		//   source.RootFolder = rootFolder;
-		//}
-
-		//private static void DeserializeSubFolders(IDictionary<string, FileSystemEntry> fileSystemEntries, string objectPrefix, string[] deserializedObject, GallerySource source)
-		//{
-		//   FileSystemEntry fileSystemEntry = null;
-		//   switch (objectPrefix)
-		//   {
-		//      case "FO":
-		//         fileSystemEntry = new MediaFolder(source);
-		//         break;
-		//      case "IF":
-		//         fileSystemEntry = new ImageFile(source);
-		//         break;
-		//      case "VF":
-		//         fileSystemEntry = new VideoFile(source);
-		//         break;
-		//   }
-		//   if (fileSystemEntry == null) throw new Exception("Failed to deserialize file system entry of source database; invalid object type");
-		//   string parentID = fileSystemEntry.LoadFromDeserialized(deserializedObject);
-		//   if (!string.IsNullOrEmpty(parentID))
-		//   {
-		//      if (!fileSystemEntries.ContainsKey(parentID)) throw new Exception("Failed to deserialize file system entry of source database; parent object does not exist");
-		//      MediaFolder parentFolder = fileSystemEntries[parentID] as MediaFolder;
-		//      if (parentFolder == null) throw new Exception("Failed to deserialize file system entry of source database; parent object is not a folder");
-		//      fileSystemEntry.SetParent(parentFolder);
-		//      if (fileSystemEntry is MediaFolder)
-		//      {
-		//         parentFolder.SubFolders.Add((MediaFolder) fileSystemEntry);
-		//      }
-		//      else
-		//      {
-		//         parentFolder.Files.Add((MediaFile) fileSystemEntry);
-		//      }
-		//   }
-		//   fileSystemEntries.Add(fileSystemEntry.ID, fileSystemEntry);
-		//   if (fileSystemEntry is MediaFolder)
-		//      RaiseMediaFolderAddedEvent((MediaFolder) fileSystemEntry);
-		//}
-
-		#endregion
-
-		#region Source media files
-
-		public static void OpenMediaFile(MediaFile mediaFile, bool preview)
-		{
-			//string filePath = string.Empty;
-			//if (mediaFile is ImageFile || !preview)
-			//{
-			//   filePath = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
-			//}
-			//else if (mediaFile is VideoFile)
-			//{
-			//   ClearWorkingDirectory();
-			//   string databaseFileName = Path.ChangeExtension(mediaFile.Source.ID, DATABASE_FILE_EXTENSION);
-			//   string databaseFilePath = Path.Combine(ObjectPool.CompleteDatabaseLocation, databaseFileName);
-			//   if (File.Exists(databaseFilePath))
-			//   {
-			//      using (ZipFile sourceDatabase = ZipFile.Read(databaseFilePath))
-			//      {
-			//         string relativePreviewPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePreviewPathName);
-			//         ZipEntry zipEntry = sourceDatabase[relativePreviewPathName];
-			//         zipEntry.Extract(ObjectPool.CompleteWorkingDirectory, ExtractExistingFileAction.OverwriteSilently);
-			//         filePath = Path.Combine(ObjectPool.CompleteWorkingDirectory, relativePreviewPathName);
-			//      }
-			//   }
-			//}
-			//if (File.Exists(filePath))
-			//{
-			//   Process process = new Process() { StartInfo = { FileName = filePath, Verb = "Open" } };
-			//   process.Start();
-			//}
-		}
-
-		#endregion
-
-		#region Gallery database
-
-		//public static void LoadGallery(ref Gallery gallery)
-		//{
-		//   lock (_galleryAccessLock)
-		//   {
-		//      using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, false))
-		//      {
-		//         RaiseStatusUpdatedEvent("Loading gallery (" + gallery.FilePath + ")...");
-		//         MemoryStream memoryStream = new MemoryStream();
-		//         ZipEntry zipEntry = galleryDatabase[GALLERY_FILE_NAME];
-		//         zipEntry.Extract(memoryStream);
-		//         memoryStream.Position = 0;
-		//         XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(memoryStream, new XmlDictionaryReaderQuotas());
-		//         DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
-		//         gallery = (Gallery) serializer.ReadObject(reader, true);
-		//         reader.Close();
-		//         memoryStream.Close();
-		//      }
-		//   }
-		//   gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
-		//}
-
-		//public static void SaveGallery(Gallery gallery)
-		//{
-		//   _databaseState.Clear();
-		//   using (ZipFile galleryDatabase = OpenGalleryDatabase(gallery, true))
-		//   {
-		//      CreateGalleryEntry(galleryDatabase, gallery);
-		//      SaveGalleryDatabase(galleryDatabase);
-		//   }
-		//   gallery.Sources.ForEach(source => RaiseMediaFolderAddedEvent(source.RootFolder));
-		//}
-
-		//public static Stream GetGalleryMetadataStream(Gallery gallery)
-		//{
-		//   MemoryStream memoryStream = new MemoryStream();
-		//   XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
-		//   DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
-		//   serializer.WriteObject(writer, gallery);
-		//   writer.Flush();
-		//   memoryStream.Position = 0;
-		//   return memoryStream;
-		//}
-
-		//private static void CreateGalleryEntry(ZipFile galleryDatabase, Gallery gallery)
-		//{
-		//   ZipEntry galleryEntry = galleryDatabase.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Stream.Null);
-		//   _databaseState.GalleryEntry = new Tuple<ZipEntry, Gallery>(galleryEntry, gallery);
-		//}
-
-		//private static ZipFile OpenGalleryDatabase(Gallery gallery, bool writing)
-		//{
-		//   ZipFile galleryDatabase = null;
-		//   if (writing)
-		//   {
-		//      string galleryDatabaseBackupPath = null;
-		//      bool deleteBackup = true;
-		//      try
-		//      {
-		//         if (File.Exists(gallery.FilePath))
-		//         {
-		//            RaiseStatusUpdatedEvent("Backing up existing source database...");
-		//            galleryDatabaseBackupPath = gallery.FilePath + ".backup";
-		//            if (File.Exists(galleryDatabaseBackupPath))
-		//               File.Delete(galleryDatabaseBackupPath);
-		//            File.Copy(gallery.FilePath, galleryDatabaseBackupPath);
-		//         }
-		//         galleryDatabase = new ZipFile(gallery.FilePath) { Encryption = (EncryptionAlgorithm) gallery.EncryptionAlgorithm };
-		//         if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
-		//         {
-		//            galleryDatabase.Password = gallery.Password;
-		//         }
-		//      }
-		//      catch
-		//      {
-		//         try
-		//         {
-		//            if (galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
-		//            {
-		//               deleteBackup = false;
-		//               CloseGalleryDatabase(galleryDatabase);
-		//               if (File.Exists(gallery.FilePath))
-		//                  File.Delete(gallery.FilePath);
-		//               File.Move(galleryDatabaseBackupPath, gallery.FilePath);
-		//               deleteBackup = true;
-		//            }
-		//            else
-		//               CloseGalleryDatabase(galleryDatabase);
-		//         }
-		//         catch { ; }
-		//         throw;
-		//      }
-		//      finally
-		//      {
-		//         try
-		//         {
-		//            if (deleteBackup && galleryDatabaseBackupPath != null && File.Exists(galleryDatabaseBackupPath))
-		//               File.Delete(galleryDatabaseBackupPath);
-		//            _databaseState.Clear();
-		//         }
-		//         catch { ; }
-		//      }
-		//   }
-		//   else
-		//   {
-		//      try
-		//      {
-		//         if (File.Exists(gallery.FilePath))
-		//         {
-		//            galleryDatabase = ZipFile.Read(gallery.FilePath);
-		//            if (galleryDatabase.Encryption != EncryptionAlgorithm.None)
-		//               galleryDatabase.Password = gallery.Password;
-		//         }
-		//      }
-		//      catch { ; }
-		//   }
-		//   return galleryDatabase;
-		//}
-
-		//private static void SaveGalleryDatabase(ZipFile galleryDatabase)
-		//{
-		//   if (galleryDatabase == null)
-		//      throw new ArgumentNullException("galleryDatabase");
-
-		//   lock (_galleryAccessLock)
-		//   {
-		//      galleryDatabase.SaveProgress += SourceDatabase_SaveProgress;
-		//      galleryDatabase.Save();
-		//      galleryDatabase.SaveProgress -= SourceDatabase_SaveProgress;
-		//   }
-		//}
-
-		//private static void CloseGalleryDatabase(ZipFile galleryDatabase)
-		//{
-		//   if (galleryDatabase != null)
-		//      galleryDatabase.Dispose();
-		//}
 
 		#endregion
 	}

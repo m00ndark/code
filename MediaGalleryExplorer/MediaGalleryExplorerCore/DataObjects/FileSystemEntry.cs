@@ -1,22 +1,20 @@
 ﻿using System.IO;
 using System.Runtime.Serialization;
 using MediaGalleryExplorerCore.DataAccess;
-using MediaGalleryExplorerCore.DataObjects.Serialization;
-using ISerializable = MediaGalleryExplorerCore.DataObjects.Serialization.ISerializable;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
 	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
-	public class FileSystemEntry : ISerializable
+	public class FileSystemEntry
 	{
 		protected FileSystemEntry(string name, string relativePath, MediaFolder parent, GallerySource source)
 		{
 			Initialize(name, relativePath, parent, source);
 		}
 
-		protected FileSystemEntry(GallerySource source)
+		protected FileSystemEntry()
 		{
-			Initialize(string.Empty, string.Empty, null, source);
+			Initialize(string.Empty, string.Empty, null, null);
 		}
 
 		#region Properties
@@ -35,28 +33,6 @@ namespace MediaGalleryExplorerCore.DataObjects
 		public string RelativePathName
 		{
 			get { return (RelativePath != null ? Path.Combine(RelativePath, Name) : string.Empty); }
-		}
-
-		#endregion
-
-		#region Serialization
-
-		public virtual string Serialize()
-		{
-			return Serialize(true);
-		}
-
-		public virtual string Serialize(bool withPrefix)
-		{
-			return ObjectSerializer.Serialize((withPrefix ? this : null), Name, RelativePath, (Parent != null ? Parent.ID : string.Empty));
-		}
-
-		public virtual string LoadFromDeserialized(string[] deserialized)
-		{
-			Name = deserialized[0];
-			RelativePath = deserialized[1];
-			CreateID();
-			return deserialized[2];
 		}
 
 		#endregion
@@ -80,13 +56,10 @@ namespace MediaGalleryExplorerCore.DataObjects
 		public void SetParent(MediaFolder parent)
 		{
 			Parent = parent;
-			if (IsFolder)
+			if (IsFolder && Parent != null)
 			{
-				if (Parent != null)
-				{
-					Parent.IncreaseTotalImageCount(((MediaFolder) this).TotalImageCount);
-					Parent.IncreaseTotalVideoCount(((MediaFolder) this).TotalVideoCount);
-				}
+				Parent.IncreaseTotalImageCount(((MediaFolder) this).TotalImageCount);
+				Parent.IncreaseTotalVideoCount(((MediaFolder) this).TotalVideoCount);
 			}
 		}
 

@@ -162,41 +162,6 @@ namespace MediaGalleryExplorerCore.Workers
 			}
 		}
 
-		public void AddSource()
-		{
-			//try
-			//{
-			//   FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-			//   folderBrowserDialog.Description = "Please select a source root folder...";
-			//   folderBrowserDialog.SelectedPath = ObjectPool.LastBrowsedPath;
-			//   if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-			//   {
-			//      ObjectPool.AddSource(new GallerySource(folderBrowserDialog.SelectedPath));
-			//      RegistryHandler.SaveSettings(SettingsType.GallerySource);
-			//      RaiseSourceListUpdatedEvent(ObjectPool.Sources);
-			//   }
-			//   ObjectPool.LastBrowsedPath = folderBrowserDialog.SelectedPath;
-			//}
-			//catch (Exception ex)
-			//{
-			//   CommonWorker.ShowError(ex);
-			//}
-		}
-
-		public void RemoveSource(GallerySource source)
-		{
-			//try
-			//{
-			//   ObjectPool.RemoveSource(source);
-			//   RegistryHandler.SaveSettings(SettingsType.GallerySource);
-			//   RaiseSourceListUpdatedEvent(ObjectPool.Sources);
-			//}
-			//catch (Exception ex)
-			//{
-			//   CommonWorker.ShowError(ex);
-			//}
-		}
-
 		#endregion
 	}
 }
