@@ -183,6 +183,7 @@ namespace MediaGalleryExplorerCore.Workers
 						XmlReader reader = XmlReader.Create(stream, new XmlReaderSettings() { CheckCharacters = false });
 						DataContractSerializer serializer = new DataContractSerializer(typeof(Gallery), _serializableDataObjectTypes);
 						Gallery = (Gallery) serializer.ReadObject(reader, true);
+						Gallery.UpdateMediaCount();
 						reader.Close();
 					}
 				}
@@ -247,6 +248,7 @@ namespace MediaGalleryExplorerCore.Workers
 					database.RegisterStreamProvider<MediaFile>(MediaFileStreamProvider);
 					FileSystemHandler.ScanFolders(database, source, reScan);
 					source.ScanDate = DateTime.Now;
+					source.UpdateMediaCount();
 					database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery);
 					database.Save();
 				}

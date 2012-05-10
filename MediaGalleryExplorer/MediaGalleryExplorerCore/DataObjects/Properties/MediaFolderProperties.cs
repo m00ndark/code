@@ -19,12 +19,12 @@ namespace MediaGalleryExplorerCore.DataObjects.Properties
 		[ReadOnly(true)]
 		[Category("Count")]
 		[DisplayName("Images")]
-		public int ImageCount { get { return MediaFolder.ImageCount; } }
+		public int ImageCount { get { return MediaFolder.MediaCount.ImageCount; } }
 
 		[ReadOnly(true)]
 		[Category("Count")]
 		[DisplayName("Videos")]
-		public int VideoCount { get { return MediaFolder.VideoCount; } }
+		public int VideoCount { get { return MediaFolder.MediaCount.VideoCount; } }
 
 		[ReadOnly(true)]
 		[Category("Folder")]

@@ -62,6 +62,7 @@
     <Compile Include="DataObjects\GalleryVersion.cs" />
     <Compile Include="DataObjects\ImageFile.cs" />
     <Compile Include="DataObjects\MediaCodec.cs" />
+    <Compile Include="DataObjects\MediaCount.cs" />
     <Compile Include="DataObjects\MediaFile.cs" />
     <Compile Include="DataObjects\MediaFolder.cs" />
     <Compile Include="DataObjects\Properties\FileSystemEntryProperties.cs" />

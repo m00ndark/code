@@ -152,7 +152,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 			{
 				ClearWorkingDirectory();
 				int folderCount = 0, fileCount = 0;
-				source.RootFolder.ResetCounters();
 				ScanSubFolder(galleryDatabase, source, source.RootFolder, reScan, ref folderCount, ref fileCount, 0);
 			}
 			finally
@@ -227,7 +226,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 							int existingIndex = parentFolder.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
 							if (existingIndex != -1) parentFolder.Files.RemoveAt(existingIndex);
 							parentFolder.Files.Add(imageFile);
-							parentFolder.IncreaseImageCount();
 							AddDatabaseImageEntry(galleryDatabase, imageFile, reScan);
 						}
 					}
@@ -258,7 +256,6 @@ namespace MediaGalleryExplorerCore.DataAccess
 						int existingIndex = parentFolder.Files.FindIndex(mediaFile => mediaFile.Name == fileName);
 						if (existingIndex != -1) parentFolder.Files.RemoveAt(existingIndex);
 						parentFolder.Files.Add(videoFile);
-						parentFolder.IncreaseVideoCount();
 						AddDatabaseImageEntry(galleryDatabase, videoFile, reScan);
 					}
 				}

@@ -53,16 +53,6 @@ namespace MediaGalleryExplorerCore.DataObjects
 			ID = CryptoServiceHandler.GenerateHash(Source.ID + ":" + (string.IsNullOrEmpty(RelativePathName) ? Name : RelativePathName));
 		}
 
-		public void SetParent(MediaFolder parent)
-		{
-			Parent = parent;
-			if (IsFolder && Parent != null)
-			{
-				Parent.IncreaseTotalImageCount(((MediaFolder) this).TotalImageCount);
-				Parent.IncreaseTotalVideoCount(((MediaFolder) this).TotalVideoCount);
-			}
-		}
-
 		public bool Exists()
 		{
 			Source.UpdateVolumeLetter();

@@ -20,11 +20,11 @@ namespace MediaGalleryExplorerCore.DataObjects
 		[DataMember] public string VolumeLetter { get; set; }
 		[DataMember] public string VolumeName { get; set; }
 		[DataMember] public string VolumeSerial { get; set; }
-		[DataMember] public int ImageCount { get; set; }
-		[DataMember] public int VideoCount { get; set; }
 		[DataMember] public MediaFolder RootFolder { get; set; }
 		[DataMember] public DateTime ScanDate { get; set; }
 		[DataMember] public List<MediaCodec> Codecs { get; private set; }
+
+		public MediaCount MediaCount { get; private set; }
 
 		public string RootedPath
 		{
@@ -55,8 +55,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 			Path = path.Substring(2);
 			CreateID();
 			RootFolder = new MediaFolder(Path, null, null, this);
-			ImageCount = 0;
-			VideoCount = 0;
+			MediaCount = new MediaCount();
 			ScanDate = DateTime.MinValue;
 			Codecs = new List<MediaCodec>();
 		}
@@ -69,6 +68,11 @@ namespace MediaGalleryExplorerCore.DataObjects
 		private string GetIDBase()
 		{
 			return VolumeSerial + ":" + Path;
+		}
+
+		public void UpdateMediaCount()
+		{
+			MediaCount = RootFolder.UpdateMediaCount();
 		}
 
 		public void UpdateVolumeLetter()

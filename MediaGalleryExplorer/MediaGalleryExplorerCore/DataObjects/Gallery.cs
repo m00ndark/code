@@ -59,5 +59,10 @@ namespace MediaGalleryExplorerCore.DataObjects
 		{
 			Sources.Remove(source);
 		}
+
+		public void UpdateMediaCount()
+		{
+			Sources.ForEach(source => source.UpdateMediaCount());
+		}
 	}
 }
