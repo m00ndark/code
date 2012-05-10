@@ -14,19 +14,10 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		[DataMember] private string Thumbnail { get; set; }
+		//[DataMember] private string Thumbnail { get; set; }
 
-		public override string ThumbnailName
-		{
-			get { return Thumbnail; }
-			set { Thumbnail = value; }
-		}
-
-		public override string PreviewName
-		{
-			get { return Name; }
-			set { throw new Exception("Set accessor of MediaFile.PreviewName property should not be used."); }
-		}
+		//public override string ThumbnailName { get { return Thumbnail; } set { Thumbnail = value; } }
+		//public override string PreviewName { get { return Name; } set { throw new Exception("Set accessor of MediaFile.PreviewName property should not be used."); } }
 
 		#endregion
 

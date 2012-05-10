@@ -15,20 +15,20 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#region Properties
 
-		[DataMember] private string Thumbnail { get; set; }
-		[DataMember] private string Preview { get; set; }
+		//[DataMember] private string Thumbnail { get; set; }
+		//[DataMember] private string Preview { get; set; }
 		[DataMember] public TimeSpan Duration { get; set; }
 		[DataMember] public List<MediaCodec> Codecs { get; private set; }
 
-		public override string ThumbnailName { get { return Thumbnail; } set { Thumbnail = value; } }
-		public override string PreviewName { get { return Preview; } set { Preview = value; } }
+		//public override string ThumbnailName { get { return Thumbnail; } set { Thumbnail = value; } }
+		//public override string PreviewName { get { return Preview; } set { Preview = value; } }
 
 		#endregion
 
 		private void Initialize()
 		{
-			ThumbnailName = string.Empty;
-			PreviewName = string.Empty;
+			//ThumbnailName = string.Empty;
+			//PreviewName = string.Empty;
 			Duration = new TimeSpan(0, 0, 0);
 			Codecs = new List<MediaCodec>();
 		}

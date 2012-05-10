@@ -215,7 +215,7 @@ namespace MediaGalleryExplorerCore.Workers
 			FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog() { Description = "Please select a source root folder..." };
 			if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
 			{
-				GallerySource source = new GallerySource(folderBrowserDialog.SelectedPath);
+				GallerySource source = new GallerySource(folderBrowserDialog.SelectedPath, Gallery);
 				if (Gallery.AddSource(source))
 				{
 					using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, true))
@@ -279,8 +279,7 @@ namespace MediaGalleryExplorerCore.Workers
 					foreach (MediaFile mediaFile in folder.Files)
 					{
 						bool thumbnailLoaded = false;
-						string thumbnailPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativeThumbnailPathName);
-						using (Stream stream = database.ExtractEntry(thumbnailPathName))
+						using (Stream stream = database.ExtractEntry(mediaFile.DatabaseThumbnailPathName))
 						{
 							if (stream != null && stream.Length > 0)
 							{
@@ -325,8 +324,7 @@ namespace MediaGalleryExplorerCore.Workers
 				FileSystemHandler.ClearWorkingDirectory();
 				using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, false))
 				{
-					string relativePreviewPathName = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePreviewPathName);
-					filePath = database.ExtractEntry(relativePreviewPathName, ObjectPool.CompleteWorkingDirectory);
+					filePath = database.ExtractEntry(mediaFile.DatabasePreviewPathName, ObjectPool.CompleteWorkingDirectory);
 				}
 			}
 			if (File.Exists(filePath))
@@ -426,7 +424,7 @@ namespace MediaGalleryExplorerCore.Workers
 					VideoFile videoFile = (mediaFile as VideoFile);
 					try
 					{
-						string previewPathName = Path.Combine(Path.GetDirectoryName(filePathName), videoFile.PreviewName);
+						string outputPreviewPathName = Path.Combine(Path.GetDirectoryName(filePathName), videoFile.Name + Path.GetExtension(videoFile.PreviewName));
 						string workingPreviewPathName = Path.Combine(ObjectPool.CompleteWorkingDirectory, videoFile.PreviewName);
 						if (!File.Exists(workingPreviewPathName))
 						{
@@ -441,8 +439,8 @@ namespace MediaGalleryExplorerCore.Workers
 							vtmProcess.Start();
 							if (!vtmProcess.WaitForExit(30000))
 								vtmProcess.Kill();
-							if (File.Exists(previewPathName))
-								File.Move(previewPathName, workingPreviewPathName);
+							if (File.Exists(outputPreviewPathName))
+								File.Move(outputPreviewPathName, workingPreviewPathName);
 						}
 						if (File.Exists(workingPreviewPathName))
 						{

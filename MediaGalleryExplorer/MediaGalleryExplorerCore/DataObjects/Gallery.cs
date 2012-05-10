@@ -4,7 +4,7 @@ using MediaGalleryExplorerCore.DataAccess;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
-	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects")]
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class Gallery
 	{
 		public Gallery(string filePath)
@@ -13,19 +13,15 @@ namespace MediaGalleryExplorerCore.DataObjects
 			FilePath = filePath;
 			Version = GalleryVersion.Instance;
 			Sources = new List<GallerySource>();
+			Codecs = new List<MediaCodec>();
 			CreateID();
 		}
 
-		public Gallery(string filePath, string name, string password, int encryptionAlgorithm)
+		public Gallery(string filePath, string name, string password, int encryptionAlgorithm) : this(filePath)
 		{
-			ID = null;
 			Name = name;
-			FilePath = filePath;
 			Password = password;
 			EncryptionAlgorithm = encryptionAlgorithm;
-			Version = GalleryVersion.Instance;
-			Sources = new List<GallerySource>();
-			CreateID();
 		}
 
 		#region Properties
@@ -37,6 +33,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 		[DataMember] public int EncryptionAlgorithm { get; set; }
 		[DataMember] public GalleryVersion Version { get; private set; }
 		[DataMember] public List<GallerySource> Sources { get; private set; }
+		[DataMember] public List<MediaCodec> Codecs { get; private set; }
 
 		#endregion
 

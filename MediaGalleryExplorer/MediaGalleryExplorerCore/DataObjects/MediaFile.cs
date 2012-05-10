@@ -22,17 +22,21 @@ namespace MediaGalleryExplorerCore.DataObjects
 		[DataMember] public Size Size { get; set; }
 		public Image ThumbnailImage { get; set; }
 
-		public abstract string ThumbnailName { get; set; }
-		public abstract string PreviewName { get; set; }
+		//public abstract string ThumbnailName { get; set; }
+		//public abstract string PreviewName { get; set; }
+		public string ThumbnailName { get { return Path.ChangeExtension(ID, "tn.jpg"); } }
+		public string PreviewName { get { return Path.ChangeExtension(ID, "jpg"); } }
 
-		public string RelativeThumbnailPathName
+		public string DatabaseThumbnailPathName
 		{
-			get { return (RelativePath != null ? Path.Combine(RelativePath, ThumbnailName) : ThumbnailName); }
+			//get { return (RelativePath != null ? Path.Combine(RelativePath, ThumbnailName) : ThumbnailName); }
+			get { return Path.Combine(DatabasePath, ThumbnailName); }
 		}
 
-		public string RelativePreviewPathName
+		public string DatabasePreviewPathName
 		{
-			get { return (RelativePath != null ? Path.Combine(RelativePath, PreviewName) : PreviewName); }
+			//get { return (RelativePath != null ? Path.Combine(RelativePath, PreviewName) : PreviewName); }
+			get { return Path.Combine(DatabasePath, PreviewName); }
 		}
 
 		#endregion

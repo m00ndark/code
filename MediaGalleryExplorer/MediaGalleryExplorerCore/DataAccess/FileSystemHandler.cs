@@ -213,11 +213,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 					{
 						if (!files.Any(filePath => (Path.GetFileName(filePath) == Path.GetFileNameWithoutExtension(file))))
 						{
-							ImageFile imageFile = new ImageFile(fileName, relativePath, parentFolder, source)
-								{
-									FileSize = fileInfo.Length,
-									ThumbnailName = fileName + ".tn.jpg"
-								};
+							ImageFile imageFile = new ImageFile(fileName, relativePath, parentFolder, source) { FileSize = fileInfo.Length };
 							try
 							{
 								imageFile.Size = ImageFileHelper.GetDimensions(file);
@@ -231,12 +227,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 					}
 					else if (MediaFile.VIDEO_FILE_EXTENSIONS.Contains(extension))
 					{
-						VideoFile videoFile = new VideoFile(fileName, relativePath, parentFolder, source)
-							{
-								FileSize = fileInfo.Length,
-								ThumbnailName = fileName + ".tn.jpg",
-								PreviewName = fileName + ".jpg"
-							};
+						VideoFile videoFile = new VideoFile(fileName, relativePath, parentFolder, source) { FileSize = fileInfo.Length };
 						try
 						{
 							TagLib.File tagFile = TagLib.File.Create(file);
@@ -245,10 +236,10 @@ namespace MediaGalleryExplorerCore.DataAccess
 							foreach (TagLib.ICodec codec in tagFile.Properties.Codecs)
 							{
 								MediaCodec mediaCodec = new MediaCodec(MediaCodec.TranslateCodecType(codec.MediaTypes), codec.Description);
-								if (source.Codecs.Contains(mediaCodec))
-									mediaCodec = source.Codecs.First(x => x.Equals(mediaCodec));
+								if (source.Gallery.Codecs.Contains(mediaCodec))
+									mediaCodec = source.Gallery.Codecs.First(x => x.Equals(mediaCodec));
 								else
-									source.Codecs.Add(mediaCodec);
+									source.Gallery.Codecs.Add(mediaCodec);
 								videoFile.Codecs.Add(mediaCodec);
 							}
 						}
@@ -280,18 +271,18 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		private static void AddDatabaseImageEntry(GalleryDatabase galleryDatabase, MediaFile mediaFile, bool reScan)
 		{
-			string path = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePath);
+			//string path = Path.Combine(mediaFile.Source.ID, mediaFile.RelativePath);
 
 			if (mediaFile is VideoFile)
-				AddDatabaseImageEntry(galleryDatabase, mediaFile, reScan, mediaFile.PreviewName, path);
+				AddDatabaseImageEntry(galleryDatabase, mediaFile, reScan, mediaFile.PreviewName);
 
-			AddDatabaseImageEntry(galleryDatabase, mediaFile, reScan, mediaFile.ThumbnailName, path);
+			AddDatabaseImageEntry(galleryDatabase, mediaFile, reScan, mediaFile.ThumbnailName);
 		}
 
-		private static void AddDatabaseImageEntry(GalleryDatabase galleryDatabase, MediaFile mediaFile, bool reScan, string fileName, string path)
+		private static void AddDatabaseImageEntry(GalleryDatabase galleryDatabase, MediaFile mediaFile, bool reScan, string fileName)
 		{
-			if (reScan || !galleryDatabase.EntryExists(fileName, path))
-				galleryDatabase.UpdateEntry(fileName, path, mediaFile);
+			if (reScan || !galleryDatabase.EntryExists(fileName, mediaFile.DatabasePath))
+				galleryDatabase.UpdateEntry(fileName, mediaFile.DatabasePath, mediaFile);
 		}
 
 		private static string RemoveAbsolutePath(string fullPath, string absolutePath)

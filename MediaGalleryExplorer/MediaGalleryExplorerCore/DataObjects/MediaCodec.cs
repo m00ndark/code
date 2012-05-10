@@ -4,7 +4,7 @@ using MediaGalleryExplorerCore.DataAccess;
 
 namespace MediaGalleryExplorerCore.DataObjects
 {
-	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects")]
+	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class MediaCodec
 	{
 		#region Enumeration

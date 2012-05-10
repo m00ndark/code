@@ -8,21 +8,21 @@ namespace MediaGalleryExplorerCore.DataObjects
 	[DataContract(Namespace = "http://schemas.datacontract.org/2004/07/MediaGalleryExplorerCore.DataObjects", IsReference = true)]
 	public class GallerySource : IComparable
 	{
-		public GallerySource(string path)
+		public GallerySource(string path, Gallery gallery)
 		{
-			Initialize(path);
+			Initialize(path, gallery);
 		}
 
 		#region Properties
 
 		[DataMember] public string ID { get; private set; }
-		[DataMember] public string Path { get; set; }
-		[DataMember] public string VolumeLetter { get; set; }
-		[DataMember] public string VolumeName { get; set; }
-		[DataMember] public string VolumeSerial { get; set; }
-		[DataMember] public MediaFolder RootFolder { get; set; }
+		[DataMember] public string Path { get; private set; }
+		[DataMember] public string VolumeLetter { get; private set; }
+		[DataMember] public string VolumeName { get; private set; }
+		[DataMember] public string VolumeSerial { get; private set; }
+		[DataMember] public Gallery Gallery { get; private set; }
+		[DataMember] public MediaFolder RootFolder { get; private set; }
 		[DataMember] public DateTime ScanDate { get; set; }
-		[DataMember] public List<MediaCodec> Codecs { get; private set; }
 
 		public MediaCount MediaCount { get; private set; }
 
@@ -44,7 +44,7 @@ namespace MediaGalleryExplorerCore.DataObjects
 
 		#endregion
 
-		private void Initialize(string path)
+		private void Initialize(string path, Gallery gallery)
 		{
 			ID = null;
 			string volumeLetter, volumeName, volumeSerial;
@@ -54,10 +54,10 @@ namespace MediaGalleryExplorerCore.DataObjects
 			VolumeSerial = volumeSerial;
 			Path = path.Substring(2);
 			CreateID();
+			Gallery = gallery;
 			RootFolder = new MediaFolder(Path, null, null, this);
 			MediaCount = new MediaCount();
 			ScanDate = DateTime.MinValue;
-			Codecs = new List<MediaCodec>();
 		}
 
 		private void CreateID()

@@ -9,13 +9,16 @@ namespace MediaGalleryExplorerCore.DataObjects
 	{
 		protected FileSystemEntry(string name, string relativePath, MediaFolder parent, GallerySource source)
 		{
-			Initialize(name, relativePath, parent, source);
+			ID = null;
+			Name = name;
+			RelativePath = relativePath;
+			Parent = parent;
+			Source = source;
+			if (!(string.IsNullOrEmpty(RelativePathName) && string.IsNullOrEmpty(Name)) && Source != null)
+				CreateID();
 		}
 
-		protected FileSystemEntry()
-		{
-			Initialize(string.Empty, string.Empty, null, null);
-		}
+		protected FileSystemEntry() : this(string.Empty, string.Empty, null, null) {}
 
 		#region Properties
 
@@ -35,18 +38,12 @@ namespace MediaGalleryExplorerCore.DataObjects
 			get { return (RelativePath != null ? Path.Combine(RelativePath, Name) : string.Empty); }
 		}
 
-		#endregion
-
-		private void Initialize(string name, string relativePath, MediaFolder parent, GallerySource source)
+		public string DatabasePath
 		{
-			ID = null;
-			Name = name;
-			RelativePath = relativePath;
-			Parent = parent;
-			Source = source;
-			if (!(string.IsNullOrEmpty(RelativePathName) && string.IsNullOrEmpty(Name)) && Source != null)
-				CreateID();
+			get { return Path.Combine((Parent != null ? Parent.DatabasePath : string.Empty), (IsFolder ? ID : string.Empty)); }
 		}
+
+		#endregion
 
 		private void CreateID()
 		{

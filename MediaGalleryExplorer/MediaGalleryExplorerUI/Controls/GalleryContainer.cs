@@ -318,6 +318,8 @@ namespace MediaGalleryExplorerUI.Controls
 			if (InvokeRequired)
 				return Invoke(new CommonWorker.EventHandler<MessageEventArgs>(CommonWorker_ShowMessage), new object[] { sender, e });
 
+			RaiseStatusUpdatedEvent(string.Empty);
+
 			return FormUtilities.ShowMessage(ParentForm, e.Message, e.Buttons, e.Icon);
 		}
 
