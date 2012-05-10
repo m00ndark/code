@@ -221,7 +221,7 @@ namespace MediaGalleryExplorerCore.Workers
 					using (GalleryDatabase database = GalleryDatabase.Open(Gallery.FilePath, Gallery.EncryptionAlgorithm, Gallery.Password, true))
 					{
 						database.RegisterStreamProvider<Gallery>(GalleryMetadataStreamProvider);
-						database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery);
+						database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery, true);
 						database.Save();
 					}
 					FolderAdded(source.RootFolder);
@@ -249,7 +249,7 @@ namespace MediaGalleryExplorerCore.Workers
 					FileSystemHandler.ScanFolders(database, source, reScan);
 					source.ScanDate = DateTime.Now;
 					source.UpdateMediaCount();
-					database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery);
+					database.UpdateEntry(GALLERY_FILE_NAME, string.Empty, Gallery, true);
 					database.Save();
 				}
 				RaiseDatabaseOperationCompletedEvent(OperationType.ScanSource);
@@ -389,7 +389,7 @@ namespace MediaGalleryExplorerCore.Workers
 
 		#region Stream providers
 
-		public static Stream GalleryMetadataStreamProvider(Gallery gallery, string fileName)
+		public static Stream GalleryMetadataStreamProvider(Gallery gallery, string fileName, int fileNumber, int totalFiles)
 		{
 			MemoryStream memoryStream = new MemoryStream();
 			XmlWriterSettings writerSettings = new XmlWriterSettings() { CloseOutput = false, Encoding = Encoding.UTF8, Indent = true, IndentChars = "\t", CheckCharacters = false };
@@ -401,7 +401,7 @@ namespace MediaGalleryExplorerCore.Workers
 			return memoryStream;
 		}
 
-		public static Stream MediaFileStreamProvider(MediaFile mediaFile, string fileName)
+		public static Stream MediaFileStreamProvider(MediaFile mediaFile, string fileName, int fileNumber, int totalFiles)
 		{
 			MemoryStream memoryStream = new MemoryStream();
 			try
@@ -410,7 +410,8 @@ namespace MediaGalleryExplorerCore.Workers
 				bool makeThumbnail = true;
 				const double maxThumbnailSize = 200.0;
 				string filePathName = Path.Combine(mediaFile.Source.RootedPath, mediaFile.RelativePathName);
-				RaiseStatusUpdatedEvent("Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named \""
+				RaiseStatusUpdatedEvent("(" + fileNumber + "/" + totalFiles
+					+ ") Generating thumbnail for " + (mediaFile is ImageFile ? "image" : "video") + " file named \""
 					+ mediaFile.Name + "\" in " + Path.Combine(mediaFile.Source.RootedPath, mediaFile.Parent.RelativePathName));
 				if (mediaFile is ImageFile)
 				{

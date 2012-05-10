@@ -16,8 +16,10 @@ namespace MediaGalleryExplorerCore.DataAccess
 		private readonly IDictionary<ZipEntry, object> _entries;
 		private readonly bool _isWriting;
 		private ZipFile _databaseFile;
+		private int _entriesToSave;
+		private int _saveEntryNumber;
 
-		public delegate Stream StreamProvider<in T>(T dataObject, string fileName);
+		public delegate Stream StreamProvider<in T>(T dataObject, string fileName, int fileNumber, int totalFiles);
 
 		private GalleryDatabase(ZipFile databaseFile, bool isWriting)
 		{
@@ -26,6 +28,8 @@ namespace MediaGalleryExplorerCore.DataAccess
 			_databaseFile = databaseFile;
 			_databaseFile.SaveProgress += Database_SaveProgress;
 			_isWriting = isWriting;
+			_entriesToSave = 0;
+			_saveEntryNumber = 0;
 		}
 
 		#region Accessibility
@@ -180,6 +184,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 			}
 			try
 			{
+				_saveEntryNumber = 0;
 				_databaseFile.Save();
 			}
 			finally
@@ -197,7 +202,7 @@ namespace MediaGalleryExplorerCore.DataAccess
 					object dataObject = _entries[e.CurrentEntry];
 					object streamProvider = GetStreamProvider(dataObject.GetType());
 					MethodInfo streamProviderMethod = streamProvider.GetType().GetMethod("Invoke");
-					e.CurrentEntry.InputStream = (Stream) streamProviderMethod.Invoke(streamProvider, new object[] { dataObject, e.CurrentEntry.FileName });
+					e.CurrentEntry.InputStream = (Stream) streamProviderMethod.Invoke(streamProvider, new object[] { dataObject, e.CurrentEntry.FileName, ++_saveEntryNumber, _entriesToSave });
 				}
 				else
 					e.Cancel = true;
@@ -212,13 +217,14 @@ namespace MediaGalleryExplorerCore.DataAccess
 
 		#region Adding/updating entries
 
-		public void UpdateEntry<T>(string fileName, string path, T dataObject)
+		public void UpdateEntry<T>(string fileName, string path, T dataObject, bool doNotCount = false)
 		{
 			if (!_streamProviders.ContainsKey(typeof(T)))
 				throw new ArgumentException("No stream provider registered for data object type " + typeof(T).Name, "dataObject");
 
 			ZipEntry entry = _databaseFile.UpdateEntry(fileName, path, Stream.Null);
 			_entries[entry] = dataObject;
+			if (!doNotCount) _entriesToSave++;
 		}
 
 		#endregion
